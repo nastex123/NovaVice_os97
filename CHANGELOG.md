@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [2026-08-31 10:26] [Added/Enhanced]
+- **Nubes y Gaviotas Bidireccionales con Animación de Aleteo en 2 Estados (`globals.css`, `PixiParticleBackground.tsx`):**
+  - **Flujo Bidireccional de Nubes:** Implementadas trayectorias simultáneas de izquierda a derecha (`cloudDriftL2R`, Nubes 1, 3, 5, 7) y de derecha a izquierda (`cloudDriftR2L`, Nubes 2, 4, 6, 8) para dotar al cielo de dinamismo y profundidad atmosférica.
+  - **Vuelo Bidireccional de Gaviotas:** Bandadas y gorriones volando de izquierda a derecha (`seagullFlightL2R`) y de derecha a izquierda (`seagullFlightR2L` con orientación `scaleX(-1)`).
+  - **Componente `PixelSeagull` con Aleteo de 2 Fotogramas (Wing Flap):** Diseñados dos fotogramas SVG pixel-art discretos (Frame 1: Alas Arriba en V vs Frame 2: Alas Abajo en planeo) alternados en CSS por hardware (`@keyframes wingFlapUp` y `@keyframes wingFlapDown` a `0.38s steps(1)`), emulando fielmente el aleteo clásico de sprites de 8/16-bits.
+  - **Validación Automatizada:** 25/25 tests en Pytest en verde y compilación estática de Next.js 15 en 1.8s con 0 errores.
+- Motivo: Satisfacer los requerimientos de animación viva, bidireccionalidad del cielo retro y sensación realista de aleteo en pixel-art.
+
 ### [2026-08-31 10:12] [Refactor/Architecture]
 - **Reorganización Estructural a Monorepo Limpio y Desacoplado (`backend/`, `scripts/`, `docs/assets/`):**
   - **Encapsulación de Backend (`backend/`):** Agrupados `src/`, `data/` (82 documentos y tickets), `tests/` (25 tests de pytest), `hermes_skills/` y `requirements.txt` bajo `backend/` con resolución de rutas relativa y auto-contenida.

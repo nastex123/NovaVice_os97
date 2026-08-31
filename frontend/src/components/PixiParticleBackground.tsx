@@ -2,13 +2,96 @@
 
 import React from "react";
 
+interface PixelSeagullProps {
+  size?: "lg" | "md" | "sm";
+  color?: string;
+  beakColor?: string;
+  className?: string;
+}
+
+const PixelSeagull: React.FC<PixelSeagullProps> = ({
+  size = "md",
+  color = "#3D1C22",
+  beakColor = "#D8AF44",
+  className = "",
+}) => {
+  if (size === "lg") {
+    return (
+      <div className={`relative inline-block w-[32px] h-[14px] ${className}`}>
+        {/* Frame 1: Wings Up */}
+        <svg className="absolute inset-0 animate-wing-up" width="32" height="14" viewBox="0 0 32 14" fill="none">
+          <rect x="0" y="3" width="6" height="3" fill={color} />
+          <rect x="6" y="5" width="6" height="3" fill={color} />
+          <rect x="12" y="7" width="8" height="3" fill={color} />
+          <rect x="20" y="5" width="6" height="3" fill={color} />
+          <rect x="26" y="3" width="6" height="3" fill={color} />
+          <rect x="14" y="9" width="4" height="2" fill={beakColor} />
+        </svg>
+        {/* Frame 2: Wings Down */}
+        <svg className="absolute inset-0 animate-wing-down" width="32" height="14" viewBox="0 0 32 14" fill="none">
+          <rect x="0" y="9" width="6" height="3" fill={color} />
+          <rect x="6" y="6" width="6" height="3" fill={color} />
+          <rect x="12" y="4" width="8" height="3" fill={color} />
+          <rect x="20" y="6" width="6" height="3" fill={color} />
+          <rect x="26" y="9" width="6" height="3" fill={color} />
+          <rect x="14" y="6" width="4" height="2" fill={beakColor} />
+        </svg>
+      </div>
+    );
+  }
+
+  if (size === "sm") {
+    return (
+      <div className={`relative inline-block w-[18px] h-[8px] ${className}`}>
+        {/* Frame 1: Wings Up */}
+        <svg className="absolute inset-0 animate-wing-up" width="18" height="8" viewBox="0 0 18 8" fill="none">
+          <rect x="0" y="1" width="3" height="2" fill={color} />
+          <rect x="3" y="3" width="3" height="2" fill={color} />
+          <rect x="6" y="4" width="6" height="2" fill={color} />
+          <rect x="12" y="3" width="3" height="2" fill={color} />
+          <rect x="15" y="1" width="3" height="2" fill={color} />
+        </svg>
+        {/* Frame 2: Wings Down */}
+        <svg className="absolute inset-0 animate-wing-down" width="18" height="8" viewBox="0 0 18 8" fill="none">
+          <rect x="0" y="5" width="3" height="2" fill={color} />
+          <rect x="3" y="3" width="3" height="2" fill={color} />
+          <rect x="6" y="2" width="6" height="2" fill={color} />
+          <rect x="12" y="3" width="3" height="2" fill={color} />
+          <rect x="15" y="5" width="3" height="2" fill={color} />
+        </svg>
+      </div>
+    );
+  }
+
+  return (
+    <div className={`relative inline-block w-[24px] h-[10px] ${className}`}>
+      {/* Frame 1: Wings Up */}
+      <svg className="absolute inset-0 animate-wing-up" width="24" height="10" viewBox="0 0 24 10" fill="none">
+        <rect x="0" y="2" width="4" height="2" fill={color} />
+        <rect x="4" y="4" width="4" height="2" fill={color} />
+        <rect x="8" y="5" width="8" height="2" fill={color} />
+        <rect x="16" y="4" width="4" height="2" fill={color} />
+        <rect x="20" y="2" width="4" height="2" fill={color} />
+      </svg>
+      {/* Frame 2: Wings Down */}
+      <svg className="absolute inset-0 animate-wing-down" width="24" height="10" viewBox="0 0 24 10" fill="none">
+        <rect x="0" y="7" width="4" height="2" fill={color} />
+        <rect x="4" y="5" width="4" height="2" fill={color} />
+        <rect x="8" y="3" width="8" height="2" fill={color} />
+        <rect x="16" y="5" width="4" height="2" fill={color} />
+        <rect x="20" y="7" width="4" height="2" fill={color} />
+      </svg>
+    </div>
+  );
+};
+
 export const PixiParticleBackground: React.FC = () => {
   return (
     <div className="absolute inset-0 pointer-events-none select-none overflow-hidden z-0">
-      {/* Drifting 16-bit volumetric pixel clouds */}
+      {/* Drifting 16-bit volumetric pixel clouds (Bidirectional: Left-to-Right & Right-to-Left) */}
 
-      {/* Cloud 1: Giant Top Stratocumulus */}
-      <div className="absolute top-4 left-0 animate-cloud-1 opacity-45">
+      {/* Cloud 1: Giant Top Stratocumulus (L2R) */}
+      <div className="absolute top-4 left-0 animate-cloud-l2r-1 opacity-45">
         <svg width="240" height="64" viewBox="0 0 240 64" fill="none" xmlns="http://www.w3.org/2000/svg">
           <rect x="55" y="8" width="90" height="18" fill="#FAF6EE" />
           <rect x="35" y="20" width="145" height="26" fill="#FAF6EE" />
@@ -19,8 +102,8 @@ export const PixiParticleBackground: React.FC = () => {
         </svg>
       </div>
 
-      {/* Cloud 2: Medium High Cumulus */}
-      <div className="absolute top-16 left-0 animate-cloud-2 opacity-35">
+      {/* Cloud 2: Medium High Cumulus (R2L) */}
+      <div className="absolute top-16 left-0 animate-cloud-r2l-1 opacity-35">
         <svg width="190" height="54" viewBox="0 0 190 54" fill="none" xmlns="http://www.w3.org/2000/svg">
           <rect x="40" y="10" width="75" height="16" fill="#FAF6EE" />
           <rect x="22" y="20" width="118" height="22" fill="#FAF6EE" />
@@ -30,8 +113,8 @@ export const PixiParticleBackground: React.FC = () => {
         </svg>
       </div>
 
-      {/* Cloud 3: Giant Horizon Cloud Cluster */}
-      <div className="absolute top-36 left-0 animate-cloud-3 opacity-30">
+      {/* Cloud 3: Giant Horizon Cloud Cluster (L2R) */}
+      <div className="absolute top-36 left-0 animate-cloud-l2r-2 opacity-30">
         <svg width="280" height="74" viewBox="0 0 280 74" fill="none" xmlns="http://www.w3.org/2000/svg">
           <rect x="65" y="12" width="110" height="22" fill="#FAF6EE" />
           <rect x="32" y="26" width="185" height="28" fill="#FAF6EE" />
@@ -41,8 +124,8 @@ export const PixiParticleBackground: React.FC = () => {
         </svg>
       </div>
 
-      {/* Cloud 4: Nimble Fast Cloud */}
-      <div className="absolute top-12 left-0 animate-cloud-4 opacity-40">
+      {/* Cloud 4: Nimble Fast Cloud (R2L) */}
+      <div className="absolute top-12 left-0 animate-cloud-r2l-2 opacity-40">
         <svg width="150" height="44" viewBox="0 0 150 44" fill="none" xmlns="http://www.w3.org/2000/svg">
           <rect x="28" y="8" width="55" height="14" fill="#FAF6EE" />
           <rect x="15" y="18" width="90" height="16" fill="#FAF6EE" />
@@ -51,8 +134,8 @@ export const PixiParticleBackground: React.FC = () => {
         </svg>
       </div>
 
-      {/* Cloud 5: Wide Upper Cirrus Cloud */}
-      <div className="absolute top-8 left-0 animate-cloud-5 opacity-30">
+      {/* Cloud 5: Wide Upper Cirrus Cloud (L2R) */}
+      <div className="absolute top-8 left-0 animate-cloud-l2r-3 opacity-30">
         <svg width="210" height="48" viewBox="0 0 210 48" fill="none" xmlns="http://www.w3.org/2000/svg">
           <rect x="45" y="6" width="80" height="14" fill="#FAF6EE" />
           <rect x="20" y="16" width="140" height="18" fill="#FAF6EE" />
@@ -61,8 +144,8 @@ export const PixiParticleBackground: React.FC = () => {
         </svg>
       </div>
 
-      {/* Cloud 6: Mid-Altitude Compact Puffy Cloud */}
-      <div className="absolute top-28 left-0 animate-cloud-6 opacity-38">
+      {/* Cloud 6: Mid-Altitude Compact Puffy Cloud (R2L) */}
+      <div className="absolute top-28 left-0 animate-cloud-r2l-3 opacity-38">
         <svg width="165" height="48" viewBox="0 0 165 48" fill="none" xmlns="http://www.w3.org/2000/svg">
           <rect x="35" y="8" width="60" height="15" fill="#FAF6EE" />
           <rect x="18" y="18" width="105" height="18" fill="#FAF6EE" />
@@ -71,8 +154,8 @@ export const PixiParticleBackground: React.FC = () => {
         </svg>
       </div>
 
-      {/* Cloud 7: Low Horizon Rolling Cloud */}
-      <div className="absolute top-52 left-0 animate-cloud-7 opacity-22">
+      {/* Cloud 7: Low Horizon Rolling Cloud (L2R) */}
+      <div className="absolute top-52 left-0 animate-cloud-l2r-4 opacity-22">
         <svg width="300" height="70" viewBox="0 0 300 70" fill="none" xmlns="http://www.w3.org/2000/svg">
           <rect x="70" y="10" width="120" height="20" fill="#FAF6EE" />
           <rect x="35" y="24" width="200" height="26" fill="#FAF6EE" />
@@ -81,8 +164,8 @@ export const PixiParticleBackground: React.FC = () => {
         </svg>
       </div>
 
-      {/* Cloud 8: High Speed Small Cloud */}
-      <div className="absolute top-22 left-0 animate-cloud-8 opacity-35">
+      {/* Cloud 8: High Speed Small Cloud (R2L) */}
+      <div className="absolute top-22 left-0 animate-cloud-r2l-4 opacity-35">
         <svg width="120" height="38" viewBox="0 0 120 38" fill="none" xmlns="http://www.w3.org/2000/svg">
           <rect x="20" y="6" width="45" height="12" fill="#FAF6EE" />
           <rect x="10" y="14" width="75" height="14" fill="#FAF6EE" />
@@ -91,126 +174,46 @@ export const PixiParticleBackground: React.FC = () => {
         </svg>
       </div>
 
-      {/* High-density flocks of pixel-art seagulls */}
+      {/* High-density flocks of pixel-art seagulls (Bidirectional + 2-State Flapping) */}
 
-      {/* Flock 1: V-Formation Trio (High Altitude) */}
-      <div className="absolute top-14 left-0 animate-seagull-1 opacity-75">
+      {/* Flock 1: V-Formation Trio (High Altitude, Left-to-Right) */}
+      <div className="absolute top-14 left-0 animate-seagull-l2r-1 opacity-75">
         <div className="flex items-start gap-4">
-          {/* Lead Gull */}
-          <div className="mt-0">
-            <svg width="32" height="14" viewBox="0 0 32 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="0" y="6" width="6" height="3" fill="#3D1C22" />
-              <rect x="6" y="3" width="6" height="3" fill="#3D1C22" />
-              <rect x="12" y="6" width="5" height="3" fill="#3D1C22" />
-              <rect x="16" y="6" width="5" height="3" fill="#3D1C22" />
-              <rect x="21" y="3" width="6" height="3" fill="#3D1C22" />
-              <rect x="27" y="6" width="5" height="3" fill="#3D1C22" />
-              <rect x="14" y="9" width="4" height="2" fill="#D8AF44" />
-            </svg>
-          </div>
-          {/* Wingman Top */}
-          <div className="mt-3">
-            <svg width="24" height="10" viewBox="0 0 24 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="0" y="4" width="4" height="2" fill="#3D1C22" />
-              <rect x="4" y="1" width="4" height="2" fill="#3D1C22" />
-              <rect x="8" y="4" width="4" height="2" fill="#3D1C22" />
-              <rect x="12" y="4" width="4" height="2" fill="#3D1C22" />
-              <rect x="16" y="1" width="4" height="2" fill="#3D1C22" />
-              <rect x="20" y="4" width="4" height="2" fill="#3D1C22" />
-            </svg>
-          </div>
-          {/* Wingman Bottom */}
-          <div className="mt-6">
-            <svg width="20" height="9" viewBox="0 0 20 9" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="0" y="4" width="3" height="2" fill="#3D1C22" />
-              <rect x="3" y="1" width="3" height="2" fill="#3D1C22" />
-              <rect x="6" y="4" width="4" height="2" fill="#3D1C22" />
-              <rect x="10" y="4" width="4" height="2" fill="#3D1C22" />
-              <rect x="14" y="1" width="3" height="2" fill="#3D1C22" />
-              <rect x="17" y="4" width="3" height="2" fill="#3D1C22" />
-            </svg>
-          </div>
+          <PixelSeagull size="lg" />
+          <PixelSeagull size="md" className="mt-3" />
+          <PixelSeagull size="sm" className="mt-6" />
         </div>
       </div>
 
-      {/* Flock 2: Duo Cruisers (Mid Altitude) */}
-      <div className="absolute top-32 left-0 animate-seagull-2 opacity-65">
+      {/* Flock 2: Duo Cruisers (Mid Altitude, Right-to-Left) */}
+      <div className="absolute top-32 left-0 animate-seagull-r2l-1 opacity-65">
         <div className="flex items-center gap-6">
-          <svg width="28" height="12" viewBox="0 0 28 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="0" y="5" width="5" height="2" fill="#3D1C22" />
-            <rect x="5" y="2" width="5" height="2" fill="#3D1C22" />
-            <rect x="10" y="5" width="4" height="2" fill="#3D1C22" />
-            <rect x="14" y="5" width="4" height="2" fill="#3D1C22" />
-            <rect x="18" y="2" width="5" height="2" fill="#3D1C22" />
-            <rect x="23" y="5" width="5" height="2" fill="#3D1C22" />
-          </svg>
-          <svg width="22" height="10" viewBox="0 0 22 10" fill="none" xmlns="http://www.w3.org/2000/svg" className="mt-2">
-            <rect x="0" y="4" width="4" height="2" fill="#3D1C22" />
-            <rect x="4" y="1" width="4" height="2" fill="#3D1C22" />
-            <rect x="8" y="4" width="3" height="2" fill="#3D1C22" />
-            <rect x="11" y="4" width="3" height="2" fill="#3D1C22" />
-            <rect x="14" y="1" width="4" height="2" fill="#3D1C22" />
-            <rect x="18" y="4" width="4" height="2" fill="#3D1C22" />
-          </svg>
+          <PixelSeagull size="lg" />
+          <PixelSeagull size="md" className="mt-2" />
         </div>
       </div>
 
-      {/* Flock 3: Solo High Glider */}
-      <div className="absolute top-20 left-0 animate-seagull-3 opacity-60">
-        <svg width="30" height="13" viewBox="0 0 30 13" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect x="0" y="5" width="5" height="3" fill="#3D1C22" />
-          <rect x="5" y="2" width="5" height="3" fill="#3D1C22" />
-          <rect x="10" y="5" width="5" height="3" fill="#3D1C22" />
-          <rect x="15" y="5" width="5" height="3" fill="#3D1C22" />
-          <rect x="20" y="2" width="5" height="3" fill="#3D1C22" />
-          <rect x="25" y="5" width="5" height="3" fill="#3D1C22" />
-        </svg>
+      {/* Flock 3: Solo High Glider (Left-to-Right) */}
+      <div className="absolute top-20 left-0 animate-seagull-l2r-2 opacity-60">
+        <PixelSeagull size="lg" />
       </div>
 
-      {/* Flock 4: Low Horizon Pair */}
-      <div className="absolute top-44 left-0 animate-seagull-4 opacity-55">
+      {/* Flock 4: Low Horizon Pair (Right-to-Left) */}
+      <div className="absolute top-44 left-0 animate-seagull-r2l-2 opacity-55">
         <div className="flex items-center gap-3">
-          <svg width="24" height="10" viewBox="0 0 24 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="0" y="4" width="4" height="2" fill="#3D1C22" />
-            <rect x="4" y="1" width="4" height="2" fill="#3D1C22" />
-            <rect x="8" y="4" width="4" height="2" fill="#3D1C22" />
-            <rect x="12" y="4" width="4" height="2" fill="#3D1C22" />
-            <rect x="16" y="1" width="4" height="2" fill="#3D1C22" />
-            <rect x="20" y="4" width="4" height="2" fill="#3D1C22" />
-          </svg>
-          <svg width="18" height="8" viewBox="0 0 18 8" fill="none" xmlns="http://www.w3.org/2000/svg" className="-mt-1">
-            <rect x="0" y="3" width="3" height="2" fill="#3D1C22" />
-            <rect x="3" y="1" width="3" height="2" fill="#3D1C22" />
-            <rect x="6" y="3" width="3" height="2" fill="#3D1C22" />
-            <rect x="9" y="3" width="3" height="2" fill="#3D1C22" />
-            <rect x="12" y="1" width="3" height="2" fill="#3D1C22" />
-            <rect x="15" y="3" width="3" height="2" fill="#3D1C22" />
-          </svg>
+          <PixelSeagull size="md" />
+          <PixelSeagull size="sm" className="-mt-1" />
         </div>
       </div>
 
-      {/* Flock 5: High Speed Darting Solo Gull */}
-      <div className="absolute top-10 left-0 animate-seagull-5 opacity-50">
-        <svg width="20" height="9" viewBox="0 0 20 9" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect x="0" y="4" width="3" height="2" fill="#3D1C22" />
-          <rect x="3" y="1" width="3" height="2" fill="#3D1C22" />
-          <rect x="6" y="4" width="4" height="2" fill="#3D1C22" />
-          <rect x="10" y="4" width="4" height="2" fill="#3D1C22" />
-          <rect x="14" y="1" width="3" height="2" fill="#3D1C22" />
-          <rect x="17" y="4" width="3" height="2" fill="#3D1C22" />
-        </svg>
+      {/* Flock 5: High Speed Darting Solo Gull (Left-to-Right) */}
+      <div className="absolute top-10 left-0 animate-seagull-l2r-3 opacity-50">
+        <PixelSeagull size="sm" />
       </div>
 
-      {/* Flock 6: Mid-Level Companion Gull */}
-      <div className="absolute top-40 left-0 animate-seagull-6 opacity-60">
-        <svg width="26" height="11" viewBox="0 0 26 11" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect x="0" y="4" width="4" height="2" fill="#3D1C22" />
-          <rect x="4" y="1" width="4" height="2" fill="#3D1C22" />
-          <rect x="8" y="4" width="5" height="2" fill="#3D1C22" />
-          <rect x="13" y="4" width="5" height="2" fill="#3D1C22" />
-          <rect x="18" y="1" width="4" height="2" fill="#3D1C22" />
-          <rect x="22" y="4" width="4" height="2" fill="#3D1C22" />
-        </svg>
+      {/* Flock 6: Mid-Level Companion Gull (Right-to-Left) */}
+      <div className="absolute top-40 left-0 animate-seagull-r2l-3 opacity-60">
+        <PixelSeagull size="md" />
       </div>
 
       {/* Left palm grove */}

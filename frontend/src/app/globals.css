@@ -98,40 +98,88 @@ body {
   }
 }
 
-@keyframes cloudDriftSlow {
+@keyframes cloudDriftL2R {
   0% {
-    transform: translateX(-240px);
+    transform: translateX(-320px);
   }
   100% {
-    transform: translateX(calc(100vw + 240px));
+    transform: translateX(calc(100vw + 320px));
   }
 }
 
-@keyframes seagullFlight {
+@keyframes cloudDriftR2L {
   0% {
-    transform: translate(-120px, 0px);
+    transform: translateX(calc(100vw + 320px));
+  }
+  100% {
+    transform: translateX(-320px);
+  }
+}
+
+@keyframes seagullFlightL2R {
+  0% {
+    transform: translate(-140px, 0px);
   }
   25% {
     transform: translate(25vw, -14px);
   }
   50% {
-    transform: translate(50vw, 4px);
+    transform: translate(50vw, 6px);
   }
   75% {
     transform: translate(75vw, -10px);
   }
   100% {
-    transform: translate(calc(100vw + 120px), 0px);
+    transform: translate(calc(100vw + 140px), 0px);
   }
 }
 
-@keyframes seagullBob {
-  0%, 100% {
-    transform: translateY(0px);
+@keyframes seagullFlightR2L {
+  0% {
+    transform: translate(calc(100vw + 140px), 0px) scaleX(-1);
+  }
+  25% {
+    transform: translate(75vw, -14px) scaleX(-1);
   }
   50% {
-    transform: translateY(-6px);
+    transform: translate(50vw, 6px) scaleX(-1);
   }
+  75% {
+    transform: translate(25vw, -10px) scaleX(-1);
+  }
+  100% {
+    transform: translate(-140px, 0px) scaleX(-1);
+  }
+}
+
+@keyframes wingFlapUp {
+  0%, 49.9% {
+    opacity: 1;
+    visibility: visible;
+  }
+  50%, 100% {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+@keyframes wingFlapDown {
+  0%, 49.9% {
+    opacity: 0;
+    visibility: hidden;
+  }
+  50%, 100% {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+.animate-wing-up {
+  animation: wingFlapUp 0.38s steps(1) infinite;
+}
+
+.animate-wing-down {
+  animation: wingFlapDown 0.38s steps(1) infinite;
 }
 
 .animate-palm-left {
@@ -164,58 +212,58 @@ body {
   transform-origin: bottom right;
 }
 
-.animate-cloud-1 {
-  animation: cloudDriftSlow 38s linear infinite;
+.animate-cloud-l2r-1 {
+  animation: cloudDriftL2R 42s linear infinite;
 }
 
-.animate-cloud-2 {
-  animation: cloudDriftSlow 52s linear infinite 8s;
+.animate-cloud-l2r-2 {
+  animation: cloudDriftL2R 56s linear infinite 12s;
 }
 
-.animate-cloud-3 {
-  animation: cloudDriftSlow 68s linear infinite 18s;
+.animate-cloud-l2r-3 {
+  animation: cloudDriftL2R 68s linear infinite 24s;
 }
 
-.animate-cloud-4 {
-  animation: cloudDriftSlow 46s linear infinite 4s;
+.animate-cloud-l2r-4 {
+  animation: cloudDriftL2R 48s linear infinite 6s;
 }
 
-.animate-cloud-5 {
-  animation: cloudDriftSlow 60s linear infinite 24s;
+.animate-cloud-r2l-1 {
+  animation: cloudDriftR2L 46s linear infinite 2s;
 }
 
-.animate-cloud-6 {
-  animation: cloudDriftSlow 40s linear infinite 14s;
+.animate-cloud-r2l-2 {
+  animation: cloudDriftR2L 62s linear infinite 16s;
 }
 
-.animate-cloud-7 {
-  animation: cloudDriftSlow 75s linear infinite 32s;
+.animate-cloud-r2l-3 {
+  animation: cloudDriftR2L 52s linear infinite 28s;
 }
 
-.animate-cloud-8 {
-  animation: cloudDriftSlow 48s linear infinite 20s;
+.animate-cloud-r2l-4 {
+  animation: cloudDriftR2L 74s linear infinite 36s;
 }
 
-.animate-seagull-1 {
-  animation: seagullFlight 22s linear infinite;
+.animate-seagull-l2r-1 {
+  animation: seagullFlightL2R 22s linear infinite;
 }
 
-.animate-seagull-2 {
-  animation: seagullFlight 28s linear infinite 7s;
+.animate-seagull-l2r-2 {
+  animation: seagullFlightL2R 19s linear infinite 5s;
 }
 
-.animate-seagull-3 {
-  animation: seagullFlight 18s linear infinite 3s;
+.animate-seagull-l2r-3 {
+  animation: seagullFlightL2R 27s linear infinite 14s;
 }
 
-.animate-seagull-4 {
-  animation: seagullFlight 26s linear infinite 14s;
+.animate-seagull-r2l-1 {
+  animation: seagullFlightR2L 24s linear infinite 2s;
 }
 
-.animate-seagull-5 {
-  animation: seagullFlight 34s linear infinite 20s;
+.animate-seagull-r2l-2 {
+  animation: seagullFlightR2L 20s linear infinite 9s;
 }
 
-.animate-seagull-6 {
-  animation: seagullFlight 21s linear infinite 10s;
+.animate-seagull-r2l-3 {
+  animation: seagullFlightR2L 29s linear infinite 18s;
 }

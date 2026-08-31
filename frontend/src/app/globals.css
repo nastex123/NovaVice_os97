@@ -5,30 +5,217 @@
 :root {
   --font-inter: "Inter", system-ui, sans-serif;
   --font-outfit: "Outfit", system-ui, sans-serif;
+  --font-mono: "Courier New", Courier, monospace;
 }
 
 body {
-  background-color: #08080c;
-  color: #f1f5f9;
-  font-family: var(--font-inter);
+  background-color: #e4beb2;
+  background-image: 
+    radial-gradient(rgba(160, 100, 90, 0.25) 20%, transparent 20%), 
+    radial-gradient(rgba(160, 100, 90, 0.25) 20%, transparent 20%),
+    linear-gradient(to bottom, #e8c6bb 0%, #c8887d 50%, #7d4440 100%);
+  background-size: 16px 16px, 16px 16px, 100% 100%;
+  background-position: 0 0, 8px 8px, 0 0;
+  color: #1a1a1a;
+  font-family: var(--font-inter), sans-serif;
   overflow: hidden;
 }
 
-/* Custom Sleek Scrollbar */
+/* Classic 90s Horizontal Striped Titlebar Pattern */
+.retro-striped-titlebar {
+  background-color: #d5c8b2;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent,
+    transparent 2px,
+    #a8997f 2px,
+    #a8997f 4px
+  );
+}
+
+/* CRT Anti-Glare, Anti-Fatigue Warm Filter Layer */
+.crt-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  background: 
+    /* Subtle horizontal scanlines */
+    repeating-linear-gradient(
+      0deg,
+      rgba(30, 20, 15, 0.10) 0px,
+      rgba(30, 20, 15, 0.10) 1px,
+      transparent 1px,
+      transparent 3px
+    ),
+    /* Anti-glare warm phosphor tint that relaxes vision */
+    radial-gradient(
+      circle at 50% 50%,
+      rgba(248, 238, 218, 0.03) 0%,
+      rgba(40, 25, 20, 0.15) 100%
+    );
+  box-shadow: inset 0 0 80px rgba(25, 15, 10, 0.30);
+  backdrop-filter: contrast(0.97) brightness(0.96);
+  mix-blend-mode: multiply;
+}
+
+/* Custom Sleek 90s Scrollbar */
 .custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 10px;
+  height: 10px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: rgba(15, 15, 24, 0.5);
+  background: #ece3d2;
+  border-left: 2px solid #1c1917;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: 9999px;
+  background: #d5c8b2;
+  border: 2px solid #1c1917;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(225, 29, 72, 0.5);
+  background: #a8997f;
+}
+
+/* Pixel Art Living Animations */
+@keyframes palmSwayLeft {
+  0%, 100% {
+    transform: rotate(0deg) skewX(0deg);
+  }
+  50% {
+    transform: rotate(2.2deg) skewX(1.4deg);
+  }
+}
+
+@keyframes palmSwayRight {
+  0%, 100% {
+    transform: rotate(0deg) skewX(0deg);
+  }
+  50% {
+    transform: rotate(-2.2deg) skewX(-1.4deg);
+  }
+}
+
+@keyframes cloudDriftSlow {
+  0% {
+    transform: translateX(-240px);
+  }
+  100% {
+    transform: translateX(calc(100vw + 240px));
+  }
+}
+
+@keyframes seagullFlight {
+  0% {
+    transform: translate(-120px, 0px);
+  }
+  25% {
+    transform: translate(25vw, -14px);
+  }
+  50% {
+    transform: translate(50vw, 4px);
+  }
+  75% {
+    transform: translate(75vw, -10px);
+  }
+  100% {
+    transform: translate(calc(100vw + 120px), 0px);
+  }
+}
+
+@keyframes seagullBob {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.animate-palm-left {
+  animation: palmSwayLeft 5.5s ease-in-out infinite;
+  transform-origin: bottom left;
+}
+
+.animate-palm-left-bg {
+  animation: palmSwayLeft 7s ease-in-out infinite 0.8s;
+  transform-origin: bottom left;
+}
+
+.animate-palm-left-mid {
+  animation: palmSwayLeft 6.2s ease-in-out infinite 1.5s;
+  transform-origin: bottom left;
+}
+
+.animate-palm-right {
+  animation: palmSwayRight 5s ease-in-out infinite;
+  transform-origin: bottom right;
+}
+
+.animate-palm-right-bg {
+  animation: palmSwayRight 6.8s ease-in-out infinite 0.6s;
+  transform-origin: bottom right;
+}
+
+.animate-palm-right-mid {
+  animation: palmSwayRight 5.8s ease-in-out infinite 1.2s;
+  transform-origin: bottom right;
+}
+
+.animate-cloud-1 {
+  animation: cloudDriftSlow 38s linear infinite;
+}
+
+.animate-cloud-2 {
+  animation: cloudDriftSlow 52s linear infinite 8s;
+}
+
+.animate-cloud-3 {
+  animation: cloudDriftSlow 68s linear infinite 18s;
+}
+
+.animate-cloud-4 {
+  animation: cloudDriftSlow 46s linear infinite 4s;
+}
+
+.animate-cloud-5 {
+  animation: cloudDriftSlow 60s linear infinite 24s;
+}
+
+.animate-cloud-6 {
+  animation: cloudDriftSlow 40s linear infinite 14s;
+}
+
+.animate-cloud-7 {
+  animation: cloudDriftSlow 75s linear infinite 32s;
+}
+
+.animate-cloud-8 {
+  animation: cloudDriftSlow 48s linear infinite 20s;
+}
+
+.animate-seagull-1 {
+  animation: seagullFlight 22s linear infinite;
+}
+
+.animate-seagull-2 {
+  animation: seagullFlight 28s linear infinite 7s;
+}
+
+.animate-seagull-3 {
+  animation: seagullFlight 18s linear infinite 3s;
+}
+
+.animate-seagull-4 {
+  animation: seagullFlight 26s linear infinite 14s;
+}
+
+.animate-seagull-5 {
+  animation: seagullFlight 34s linear infinite 20s;
+}
+
+.animate-seagull-6 {
+  animation: seagullFlight 21s linear infinite 10s;
 }

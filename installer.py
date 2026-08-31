@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Nova Tech University - Admissions Assistant RAG
-Cross-Platform Interactive Installer (Windows / Linux / macOS)
+Nova Idiomas Colombia - Asistente Inteligente de Atención al Cliente con RAG
+Instalador Automático Multiplataforma (Windows / Linux / macOS)
 """
 
 import os
@@ -15,9 +15,39 @@ BASE_DIR = Path(__file__).resolve().parent
 FRONTEND_DIR = BASE_DIR / "frontend"
 VENV_DIR = BASE_DIR / "venv"
 
+def ensure_node_in_path():
+    """Detect Node/NPM in common install locations (NVM, fnm, volta, local bin) and add to PATH if needed."""
+    if shutil.which("node") and shutil.which("npm"):
+        return
+    home = Path.home()
+    possible_paths = [
+        home / ".local" / "bin",
+        home / "bin",
+        Path("/usr/local/bin"),
+    ]
+    # Check NVM directories
+    nvm_versions_dir = home / ".nvm" / "versions" / "node"
+    if nvm_versions_dir.exists():
+        for v_dir in sorted(nvm_versions_dir.glob("v*"), reverse=True):
+            possible_paths.append(v_dir / "bin")
+
+    # Check FNM / Volta / asdf
+    possible_paths.extend([
+        home / ".fnm" / "current" / "bin",
+        home / ".volta" / "bin",
+        home / ".asdf" / "shims",
+    ])
+
+    current_path = os.environ.get("PATH", "")
+    for p in possible_paths:
+        if p.exists() and (p / ("node.exe" if platform.system() == "Windows" else "node")).exists():
+            if str(p) not in current_path:
+                os.environ["PATH"] = f"{p}{os.pathsep}{current_path}"
+                current_path = os.environ["PATH"]
+
 def print_banner():
     print("=" * 70)
-    print("  🎓 NOVA TECH UNIVERSITY - ASISTENTE INTELIGENTE DE ADMISIONES (RAG)")
+    print("  🎓 NOVA IDIOMAS - ASISTENTE INTELIGENTE DE ATENCIÓN AL CLIENTE (RAG)")
     print("  🚀 INSTALADOR AUTOMÁTICO MULTIPLATAFORMA (WINDOWS / LINUX / MACOS)")
     print("=" * 70)
 
@@ -45,6 +75,7 @@ def check_prerequisites():
         sys.exit(1)
         
     # Check Node.js and npm
+    ensure_node_in_path()
     node_path = shutil.which("node")
     npm_path = shutil.which("npm")
     
@@ -96,11 +127,14 @@ def setup_frontend_environment():
         return
 
     print("\n--- Configurando Frontend en Next.js + PixiJS ---")
+    ensure_node_in_path()
     npm_path = shutil.which("npm")
     if npm_path:
         print("[+] Instalando paquetes de Node.js (Next.js, PixiJS, Tailwind CSS, Lucide, Framer Motion)...")
         try:
-            subprocess.check_call(["npm", "install"], cwd=str(FRONTEND_DIR), shell=True)
+            is_win = platform.system() == "Windows"
+            cmd = "npm install" if is_win else [npm_path, "install"]
+            subprocess.check_call(cmd, cwd=str(FRONTEND_DIR), shell=is_win)
             print("[✓] Dependencias del Frontend instaladas con éxito.")
         except Exception as e:
             print(f"[!] Error instalando dependencias de npm: {e}")
@@ -109,6 +143,7 @@ def setup_frontend_environment():
 
 def check_opencode():
     print("\n--- Verificando Servidor OpenCode ---")
+    ensure_node_in_path()
     opencode_path = shutil.which("opencode")
     if opencode_path:
         print("[✓] OpenCode CLI detectado en el sistema.")

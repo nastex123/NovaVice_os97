@@ -29,6 +29,7 @@ def test_installer_script_structure():
 def test_run_launcher_structure():
     run_path = BASE_DIR / "run.py"
     content = run_path.read_text(encoding="utf-8")
+    assert "def prompt_advisor_selection" in content
     assert "def start_opencode" in content
     assert "def start_fastapi" in content
     assert "def start_nextjs" in content

@@ -1,16 +1,16 @@
 # Product Requirements Document (PRD)
 
 ## Project Overview
-- **Project Name:** University Admissions Intelligent Assistant (RAG) with Next.js 15, PixiJS & OpenCode Reasoning Engine
+- **Project Name:** Nova Idiomas Colombia Admissions Intelligent Assistant (RAG) with "Nova OS '97" Retro UI, Next.js 15 & Dual Reasoning Engine (OpenCode + AGY Antigravity)
 - **Target Role:** AI Backend & Full Stack Engineer
-- **Domain:** Higher Education / Technological University Admissions (Nova Tech University)
+- **Domain:** Language Academy & Higher Education Admissions (Nova Idiomas Colombia)
 - **Document Version:** 2.6.0
-- **Status:** Implemented & Verified (100% Test Pass Rate, 19/19 Tests)
+- **Status:** Implemented & Verified (100% Test Pass Rate, 25/25 Tests)
 
 ---
 
 ## 1. Problem Statement
-The admissions office of Nova Tech University receives hundreds of repetitive inquiries daily across digital channels regarding academic programs, course syllabi, tuition payment plans, scholarship criteria, admissions calendars, campus housing, credit transfers, career services, specialized labs (such as the NVIDIA H100 GPU cluster), international exchanges, and graduation requirements.
+The admissions department of Nova Idiomas Colombia receives hundreds of repetitive inquiries daily across digital channels regarding language programs (English, French, German, Italian, Portuguese, Spanish for foreigners), class schedules (morning, afternoon, after-work evening, Saturdays, Sundays), COP tuition pricing, installment payment plans (0% interest), level placement tests, international certifications (IELTS, TOEFL, Cambridge, DELF/DALF, Goethe), and campus locations (Bogota Chicó/Chapinero, Medellin Poblado/Laureles, Cali Granada, and 100% Virtual Sync).
 
 Human admission counselors spent excessive time repeatedly answering standard FAQ inquiries, leading to long wait times, applicant churn, and high operational costs.
 
@@ -19,12 +19,12 @@ Human admission counselors spent excessive time repeatedly answering standard FA
 ## 2. Solution Goals & Non-Goals
 
 ### Goals
-- **Interactive Guided Navigation (9 Options & 8 Thematic Submenus):** Provide a structured numbered menu system (1 to 9 with 40 leaf sub-queries) allowing applicants to navigate official information via single-digit inputs or clickable action buttons.
-- **Strict Document Grounding (87 Official Documents & 264 Chunks):** Base all responses strictly on 87 verified university documents across 7 thematic clusters (syllabi, labs, international mobility, banking, student life, career partnerships, regulations), eliminating hallucinations.
-- **High-Performance Python Intermediary with OpenCode Deep Reasoning (`Web` ➔ `Python` ➔ `OpenCode`):** Real-time integration routing Option 9 ("Hablar con un Asesor") and open-ended queries to OpenCode acting as the empathetic Human Admissions Advisor, with multi-document high-density context injection.
-- **Modern Next.js 15 + PixiJS Web Application:** Goth-Tech visual design with WebGL particle constellation background, collapsible sidebar, Framer Motion transitions, live telemetry polling, and native GFM Markdown rendering (`react-markdown` + `remark-gfm`).
-- **Cross-Platform Executables & Supervisor Launcher:** One-click installer (`installer.py`, `install.bat`, `install.sh`) and process supervisor (`run.py`, `start.bat`, `start.sh`) running OpenCode (:4096), FastAPI (:8000), and Next.js (:3000) simultaneously with graceful `SIGINT` termination.
-- **Hybrid Retrieval with Auto-Fitting BM25:** Combine dense cosine vector similarity with pure Python BM25 lexical keyword matching and Spanish morphological suffix stemming.
+- **Interactive Guided Navigation (Root Menu & Pillar Submenus):** Provide a structured numbered menu system (Options 1 to 4 with sub-options and root menu 0) allowing applicants to navigate official information via single-digit inputs or clickable action buttons.
+- **Strict Document Grounding (82 Official Documents & 245 Chunks):** Base all responses strictly on 82 verified institutional documents across all language courses, schedules, COP pricing, refund policies, international certifications, and campus venues, eliminating hallucinations.
+- **Dual AI Advisor Engine (OpenCode Daemon vs AGY Antigravity CLI):** Pre-launch supervisor switch (`run.py -a [opencode|agy]`) allowing dynamic selection between local OpenCode reasoning daemon (:4096) and Google Antigravity (AGY) reasoning engine with multi-document high-density context injection.
+- **"Nova OS '97" Poolsuite / GTA Vice City Retro Web Application:** Macintosh '97 retro desktop experience with live vintage 1997 clock, striped titlebars, CRT optical anti-glare filter with ON/OFF switch, warm anti-fatigue color palette, and high-density animated pixel-art tropical palms, clouds and seagulls (GPU 60 FPS).
+- **Cross-Platform Executables & Supervisor Launcher:** One-click installer (`installer.py`, `install.bat`, `install.sh`) and process supervisor (`run.py`, `start.bat`, `start.sh`) running FastAPI (:8000), Next.js (:3000), and OpenCode (:4096 when active) simultaneously with graceful `SIGINT` termination.
+- **Hybrid Retrieval with Auto-Fitting BM25:** Combine dense cosine vector similarity (ChromaDB) with pure Python BM25 lexical keyword matching and Spanish morphological suffix stemming.
 - **Graceful Multi-Channel Escalation:** Reliably detect out-of-scope inquiries (threshold < 0.50), log structured tracking tickets (`ESC-YYYYMMDD-XXXX`), and dispatch webhook notifications.
 - **Dual-Layer Caching & Observability:** Sub-30ms cache hits, automated document-invalidation triggers, JSON telemetry (`/api/v1/metrics`), and Prometheus metrics (`/metrics/prometheus`).
 

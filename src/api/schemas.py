@@ -29,6 +29,7 @@ class HealthResponse(BaseModel):
     documents_indexed: int
     embedding_engine: str
     vector_store: str
+    advisor_engine: Optional[str] = "opencode"
 
 
 class MetricsResponse(BaseModel):
@@ -43,3 +44,27 @@ class MetricsResponse(BaseModel):
     total_tokens: int
     estimated_cost_usd: float
     average_latency_ms: float
+
+
+class WebhookRequest(BaseModel):
+    event: Optional[str] = Field("inquiry", description="Tipo de evento recibido por el webhook.")
+    query: str = Field(..., description="Consulta o mensaje del usuario.")
+    user_id: Optional[str] = Field("webhook_user", description="Identificador del usuario.")
+    channel: Optional[str] = Field("api_webhook", description="Canal de origen (ej. 'telegram', 'email', 'crm').")
+    metadata: Optional[Dict[str, Any]] = Field(default_factory=dict, description="Metadatos adicionales del remitente.")
+
+
+class QuoteRequest(BaseModel):
+    idioma: str = Field(..., description="Idioma a cotizar (inglés, francés, alemán, italiano, portugués, español).")
+    modalidad: Optional[str] = Field("regular", description="'regular', 'intensivo', 'sabatino', 'privadas_10h', 'paquete_b1', 'bilinguismo_total'")
+    tipo_pago: Optional[str] = Field("contado", description="'contado' (10% descuento) o 'cuotas' (3 cuotas sin interés)")
+    es_familiar: Optional[bool] = Field(False, description="True si aplica descuento familiar del 15%.")
+
+
+class PlacementTestRequest(BaseModel):
+    nombre_completo: str = Field(..., description="Nombre completo del estudiante.")
+    correo: str = Field(..., description="Correo electrónico.")
+    telefono: str = Field(..., description="Número de WhatsApp o teléfono.")
+    idioma: str = Field(..., description="Idioma a clasificar.")
+    modalidad_examen: Optional[str] = Field("virtual", description="'virtual', 'presencial_bogota', 'presencial_medellin', 'presencial_cali'")
+

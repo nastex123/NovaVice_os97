@@ -3,9 +3,9 @@ import "./globals.css";
 import { PixiParticleBackground } from "../components/PixiParticleBackground";
 
 export const metadata: Metadata = {
-  title: "Nova Tech University | Asistente Inteligente de Admisiones (RAG)",
+  title: "Nova Idiomas Colombia | Asistente de Admisiones",
   description:
-    "Portal oficial de admisiones impulsado por RAG en Python y OpenCode con navegación interactiva y consultas en tiempo real.",
+    "Portal oficial de admisiones e idiomas con RAG híbrido y asistencia académica personalizada en tiempo real.",
 };
 
 export default function RootLayout({

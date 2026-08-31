@@ -13,7 +13,7 @@ export interface ChatMessage {
   source_documents?: string[];
   escalated_to_human?: boolean;
   cached?: boolean;
-  mode?: "rag_direct" | "opencode_advisor" | "menu_navigation" | "escalation";
+  mode?: "rag_direct" | "opencode_advisor" | "agy_advisor" | "menu_navigation" | "escalation" | "guardrail_defense";
   action_buttons?: ActionButton[];
   isVoice?: boolean;
 }
@@ -38,4 +38,5 @@ export interface ServerHealth {
   documents_indexed: number;
   embedding_engine: string;
   vector_store: string;
+  advisor_engine?: string;
 }

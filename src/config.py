@@ -4,7 +4,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     # Core Application Configuration
-    app_name: str = "Nova Tech University Admissions RAG Assistant"
+    app_name: str = "Nova Idiomas - Asistente Inteligente de Atención y Admisiones"
     app_env: str = "development"
     debug: bool = True
     port: int = 8000
@@ -18,13 +18,20 @@ class Settings(BaseSettings):
     escalations_log_path: Path = data_dir / "escalations.json"
 
     # Vector Storage and Retrieval
-    chroma_collection_name: str = "admissions_knowledge_base"
+    chroma_collection_name: str = "idiomas_knowledge_base"
     similarity_threshold: float = 0.50
     top_k_results: int = 3
+
+    # Advisor Engine Selection (OpenCode vs AGY / Antigravity)
+    advisor_backend: str = "opencode"  # "opencode" or "agy"
 
     # OpenCode Integration
     opencode_server_url: str = "http://127.0.0.1:4096"
     opencode_enabled: bool = True
+
+    # AGY (Google Antigravity) Integration
+    agy_enabled: bool = True
+    agy_model: str = "gemini-2.5-pro"
 
     # LLM and Provider Configuration
     llm_provider: str = "opencode"
@@ -34,10 +41,11 @@ class Settings(BaseSettings):
     llm_temperature: float = 0.2
 
     # Human Escalation and Webhook Dispatcher
-    admissions_office_email: str = "admisiones@novatech.edu"
+    admissions_office_email: str = "admisiones@novaidiomas.edu.co"
+    support_office_email: str = "soporte@novaidiomas.edu.co"
     escalation_webhook_url: str = ""
 
-    # Optional Telegram Bot Integration
+    # Telegram Bot Integration
     telegram_bot_token: str = ""
     telegram_enabled: bool = False
 

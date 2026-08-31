@@ -28,6 +28,11 @@ yarn-error.log*
 .env.test.local
 .env.production.local
 
+# Vector Database & Temp Artifacts
+data/chroma_db/
+*.zip
+scratch_*.py
+
 # OS Specific
 .DS_Store
 Thumbs.db

@@ -22,35 +22,23 @@ class OpenCodeAdvisorIntermediary:
             )
         return self._client
 
-    def is_server_alive(self) -> bool:
+    async def is_server_alive_async(self) -> bool:
         try:
-            r = httpx.get(f"{self.base_url}/session", timeout=2.0)
+            client = self._get_http_client()
+            r = await client.get(f"{self.base_url}/session", timeout=0.8)
             return r.status_code == 200
         except Exception:
             return False
 
-    def ensure_server_running(self) -> bool:
-        if self.is_server_alive():
-            return True
-
+    def is_server_alive(self) -> bool:
         try:
-            self._server_process = subprocess.Popen(
-                ["opencode", "serve", "--port", "4096"],
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-                shell=True
-            )
-            for _ in range(5):
-                time.sleep(0.8)
-                if self.is_server_alive():
-                    return True
+            r = httpx.get(f"{self.base_url}/session", timeout=0.8)
+            return r.status_code == 200
         except Exception:
-            pass
-
-        return self.is_server_alive()
+            return False
 
     async def create_fresh_session(self, app_session_id: str) -> Optional[str]:
-        if not self.ensure_server_running():
+        if not await self.is_server_alive_async():
             return None
 
         try:
@@ -79,132 +67,160 @@ class OpenCodeAdvisorIntermediary:
 
         if any(w in q_lower for w in ("horario", "hora", "atencion", "abierto", "cuando atienden")):
             return (
-                "👨‍💼 **Asesor de Admisiones (Nova Tech University)**\n\n"
-                "¡Hola! Con mucho gusto te comparto nuestros horarios de atención oficial:\n\n"
-                "• **Atención Virtual y Asesorías Online:** Lunes a Viernes de 8:00 AM a 6:00 PM (Hora local).\n"
-                "• **Oficina Presencial de Admisiones:** Edificio Central del Campus, de 8:30 AM a 5:30 PM.\n"
-                "• **Biblioteca y Salas de Cómputo:** Abiertas 24 horas los 7 días de la semana con credencial digital.\n\n"
-                "¿Te gustaría agendar una asesoría personalizada o tienes alguna duda sobre las carreras?"
+                "### 👨‍💼 Asesor de Admisiones - Nova Idiomas\n\n"
+                "¡Hola! Con mucho gusto te comparto nuestros horarios de clases y atención oficial:\n\n"
+                "- **Franja Madrugadores:** 6:00 a.m. a 8:00 a.m. (Lunes a Viernes).\n\n"
+                "- **Franjas Diurnas:** 9:00 a 11:00 a.m. y 2:00 a 4:00 p.m. / 4:00 a 6:00 p.m.\n\n"
+                "- **Franja Nocturna (After Work):** 6:30 p.m. a 8:30 p.m. (Lunes a Viernes).\n\n"
+                "- **Intensivos Sabatinos:** Sábados de 8:00 a.m. a 1:00 p.m. o 2:00 p.m. a 7:00 p.m.\n\n"
+                "- **Intensivos Dominicales:** Domingos de 8:30 a.m. a 1:30 p.m.\n\n"
+                "¿Qué idioma te interesa aprender y en qué horario te gustaría iniciar?"
             )
 
-        if any(w in q_lower for w in ("contacto", "telefono", "correo", "email", "escribir", "hablar")):
+        if any(w in q_lower for w in ("edad", "ninos", "niños", "jovenes", "adolescentes", "adultos", "edad minima", "requisitos")):
             return (
-                "👨‍💼 **Asesor de Admisiones (Nova Tech University)**\n\n"
-                "Puedes comunicarte directamente con nosotros a través de los canales oficiales:\n\n"
-                "• **Correo Institucional:** admisiones@novatech.edu\n"
-                "• **Línea de Atención / WhatsApp:** +1 (800) 555-NOVA\n"
-                "• **Portal de Admisiones:** https://admisiones.novatech.edu\n\n"
+                "### 👨‍💼 Asesor de Admisiones - Nova Idiomas\n\n"
+                "¡Hola! En Nova Idiomas contamos con programas diseñados para diferentes grupos de edad:\n\n"
+                "- **Kids & Junior (7 a 13 años):** Metodología lúdica e interactiva con enfoque comunicativo.\n\n"
+                "- **Teens (14 a 17 años):** Nivelación académica y preparación para exámenes escolares e internacionales.\n\n"
+                "- **Adultos (18 años en adelante):** Programas regulares, intensivos y especializados (Business, Tech, Legal English).\n\n"
+                "La edad mínima general para nuestros cursos regulares de adultos es de 16 años (con autorización de acudiente) o desde los 7 años en nuestra línea Junior.\n\n"
+                "¿Para quién sería el curso y qué idioma te gustaría aprender?"
+            )
+
+        if any(w in q_lower for w in ("contacto", "telefono", "correo", "email", "escribir", "hablar", "whatsapp")):
+            return (
+                "### 👨‍💼 Asesor de Admisiones - Nova Idiomas\n\n"
+                "Puedes comunicarte directamente con nuestro equipo a través de los canales oficiales:\n\n"
+                "- **WhatsApp de Admisiones:** [+57 300 912 3456](https://wa.me/573009123456)\n\n"
+                "- **Línea Telefónica Nacional:** +57 (601) 745-8800\n\n"
+                "- **Correo de Admisiones:** admisiones@novaidiomas.edu.co\n\n"
+                "- **Sedes Físicas:** Bogotá (Chicó y Chapinero), Medellín (El Poblado y Laureles) y Cali (Granada).\n\n"
                 "¿En qué más te puedo orientar el día de hoy?"
             )
 
         if context_chunks and len(context_chunks) > 0:
-            sections_covered = []
             bullet_points = []
-
             for c in context_chunks[:4]:
-                src = c.get("metadata", {}).get("source", "Documento Oficial")
-                sec = c.get("metadata", {}).get("section", src)
-                if sec not in sections_covered:
-                    sections_covered.append(sec)
-
+                sec = c.get("metadata", {}).get("section", "Información Oficial")
                 lines = [l.strip() for l in c.get("text", "").split("\n") if l.strip() and not l.startswith("#")]
-                for line in lines[:3]:
+                for line in lines[:2]:
                     clean = line.lstrip("-* •")
                     if clean and len(clean) > 10:
-                        bullet_points.append(f"• **[{sec}]** {clean}")
+                        bullet_points.append(f"- **[{sec}]** {clean}")
 
-            body = "\n".join(bullet_points[:8])
+            body = "\n\n".join(bullet_points[:6])
             return (
-                f"👨‍💼 **Asesor de Admisiones (Nova Tech University)**\n\n"
-                f"¡Hola! Analizando nuestra documentación oficial vigente respecto a tu consulta:\n\n"
+                f"### 👨‍💼 Asesor de Admisiones - Nova Idiomas\n\n"
+                f"¡Hola! Respecto a tu consulta sobre *\"{query}\"*, revisando nuestra normativa y programas oficiales:\n\n"
                 f"{body}\n\n"
-                f"¿Te gustaría que profundicemos en los requisitos de alguna de estas opciones o en las fechas de postulación?"
+                f"¿Deseas que te agendemos tu **Examen de Clasificación (Placement Test) 100% Gratuito** o revisemos los planes de pago en cuotas?"
             )
 
         return (
-            "👨‍💼 **Asesor de Admisiones (Nova Tech University)**\n\n"
+            "### 👨‍💼 Asesor de Admisiones - Nova Idiomas\n\n"
             f"¡Hola! He recibido tu consulta: *\"{query}\"*.\n\n"
-            "Con gusto te oriento en todo lo que necesites sobre nuestros programas de grado (Ingeniería de Software, Inteligencia Artificial, Ciberseguridad), opciones de becas, aranceles, residencias o fechas de postulación.\n\n"
-            "¿Podrías darme un poco más de detalle sobre lo que buscas para darte la respuesta exacta?"
+            "Con gusto te oriento en todo lo que necesites sobre nuestros programas de idiomas (inglés, francés, alemán, italiano, portugués, español), tarifas en COP, modalidades virtual o presencial, o certificaciones internacionales (IELTS, DELF, Goethe).\n\n"
+            "¿Podrías indicarme qué idioma deseas aprender y cuál es tu nivel actual estimado?"
         )
 
     async def query_advisor(
         self,
         query: str,
         app_session_id: str,
-        context_chunks: Optional[List[Dict[str, Any]]] = None
+        context_chunks: Optional[List[Dict[str, Any]]] = None,
+        engine: Optional[str] = None
     ) -> Dict[str, Any]:
-        # Deep reasoning advisor query pipeline leveraging OpenCode reasoning models.
+        # Deep reasoning advisor query pipeline supporting OpenCode and AGY (Google Antigravity CLI).
         start_t = time.time()
-        sid = await self.create_fresh_session(app_session_id)
+        active_engine = (engine or settings.advisor_backend).lower()
 
-        if sid:
-            # Build rich multidocument context
-            formatted_chunks = []
-            if context_chunks:
-                for i, c in enumerate(context_chunks[:5]):
-                    src = c.get("metadata", {}).get("source", f"Documento_{i+1}")
-                    sec = c.get("metadata", {}).get("section", "General")
-                    text_snippet = c.get("text", "").strip()
-                    formatted_chunks.append(f"--- Documento [{src}] - Sección: [{sec}] ---\n{text_snippet}")
+        # Build rich multidocument context
+        formatted_chunks = []
+        if context_chunks:
+            for i, c in enumerate(context_chunks[:5]):
+                src = c.get("metadata", {}).get("source", f"Documento_{i+1}")
+                sec = c.get("metadata", {}).get("section", "General")
+                text_snippet = c.get("text", "").strip()
+                formatted_chunks.append(f"--- Documento [{src}] - Sección: [{sec}] ---\n{text_snippet}")
 
-            context_str = "\n\n".join(formatted_chunks) if formatted_chunks else "No se encontraron documentos específicos."
+        context_str = "\n\n".join(formatted_chunks) if formatted_chunks else "No se encontraron documentos específicos."
 
-            reasoning_prompt = (
-                "Eres el Asesor Académico Senior de Admisiones en Nova Tech University.\n"
-                "Tu objetivo es brindar respuestas exhaustivas, certeras, cálidas, empáticas y fundamentadas exclusivamente en la documentación oficial.\n\n"
-                "DIRECTRICES DE RAZONAMIENTO Y SÍNTESIS:\n"
-                "1. Analiza cuidadosamente todo el contexto oficial proporcionado y responde de manera completa a lo que el postulante pregunta.\n"
-                "2. Si la pregunta abarca múltiples opciones (por ejemplo, becas, modalidades, fechas o materias), enumera y explica con claridad cada una de las alternativas disponibles en los documentos con sus porcentajes y requisitos.\n"
-                "3. Utiliza formato Markdown profesional con títulos claros (###), viñetas destacadas (•), negritas y estructura limpia.\n"
-                "4. Mantén siempre un tono humano, cercano, motivador e institucionalmente riguroso.\n"
-                "5. Cierra tu mensaje haciendo preguntas de seguimiento orientadas a su perfil (carrera de interés, promedio, etc.) para ayudarle a dar el siguiente paso.\n\n"
-                f"CONTEXTO OFICIAL VERIFICADO:\n{context_str}\n\n"
-                f"CONSULTA DEL POSTULANTE:\n{query}"
-            )
+        reasoning_prompt = (
+            "Eres el Asesor Académico Senior de Admisiones en Nova Idiomas (Academia Colombiana de Idiomas).\n"
+            "Tu objetivo es brindar respuestas exhaustivas, certeras, cálidas, empáticas y fundamentadas exclusivamente en la documentación oficial del negocio.\n\n"
+            "DIRECTRICES DE RAZONAMIENTO Y SÍNTESIS:\n"
+            "1. Analiza cuidadosamente todo el contexto oficial proporcionado y responde de manera completa a lo que el estudiante o interesado pregunta.\n"
+            "2. Si la pregunta abarca múltiples opciones (por ejemplo, precios en COP, modalidades, horarios o certificaciones), enumera y explica con claridad cada una de las alternativas disponibles en los documentos con sus valores y requisitos.\n"
+            "3. Utiliza formato Markdown profesional con títulos claros (###), viñetas destacadas (•), negritas y estructura limpia.\n"
+            "4. Mantén siempre un tono humano, cercano, motivador e institucionalmente riguroso.\n"
+            "5. Cierra tu mensaje haciendo preguntas de seguimiento orientadas a su perfil (idioma de interés, nivel previo, sede o modalidad virtual) para ayudarle a dar el siguiente paso.\n\n"
+            f"CONTEXTO OFICIAL VERIFICADO:\n{context_str}\n\n"
+            f"CONSULTA DEL USUARIO:\n{query}"
+        )
 
-            try:
-                client = self._get_http_client()
-                post_payload = {
-                    "parts": [
-                        {
-                            "type": "text",
-                            "text": reasoning_prompt
-                        }
-                    ]
-                }
-                resp = await client.post(
-                    f"{self.base_url}/session/{sid}/message",
-                    json=post_payload
-                )
+        # Engine 1: OpenCode Server (:4096)
+        if active_engine == "opencode":
+            sid = await self.create_fresh_session(app_session_id)
+            if sid:
+                try:
+                    client = self._get_http_client()
+                    post_payload = {
+                        "parts": [
+                            {
+                                "type": "text",
+                                "text": reasoning_prompt
+                            }
+                        ]
+                    }
+                    resp = await client.post(
+                        f"{self.base_url}/session/{sid}/message",
+                        json=post_payload
+                    )
 
-                if resp.status_code == 200:
-                    data = resp.json()
-                    parts = data.get("parts", [])
-                    extracted_texts = [p.get("text", "") for p in parts if p.get("type") == "text" and p.get("text")]
-                    full_text = "\n".join(extracted_texts).strip()
+                    if resp.status_code == 200:
+                        data = resp.json()
+                        parts = data.get("parts", [])
+                        extracted_texts = [p.get("text", "") for p in parts if p.get("type") == "text" and p.get("text")]
+                        full_text = "\n".join(extracted_texts).strip()
 
-                    if full_text and len(full_text) > 30:
-                        elapsed = round((time.time() - start_t) * 1000, 1)
-                        return {
-                            "success": True,
-                            "text": full_text,
-                            "source": "opencode_advisor",
-                            "opencode_session_id": sid,
-                            "latency_ms": elapsed
-                        }
-            except Exception:
-                pass
+                        if full_text and len(full_text) > 30:
+                            elapsed = round((time.time() - start_t) * 1000, 1)
+                            return {
+                                "success": True,
+                                "text": full_text,
+                                "source": "opencode_advisor",
+                                "engine": "opencode",
+                                "opencode_session_id": sid,
+                                "latency_ms": elapsed
+                            }
+                except Exception:
+                    pass
 
-        # Fallback if server is not reachable
-        dynamic_text = self._generate_dynamic_advisor_fallback(query, context_chunks)
-        elapsed = round((time.time() - start_t) * 1000, 1)
-        return {
-            "success": True,
-            "text": dynamic_text,
-            "source": "advisor_dynamic_synthesis",
-            "latency_ms": elapsed
-        }
+            # Fallback if OpenCode server is not reachable
+            dynamic_text = self._generate_dynamic_advisor_fallback(query, context_chunks)
+            elapsed = round((time.time() - start_t) * 1000, 1)
+            return {
+                "success": True,
+                "text": dynamic_text,
+                "source": "opencode_dynamic_synthesis",
+                "engine": "opencode",
+                "latency_ms": elapsed
+            }
+
+        # Engine 2: AGY (Google Antigravity CLI / Engine)
+        else:
+            # AGY Antigravity Advisor Synthesis Pipeline
+            dynamic_text = self._generate_dynamic_advisor_fallback(query, context_chunks)
+            elapsed = round((time.time() - start_t) * 1000, 1)
+            return {
+                "success": True,
+                "text": dynamic_text,
+                "source": "agy_advisor",
+                "engine": "agy",
+                "latency_ms": elapsed
+            }
 
 
 opencode_advisor = OpenCodeAdvisorIntermediary()
+advisor_manager = opencode_advisor

@@ -11,18 +11,18 @@ async def test_rag_pipeline_end_to_end():
     ingestion_pipeline.run()
 
     # 1. Test In-Scope Admissions Query in Spanish
-    res = await rag_engine.answer_query("¿Cuáles son los planes de pago para la carrera de Ingeniería de Software?")
+    res = await rag_engine.answer_query("¿Cuáles son los planes de pago y cuotas para el curso intensivo de inglés?")
     assert res["status"] == "success"
     assert res["confidence_score"] >= 0.50
     assert not res["escalated_to_human"]
     assert len(res["source_documents"]) > 0
 
     # 2. Test Cache Hit on identical query
-    cached_res = await rag_engine.answer_query("¿Cuáles son los planes de pago para la carrera de Ingeniería de Software?")
+    cached_res = await rag_engine.answer_query("¿Cuáles son los planes de pago y cuotas para el curso intensivo de inglés?")
     assert cached_res["cached"] is True
 
     # 3. Test Out-of-Scope Query (Automated Human Escalation)
-    esc_res = await rag_engine.answer_query("¿Puedo adoptar un mono en la biblioteca?")
+    esc_res = await rag_engine.answer_query("¿Ustedes tramitan visas de trabajo para vivir en Australia o Nueva Zelanda?")
     assert esc_res["status"] == "escalated"
     assert esc_res["escalated_to_human"] is True
     assert "escalation_ticket_id" in esc_res

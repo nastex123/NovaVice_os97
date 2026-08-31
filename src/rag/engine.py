@@ -55,9 +55,9 @@ class PurePythonRAGEngine:
                 )
             else:
                 formatted_response = (
-                    "🎓 **Información Oficial de Admisiones**\n\n"
-                    "Nova Tech University ofrece programas de grado y posgrado con modalidades 100% online, híbrida y presencial.\n\n"
-                    "🏛️ *Fuente oficial:* Guía Institucional de Admisiones"
+                    "🎓 **Información Oficial - Nova Idiomas**\n\n"
+                    "Nova Idiomas ofrece programas de inglés, francés, alemán, italiano, portugués y español con modalidades 100% online en vivo, presencial e híbrida en Colombia.\n\n"
+                    "🏛️ *Fuente oficial:* Guía de Admisiones y Programas Nova Idiomas"
                 )
 
             return {
@@ -97,13 +97,13 @@ class PurePythonRAGEngine:
                     }
                 else:
                     return {
-                        "text": f"Nova Tech Admissions Advisory Notice: Official information retrieved. (Provider status {resp.status_code})",
+                        "text": f"Nova Idiomas - Aviso Oficial: Información recuperada correctamente de los documentos del negocio. (Código {resp.status_code})",
                         "prompt_tokens": 50,
                         "completion_tokens": 20
                     }
         except Exception:
             return {
-                "text": "Based on official admissions documents, Nova Tech University offers accredited B.Sc. and M.Sc. programs with flexible study modalities (online, hybrid, and on-campus).",
+                "text": "Con base en los documentos oficiales de Nova Idiomas Colombia, ofrecemos programas certificados en inglés, francés, alemán, italiano y portugués con modalidades presencial, virtual sincrónica e híbrida.",
                 "prompt_tokens": 50,
                 "completion_tokens": 25
             }
@@ -179,21 +179,30 @@ class PurePythonRAGEngine:
         session_data = applicant_memory.get_session(session_id)
         current_state = session_data.get("attributes", {}).get("menu_state", "root")
 
-        # 4. Handle Advisor Mode via OpenCode Intermediary
+        # 4. Handle Advisor Mode via Selected Intermediary (OpenCode or AGY)
         if current_state == "advisor_mode" or use_opencode_mode or use_hermes_mode:
             from src.core.opencode_client import opencode_advisor
             # Retrieve 5 rich context chunks for comprehensive multi-document reasoning
             advisor_chunks = hybrid_retriever.retrieve(effective_query, top_k=5)
-            advisor_res = await opencode_advisor.query_advisor(effective_query, session_id, context_chunks=advisor_chunks)
+            advisor_res = await opencode_advisor.query_advisor(
+                effective_query,
+                session_id,
+                context_chunks=advisor_chunks,
+                engine=self.settings.advisor_backend
+            )
             latency = time.time() - start_time
             metrics_bus.record_query(cached=False, latency=latency)
 
+            is_agy = self.settings.advisor_backend.lower() == "agy"
+            engine_label = "AGY / Antigravity" if is_agy else "OpenCode"
+            mode_tag = "agy_advisor" if is_agy else "opencode_advisor"
+
             resp_text = advisor_res.get("text", "")
-            footer = "\n\n💡 *(Atendido por el Asesor de Admisiones vía OpenCode. Escribe **0** para volver al Menú Principal)*"
+            footer = f"\n\n💡 *(Atendido por el Asesor de Admisiones vía {engine_label}. Escribe **0** para volver al Menú Principal)*"
             if not resp_text.endswith(footer):
                 resp_text += footer
 
-            source_docs = [f"{c.get('metadata', {}).get('source', 'doc')} (Sección: {c.get('metadata', {}).get('section', 'General')})" for c in advisor_chunks] if advisor_chunks else ["Asesor Humano de Admisiones (OpenCode)"]
+            source_docs = [f"{c.get('metadata', {}).get('source', 'doc')} (Sección: {c.get('metadata', {}).get('section', 'General')})" for c in advisor_chunks] if advisor_chunks else [f"Asesor Humano de Admisiones ({engine_label})"]
 
             return {
                 "status": "success",
@@ -202,7 +211,7 @@ class PurePythonRAGEngine:
                 "confidence_score": 1.0,
                 "escalated_to_human": False,
                 "cached": False,
-                "mode": "opencode_advisor",
+                "mode": mode_tag,
                 "latency_ms": round(latency * 1000, 1),
                 "action_buttons": [{"label": "0. Menú Principal", "value": "0"}, {"label": "9. Otra Consulta al Asesor", "value": "9"}]
             }
@@ -213,24 +222,28 @@ class PurePythonRAGEngine:
                 query=query,
                 user_id=user_id,
                 confidence_score=top_similarity,
-                reason="low_relevance"
+                reason="knowledge_gap_escalation"
             )
-            # Dispatch background webhook notification
             await escalation_dispatcher.dispatch_webhook(ticket)
-
             metrics_bus.record_escalation()
+
+            response_text = (
+                f"**Asesoria Academica - Nova Idiomas**\n\n"
+                f"Hola. Actualmente no cuento con el detalle exacto de esa consulta especifica en la base de datos automatizada, "
+                f"pero con gusto te ayudamos de forma directa.\n\n"
+                f"He guardado tu consulta con el caso de seguimiento **#{ticket['ticket_id']}** para que nuestro equipo de admisiones pueda orientarte.\n\n"
+                f"**Canales de atencion directa:**\n"
+                f"- **WhatsApp:** [+57 300 912 3456](https://wa.me/573009123456)\n"
+                f"- **Correo:** {self.settings.admissions_office_email}\n\n"
+                f"Tambien puedes explorar nuestras opciones principales o realizar una nueva pregunta."
+            )
+
             latency = time.time() - start_time
             metrics_bus.record_query(cached=False, latency=latency)
 
             escalation_response = {
                 "status": "escalated",
-                "response": (
-                    f"⚠️ **Consulta Fuera del Alcance Oficial**\n\n"
-                    f"Disculpa, esta solicitud específica no se encuentra en nuestra base de datos oficial de admisiones.\n\n"
-                    f"He generado el ticket de atención **#{ticket['ticket_id']}** y transferí tu pregunta al "
-                    f"Equipo de Asesoría de Admisiones (admisiones@novatech.edu).\n"
-                    f"Un asesor académico se comunicará contigo para ayudarte."
-                ),
+                "response": response_text,
                 "source_documents": [],
                 "confidence_score": top_similarity,
                 "escalated_to_human": True,
@@ -238,7 +251,12 @@ class PurePythonRAGEngine:
                 "cached": False,
                 "mode": "escalation",
                 "latency_ms": round(latency * 1000, 1),
-                "action_buttons": [{"label": "0. Menú Principal", "value": "0"}, {"label": "9. Asesor OpenCode", "value": "9"}]
+                "action_buttons": [
+                    {"label": "1. Cursos & Certificaciones", "value": "1"},
+                    {"label": "2. Horarios & Modalidades", "value": "2"},
+                    {"label": "3. Precios & Financiación", "value": "3"},
+                    {"label": "0. Menú Principal", "value": "0"}
+                ]
             }
             return escalation_response
 
@@ -250,7 +268,7 @@ class PurePythonRAGEngine:
         llm_output = await self._call_llm_api(prompt, chunks=chunks)
         answer_text = llm_output["text"]
         if mapped_query:
-            answer_text += "\n\n💡 *(Escribe **0** para regresar al Menú Principal, o **9** para hablar con el Asesor OpenCode)*"
+            answer_text += "\n\n*(Escribe '0' para regresar al Menu Principal)*"
 
         # 7. Update Telemetry & Memory
         latency = time.time() - start_time
@@ -270,7 +288,13 @@ class PurePythonRAGEngine:
             "cached": False,
             "mode": "opencode_advisor" if (use_opencode_mode or use_hermes_mode) else "rag_direct",
             "latency_ms": round(latency * 1000, 1),
-            "action_buttons": action_buttons if action_buttons else [{"label": "0. Menú Principal", "value": "0"}, {"label": "9. Asesor OpenCode", "value": "9"}]
+            "action_buttons": action_buttons if action_buttons else [
+                {"label": "1. Cursos & Certificaciones", "value": "1"},
+                {"label": "2. Horarios & Modalidades", "value": "2"},
+                {"label": "3. Precios & Financiación", "value": "3"},
+                {"label": "4. Admisiones & Sedes", "value": "4"},
+                {"label": "0. Menú Principal", "value": "0"}
+            ]
         }
 
         # 8. Cache response

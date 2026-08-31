@@ -58,7 +58,15 @@ class HybridRetriever:
             matching_tokens = sum(1 for tok in query_tokens if tok in doc_text_lower)
             coverage = matching_tokens / float(num_query_tokens)
 
-            norm_bm = (min(1.0, bm_score / 3.5) * coverage) if bm_score > 0 else 0.0
+            # Weighted normalization that requires sufficient query coverage
+            if bm_score > 0 and matching_tokens > 0:
+                base_norm = min(1.0, bm_score / 3.0)
+                norm_bm = base_norm * coverage
+                if coverage >= 0.5:
+                    norm_bm = min(1.0, norm_bm * 1.25)
+            else:
+                norm_bm = 0.0
+
             dense_sim = item.get("similarity_score", 0.0)
             item["similarity_score"] = round(max(dense_sim, norm_bm), 4)
 

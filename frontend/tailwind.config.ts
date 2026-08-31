@@ -9,44 +9,46 @@ export default {
   theme: {
     extend: {
       colors: {
-        background: "#08080C",
-        surface: "#0F0F18",
-        surfaceHover: "#161626",
-        surfaceCard: "#131320",
-        borderDark: "rgba(255, 255, 255, 0.08)",
-        borderGlow: "rgba(225, 29, 72, 0.3)",
-        crimson: {
-          DEFAULT: "#E11D48",
-          glow: "rgba(225, 29, 72, 0.4)",
-          dark: "#9F1239",
+        vicePink: {
+          DEFAULT: "#D85075",
+          dark: "#B8385C",
+          light: "#E87896",
+          pastel: "#F9E6EB",
         },
-        cyber: {
-          blue: "#38BDF8",
-          purple: "#A855F7",
-          emerald: "#10B981",
-          amber: "#F59E0B",
-        }
+        viceCyan: {
+          DEFAULT: "#2894A0",
+          dark: "#1A737E",
+          light: "#52B4BE",
+          pastel: "#E2F4F6",
+        },
+        viceYellow: {
+          DEFAULT: "#D8AF44",
+          dark: "#B58C25",
+          light: "#F5EBC7",
+        },
+        viceOrange: "#D86B48",
+        retroBeige: {
+          DEFAULT: "#ECE3D2",
+          dark: "#D5C8B2",
+          light: "#F7F2E8",
+          frame: "#DDD1BC",
+        },
+        retroPaper: "#F5EFE4",
+        retroCard: "#FAF7EE",
+        retroBorder: "#1C1917",
       },
       fontFamily: {
         sans: ["var(--font-inter)", "system-ui", "sans-serif"],
         display: ["var(--font-outfit)", "system-ui", "sans-serif"],
+        mono: ["var(--font-mono)", "Courier New", "monospace"],
       },
       boxShadow: {
-        glow: "0 0 25px -5px rgba(225, 29, 72, 0.25)",
-        glowBlue: "0 0 25px -5px rgba(56, 189, 248, 0.25)",
-        glowPurple: "0 0 25px -5px rgba(168, 85, 247, 0.25)",
-        card: "0 8px 32px 0 rgba(0, 0, 0, 0.37)",
+        "retro-sm": "2px 2px 0px 0px #000000",
+        "retro": "3px 3px 0px 0px #000000",
+        "retro-lg": "5px 5px 0px 0px #000000",
+        "retro-xl": "8px 8px 0px 0px #000000",
+        "retro-inset": "inset 2px 2px 0px 0px rgba(0, 0, 0, 0.25)",
       },
-      animation: {
-        "pulse-slow": "pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite",
-        "float": "float 6s ease-in-out infinite",
-      },
-      keyframes: {
-        float: {
-          "0%, 100%": { transform: "translateY(0px)" },
-          "50%": { transform: "translateY(-8px)" },
-        }
-      }
     },
   },
   plugins: [],

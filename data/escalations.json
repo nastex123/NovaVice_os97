@@ -638,5 +638,375 @@
     "escalation_reason": "low_relevance",
     "assigned_to": "admisiones@novatech.edu",
     "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260831-9CDFAD",
+    "created_at": "2026-08-31T06:37:27-0500",
+    "user_id": "postulante_web",
+    "query": "becas",
+    "confidence_score": 0.2337,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admisiones@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260831-207FE6",
+    "created_at": "2026-08-31T07:04:07-0500",
+    "user_id": "test_applicant_01",
+    "query": "\u00bfCu\u00e1les son las fechas de admisi\u00f3n para Oto\u00f1o 2026?",
+    "confidence_score": 0.4453,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admisiones@novaidiomas.edu.co",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260831-9D8652",
+    "created_at": "2026-08-31T07:04:11-0500",
+    "user_id": "guest_applicant",
+    "query": "\u00bfPuedo adoptar un mono en la biblioteca?",
+    "confidence_score": 0.4877,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admisiones@novaidiomas.edu.co",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260831-AF8FCD",
+    "created_at": "2026-08-31T07:05:15-0500",
+    "user_id": "guest_applicant",
+    "query": "\u00bfUstedes tramitan visas de trabajo para vivir en Australia o Nueva Zelanda?",
+    "confidence_score": 0.4234,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admisiones@novaidiomas.edu.co",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260831-5537ED",
+    "created_at": "2026-08-31T07:05:26-0500",
+    "user_id": "postulante_nextjs",
+    "query": "donde estan las sedes?",
+    "confidence_score": 0.4634,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admisiones@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260831-EECB6B",
+    "created_at": "2026-08-31T07:06:39-0500",
+    "user_id": "guest_applicant",
+    "query": "\u00bfTienen venta de repuestos para motocicletas Yamaha?",
+    "confidence_score": 0.4181,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admisiones@novaidiomas.edu.co",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260831-399963",
+    "created_at": "2026-08-31T07:08:10-0500",
+    "user_id": "postulante_nextjs",
+    "query": "becas",
+    "confidence_score": 0.2098,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admisiones@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260831-CE5958",
+    "created_at": "2026-08-31T07:09:06-0500",
+    "user_id": "postulante_nextjs",
+    "query": "ola",
+    "confidence_score": 0.2944,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admisiones@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260831-E1CEFF",
+    "created_at": "2026-08-31T07:15:49-0500",
+    "user_id": "guest_applicant",
+    "query": "\u00bfUstedes tramitan visas de trabajo para vivir en Australia o Nueva Zelanda?",
+    "confidence_score": 0.4234,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admisiones@novaidiomas.edu.co",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260831-A1A366",
+    "created_at": "2026-08-31T07:20:26-0500",
+    "user_id": "guest_applicant",
+    "query": "\u00bfTienen venta de repuestos para motocicletas?",
+    "confidence_score": 0.4963,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admisiones@novaidiomas.edu.co",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260831-BEEE23",
+    "created_at": "2026-08-31T07:20:38-0500",
+    "user_id": "guest_applicant",
+    "query": "\u00bfUstedes tramitan visas de trabajo para vivir en Australia o Nueva Zelanda?",
+    "confidence_score": 0.4234,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admisiones@novaidiomas.edu.co",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260831-D3C41B",
+    "created_at": "2026-08-31T07:24:43-0500",
+    "user_id": "postulante_nextjs",
+    "query": "zzzzzzzzz",
+    "confidence_score": 0.1626,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admisiones@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260831-128B08",
+    "created_at": "2026-08-31T07:26:04-0500",
+    "user_id": "postulante_nextjs",
+    "query": "sedes disponibles",
+    "confidence_score": 0.4292,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admisiones@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260831-9F83C0",
+    "created_at": "2026-08-31T07:26:31-0500",
+    "user_id": "postulante_nextjs",
+    "query": "sedes existentes",
+    "confidence_score": 0.4292,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admisiones@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260831-F20FF2",
+    "created_at": "2026-08-31T07:50:30-0500",
+    "user_id": "guest_applicant",
+    "query": "\u00bfUstedes tramitan visas de trabajo para vivir en Australia o Nueva Zelanda?",
+    "confidence_score": 0.4777,
+    "escalation_reason": "knowledge_gap_escalation",
+    "assigned_to": "admisiones@novaidiomas.edu.co",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260831-154860",
+    "created_at": "2026-08-31T07:50:52-0500",
+    "user_id": "guest_applicant",
+    "query": "quiero hablar con un asesor",
+    "confidence_score": 0.4641,
+    "escalation_reason": "knowledge_gap_escalation",
+    "assigned_to": "admisiones@novaidiomas.edu.co",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260831-5FC545",
+    "created_at": "2026-08-31T07:50:52-0500",
+    "user_id": "guest_applicant",
+    "query": "\u00bfC\u00f3mo reparar un motor de avi\u00f3n Boeing 747?",
+    "confidence_score": 0.4341,
+    "escalation_reason": "knowledge_gap_escalation",
+    "assigned_to": "admisiones@novaidiomas.edu.co",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260831-34CD86",
+    "created_at": "2026-08-31T07:51:34-0500",
+    "user_id": "guest_applicant",
+    "query": "\u00bfC\u00f3mo reparar un motor de avi\u00f3n Boeing 747?",
+    "confidence_score": 0.4341,
+    "escalation_reason": "knowledge_gap_escalation",
+    "assigned_to": "admisiones@novaidiomas.edu.co",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260831-1A7E93",
+    "created_at": "2026-08-31T07:59:37-0500",
+    "user_id": "postulante_nextjs",
+    "query": "pene",
+    "confidence_score": 0.2777,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admisiones@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260831-F5A948",
+    "created_at": "2026-08-31T07:59:44-0500",
+    "user_id": "guest_applicant",
+    "query": "\u00bfUstedes tramitan visas de trabajo para vivir en Australia o Nueva Zelanda?",
+    "confidence_score": 0.4777,
+    "escalation_reason": "knowledge_gap_escalation",
+    "assigned_to": "admisiones@novaidiomas.edu.co",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260831-DC0AF5",
+    "created_at": "2026-08-31T08:21:38-0500",
+    "user_id": "guest_applicant",
+    "query": "\u00bfUstedes tramitan visas de trabajo para vivir en Australia o Nueva Zelanda?",
+    "confidence_score": 0.4777,
+    "escalation_reason": "knowledge_gap_escalation",
+    "assigned_to": "admisiones@novaidiomas.edu.co",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260831-2986D7",
+    "created_at": "2026-08-31T08:26:45-0500",
+    "user_id": "guest_applicant",
+    "query": "\u00bfUstedes tramitan visas de trabajo para vivir en Australia o Nueva Zelanda?",
+    "confidence_score": 0.4777,
+    "escalation_reason": "knowledge_gap_escalation",
+    "assigned_to": "admisiones@novaidiomas.edu.co",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260831-6102F9",
+    "created_at": "2026-08-31T08:30:52-0500",
+    "user_id": "postulante_nextjs",
+    "query": "/opencode",
+    "confidence_score": 0.2852,
+    "escalation_reason": "knowledge_gap_escalation",
+    "assigned_to": "admisiones@novaidiomas.edu.co",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260831-6038E8",
+    "created_at": "2026-08-31T08:34:50-0500",
+    "user_id": "guest_applicant",
+    "query": "\u00bfUstedes tramitan visas de trabajo para vivir en Australia o Nueva Zelanda?",
+    "confidence_score": 0.4777,
+    "escalation_reason": "knowledge_gap_escalation",
+    "assigned_to": "admisiones@novaidiomas.edu.co",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260831-8FEF3A",
+    "created_at": "2026-08-31T08:41:48-0500",
+    "user_id": "guest_applicant",
+    "query": "\u00bfUstedes tramitan visas de trabajo para vivir en Australia o Nueva Zelanda?",
+    "confidence_score": 0.4777,
+    "escalation_reason": "knowledge_gap_escalation",
+    "assigned_to": "admisiones@novaidiomas.edu.co",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260831-48206A",
+    "created_at": "2026-08-31T08:44:10-0500",
+    "user_id": "postulante_nextjs",
+    "query": "quiero una pizza",
+    "confidence_score": 0.3854,
+    "escalation_reason": "knowledge_gap_escalation",
+    "assigned_to": "admisiones@novaidiomas.edu.co",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260831-237ECD",
+    "created_at": "2026-08-31T08:44:41-0500",
+    "user_id": "postulante_nextjs",
+    "query": "existen tipos de becas?",
+    "confidence_score": 0.4948,
+    "escalation_reason": "knowledge_gap_escalation",
+    "assigned_to": "admisiones@novaidiomas.edu.co",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260831-55CB5C",
+    "created_at": "2026-08-31T08:44:47-0500",
+    "user_id": "postulante_nextjs",
+    "query": "becas",
+    "confidence_score": 0.2518,
+    "escalation_reason": "knowledge_gap_escalation",
+    "assigned_to": "admisiones@novaidiomas.edu.co",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260831-68EBE3",
+    "created_at": "2026-08-31T08:51:37-0500",
+    "user_id": "guest_applicant",
+    "query": "\u00bfUstedes tramitan visas de trabajo para vivir en Australia o Nueva Zelanda?",
+    "confidence_score": 0.4777,
+    "escalation_reason": "knowledge_gap_escalation",
+    "assigned_to": "admisiones@novaidiomas.edu.co",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260831-7B1414",
+    "created_at": "2026-08-31T08:57:11-0500",
+    "user_id": "guest_applicant",
+    "query": "\u00bfUstedes tramitan visas de trabajo para vivir en Australia o Nueva Zelanda?",
+    "confidence_score": 0.4777,
+    "escalation_reason": "knowledge_gap_escalation",
+    "assigned_to": "admisiones@novaidiomas.edu.co",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260831-1A1C34",
+    "created_at": "2026-08-31T09:26:16-0500",
+    "user_id": "guest_applicant",
+    "query": "\u00bfUstedes tramitan visas de trabajo para vivir en Australia o Nueva Zelanda?",
+    "confidence_score": 0.4777,
+    "escalation_reason": "knowledge_gap_escalation",
+    "assigned_to": "admisiones@novaidiomas.edu.co",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260831-C145B3",
+    "created_at": "2026-08-31T09:26:46-0500",
+    "user_id": "guest_applicant",
+    "query": "\u00bfUstedes tramitan visas de trabajo para vivir en Australia o Nueva Zelanda?",
+    "confidence_score": 0.4777,
+    "escalation_reason": "knowledge_gap_escalation",
+    "assigned_to": "admisiones@novaidiomas.edu.co",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260831-1A16D8",
+    "created_at": "2026-08-31T09:39:16-0500",
+    "user_id": "guest_applicant",
+    "query": "\u00bfUstedes tramitan visas de trabajo para vivir en Australia o Nueva Zelanda?",
+    "confidence_score": 0.4777,
+    "escalation_reason": "knowledge_gap_escalation",
+    "assigned_to": "admisiones@novaidiomas.edu.co",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260831-2464F7",
+    "created_at": "2026-08-31T09:44:31-0500",
+    "user_id": "guest_applicant",
+    "query": "\u00bfUstedes tramitan visas de trabajo para vivir en Australia o Nueva Zelanda?",
+    "confidence_score": 0.4777,
+    "escalation_reason": "knowledge_gap_escalation",
+    "assigned_to": "admisiones@novaidiomas.edu.co",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260831-257572",
+    "created_at": "2026-08-31T09:48:42-0500",
+    "user_id": "postulante_nextjs",
+    "query": "pizza",
+    "confidence_score": 0.1776,
+    "escalation_reason": "knowledge_gap_escalation",
+    "assigned_to": "admisiones@novaidiomas.edu.co",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260831-0311C5",
+    "created_at": "2026-08-31T09:48:49-0500",
+    "user_id": "postulante_nextjs",
+    "query": "pizza",
+    "confidence_score": 0.1776,
+    "escalation_reason": "knowledge_gap_escalation",
+    "assigned_to": "admisiones@novaidiomas.edu.co",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260831-60E7E0",
+    "created_at": "2026-08-31T09:49:40-0500",
+    "user_id": "guest_applicant",
+    "query": "\u00bfUstedes tramitan visas de trabajo para vivir en Australia o Nueva Zelanda?",
+    "confidence_score": 0.4777,
+    "escalation_reason": "knowledge_gap_escalation",
+    "assigned_to": "admisiones@novaidiomas.edu.co",
+    "status": "pending_human_review"
   }
 ]

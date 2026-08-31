@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nova Tech University - Asistente de Admisiones</title>
+    <title>Nova Idiomas - Asistente Inteligente de Atención</title>
     <link rel="stylesheet" href="/static/style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,10 +14,10 @@
         <!-- Sidebar Navigation & Telemetry -->
         <aside class="sidebar">
             <div class="brand">
-                <div class="logo-circle">NTU</div>
+                <div class="logo-circle">NI</div>
                 <div class="brand-text">
-                    <h2>Nova Tech</h2>
-                    <span>Oficina de Admisiones</span>
+                    <h2>Nova Idiomas</h2>
+                    <span>Academia de Idiomas</span>
                 </div>
             </div>
 
@@ -46,10 +46,10 @@
                 <div class="toggle-container">
                     <input type="checkbox" id="opencode-toggle">
                     <label for="opencode-toggle" class="toggle-label">
-                        <span class="mode-text">Modo Asesor OpenCode</span>
+                        <span class="mode-text">Modo Asesor Humano</span>
                     </label>
                 </div>
-                <p class="mode-caption">Alterna entre RAG Directo Ultrarrápido y el razonamiento del Asesor Humano OpenCode.</p>
+                <p class="mode-caption">Alterna entre RAG Directo Ultrarrápido y el razonamiento del Asesor Académico.</p>
             </div>
 
             <div class="quick-links">
@@ -63,26 +63,26 @@
             <header class="chat-header">
                 <div class="status-indicator">
                     <span class="dot online"></span>
-                    <span>Base de Conocimiento: <strong>Documentos Oficiales Verificados</strong></span>
+                    <span>Base de Conocimiento: <strong>Nova Idiomas Colombia (Verificada)</strong></span>
                 </div>
                 <div class="badge-tag">Búsqueda Híbrida Activa</div>
             </header>
 
             <div class="chat-history" id="chat-history">
                 <div class="message assistant-msg">
-                    <div class="avatar">NTU</div>
+                    <div class="avatar">NI</div>
                     <div class="msg-bubble">
-                        <p>🎓 <strong>¡Bienvenido a la Oficina de Admisiones de Nova Tech University!</strong><br><br>
-Explora nuestra base de conocimiento de <strong>87 documentos oficiales (234+ chunks)</strong> digitando el número de la opción o usando los botones:<br><br>
-1️⃣ <strong>Carreras de Grado, Mallas y Sílabos</strong> (Software, IA, Cyber, Cloud, Cuántica, Full Stack)<br>
-2️⃣ <strong>Aranceles, Cuotas y Convenios Bancarios</strong> (Plan A 10%, Plan B 4 cuotas, USDC)<br>
-3️⃣ <strong>Calendario, Requisitos y Visas I-20</strong> (Otoño 2026, TU Munich, Tokyo Tech, Berkeley)<br>
-4️⃣ <strong>Becas de Excelencia y Trabajo-Estudio</strong> (Turing 50%, Ada Lovelace 35%, Empleo $12/hr)<br>
-5️⃣ <strong>Laboratorios e Investigación</strong> (Clúster GPU NVIDIA H100, MakerSpace 3D, Cyber Range)<br>
-6️⃣ <strong>Vida Universitaria y Residencias</strong> (Dormitorios $400-$650, Centro Médico Gratis, e-Sports)<br>
-7️⃣ <strong>Empleabilidad, Startups y Alianzas</strong> (Nova Ventures $100k, Microsoft, AWS, Google)<br>
-8️⃣ <strong>Reglamentos, Titulación y Posgrados</strong> (Maestrías M.Sc. IA/Cyber, 100% IP del Alumno)<br>
-9️⃣ <strong>Hablar con un Asesor de Admisiones (OpenCode)</strong><br><br>
+                        <p>🎓 <strong>¡Bienvenido a Nova Idiomas - Academia Colombiana de Idiomas!</strong><br><br>
+Explora nuestra información oficial sobre <strong>horarios, precios en COP, niveles MCER, inscripciones y sedes</strong> digitando el número de la opción o usando los botones:<br><br>
+1️⃣ <strong>Idiomas Ofertados y Niveles MCER</strong> (Inglés, Francés, Alemán, Italiano, Portugués, Español)<br>
+2️⃣ <strong>Precios en COP y Planes de Pago</strong> ($650k-$720k/módulo, 10% contado, 3 cuotas 0% interés)<br>
+3️⃣ <strong>Horarios y Modalidades</strong> (Virtual en vivo, Sedes Bogotá/Medellín/Cali, Madrugadores, Noches)<br>
+4️⃣ <strong>Inscripciones y Placement Test</strong> (Examen de nivelación 100% gratuito, aperturas mensuales)<br>
+5️⃣ <strong>Certificaciones Internacionales</strong> (IELTS, TOEFL, Cambridge, DELF/DALF, Goethe)<br>
+6️⃣ <strong>Políticas de Asistencia y Reembolsos</strong> (80% asistencia, congelamiento hasta 90 días)<br>
+7️⃣ <strong>Sedes Físicas y Contacto</strong> (Bogotá Chicó/Chapinero, Medellín Poblado, Cali Granada)<br>
+8️⃣ <strong>Clubes de Conversación y Tutorías</strong> (Speaking clubs ilimitados y 4 hrs tutoría gratis)<br>
+9️⃣ <strong>Hablar con un Asesor Humano de Admisiones</strong><br><br>
 💡 <em>(Escribe <strong>0</strong> en cualquier momento para volver a este Menú Principal)</em></p>
                     </div>
                 </div>
@@ -90,15 +90,15 @@ Explora nuestra base de conocimiento de <strong>87 documentos oficiales (234+ ch
 
             <!-- Quick Suggestions -->
             <div class="chips-row" id="chips-container">
-                <button class="chip" data-query="1">1. Carreras & Sílabos</button>
-                <button class="chip" data-query="2">2. Aranceles & Pagos</button>
-                <button class="chip" data-query="3">3. Fechas & Visas</button>
-                <button class="chip" data-query="4">4. Becas & Empleo</button>
-                <button class="chip" data-query="5">5. Labs GPU H100</button>
-                <button class="chip" data-query="6">6. Residencias & Campus</button>
-                <button class="chip" data-query="7">7. Startups & Alianzas</button>
-                <button class="chip" data-query="8">8. Titulación & Posgrados</button>
-                <button class="chip" data-query="9">9. Asesor OpenCode</button>
+                <button class="chip" data-query="1">1. Idiomas & Niveles</button>
+                <button class="chip" data-query="2">2. Precios en COP</button>
+                <button class="chip" data-query="3">3. Horarios & Sedes</button>
+                <button class="chip" data-query="4">4. Test de Nivel Gratis</button>
+                <button class="chip" data-query="5">5. Certificaciones</button>
+                <button class="chip" data-query="6">6. Reembolsos & Pausas</button>
+                <button class="chip" data-query="7">7. Sedes en Colombia</button>
+                <button class="chip" data-query="8">8. Clubes & Tutorías</button>
+                <button class="chip" data-query="9">9. Asesor Humano</button>
                 <button class="chip" data-query="0">0. Menú Principal</button>
             </div>
 

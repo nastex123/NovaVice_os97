@@ -6,18 +6,17 @@ RAG_BACKEND_URL = "http://localhost:8000/api/v1/chat"
 DEFAULT_TIMEOUT = 15.0
 
 
-def query_university_admissions_rag(query: str, user_id: str = "hermes_agent_applicant") -> Dict[str, Any]:
+def query_language_academy_rag(query: str, user_id: str = "hermes_agent_applicant") -> Dict[str, Any]:
     """
-    Queries Nova Tech University admissions RAG system for official information regarding
-    tuition fees, payment plans, application deadlines, requirements, modalities, and scholarships.
+    Consulta la base de conocimiento oficial de Nova Idiomas Colombia sobre
+    horarios, precios en COP, niveles MCER, inscripciones, certificaciones y modalidades.
 
     Args:
-        query (str): The specific question asked by the applicant.
-        user_id (str, optional): The applicant identifier. Defaults to 'hermes_agent_applicant'.
+        query (str): La pregunta específica del postulante o estudiante.
+        user_id (str, optional): Identificador del usuario.
 
     Returns:
-        Dict[str, Any]: Dictionary containing status, official response, confidence score,
-                       and escalation details if routed to human admissions staff.
+        Dict[str, Any]: Diccionario con respuesta oficial fundamentada, puntaje de confianza y citaciones.
     """
     payload = {
         "user_id": user_id,
@@ -41,30 +40,31 @@ def query_university_admissions_rag(query: str, user_id: str = "hermes_agent_app
             else:
                 return {
                     "status": "error",
-                    "response": f"Admissions backend returned HTTP status {resp.status_code}.",
+                    "response": f"El backend de Nova Idiomas retornó estado HTTP {resp.status_code}.",
                     "escalated_to_human": True
                 }
     except Exception as exc:
         return {
             "status": "connection_error",
-            "response": f"Could not reach admissions backend at {RAG_BACKEND_URL}. Ensure the server is active. Detail: {str(exc)}",
+            "response": f"No se pudo conectar al backend de Nova Idiomas en {RAG_BACKEND_URL}. Detalle: {str(exc)}",
             "escalated_to_human": True
         }
 
 
-# Standard tool descriptor for Hermes Agent CLI
+# Descriptor estándar para integración de herramientas con agentes LLM
 tool_definition = {
     "type": "function",
     "function": {
-        "name": "query_university_admissions_rag",
-        "description": "Queries Nova Tech University admissions knowledge base for tuition, requirements, schedules, and modalities.",
+        "name": "query_language_academy_rag",
+        "description": "Consulta la base de conocimiento oficial de Nova Idiomas (precios COP, horarios, niveles MCER, sedes, certificaciones).",
         "parameters": {
             "type": "object",
             "properties": {
-                "query": {"type": "string", "description": "The admissions inquiry question."},
-                "user_id": {"type": "string", "description": "Optional applicant user ID."}
+                "query": {"type": "string", "description": "Pregunta del usuario sobre cursos de idiomas."},
+                "user_id": {"type": "string", "description": "ID de usuario opcional."}
             },
             "required": ["query"]
         }
     }
 }
+

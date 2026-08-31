@@ -11,10 +11,14 @@ class PureBM25:
         "a", "an", "the", "in", "on", "at", "to", "for", "of", "and", "or", "is",
         "are", "was", "were", "be", "been", "can", "could", "i", "you", "my", "we",
         "with", "about", "what", "which", "how", "do", "does", "did", "have", "has",
-        # Spanish stop-words
+        # Spanish stop-words and conversational modifiers
         "el", "la", "los", "las", "un", "una", "unos", "unas", "de", "del", "en",
         "y", "o", "u", "que", "es", "son", "fue", "por", "para", "con", "se", "su",
-        "sus", "al", "como", "cual", "cuales", "como", "este", "esta", "estos", "estas"
+        "sus", "al", "como", "cual", "cuales", "este", "esta", "estos", "estas",
+        "disponible", "disponibles", "existente", "existentes", "actual", "actuales",
+        "vigente", "vigentes", "ofrecido", "ofrecidos", "manejado", "manejados",
+        "tienen", "hay", "ofrecen", "manejan", "cuentan", "saber", "conocer",
+        "informacion", "quiero", "quisiera", "favor", "hola", "buenos", "dias", "tardes"
     }
 
     def __init__(self, k1: float = 1.5, b: float = 0.75):

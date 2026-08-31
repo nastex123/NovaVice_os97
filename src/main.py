@@ -17,13 +17,29 @@ async def lifespan(app: FastAPI):
         ingestion_pipeline.run()
     except Exception as e:
         print(f"Startup ingestion note: {e}")
+
+    # Start Telegram background polling if configured
+    try:
+        from src.bot.telegram_bot import telegram_service
+        if settings.telegram_enabled and telegram_service.is_configured:
+            telegram_service.start_polling()
+    except Exception as e:
+        print(f"Telegram start note: {e}")
+
     yield
+
+    # Shutdown hooks
+    try:
+        from src.bot.telegram_bot import telegram_service
+        telegram_service.stop_polling()
+    except Exception:
+        pass
 
 
 app = FastAPI(
     title=settings.app_name,
-    version="2.0.0",
-    description="Enterprise RAG Assistant for Nova Tech University Admissions with Hermes Agent Integration.",
+    version="2.5.0",
+    description="Asistente Inteligente de Atención al Cliente con RAG y Automatización en Python para Academia de Idiomas.",
     lifespan=lifespan
 )
 

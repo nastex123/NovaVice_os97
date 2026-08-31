@@ -9,50 +9,56 @@ def test_navigation_root_menu_and_submenus():
     # 1. Reset to root menu
     resp, query, handled, buttons = navigation_engine.process_input("0", session_id)
     assert handled is True
-    assert "¡Bienvenido a la Oficina de Admisiones" in resp
-    assert len(buttons) >= 8
+    assert "Bienvenido a Nova Idiomas" in resp
+    assert len(buttons) == 4
 
-    # 2. Select option 1 (Programs & Syllabi)
+    # 2. Select option 1 (Cursos y Certificaciones)
     resp, query, handled, buttons = navigation_engine.process_input("1", session_id)
     assert handled is True
-    assert "1. Carreras de Grado, Mallas Curriculares y Sílabos" in resp
+    assert "1. Cursos, Idiomas y Certificaciones" in resp
     assert len(buttons) >= 6
 
-    # 3. Select leaf option 1.1 (Software Engineering & Algoritmos CS-201)
+    # 3. Select leaf option 1.1 (Ingles General)
     resp, query, handled, buttons = navigation_engine.process_input("1.1", session_id)
     assert handled is False
-    assert "Algoritmos" in query or "Ingeniería de Software" in query
+    assert "MCER" in query or "ingles" in query.lower()
 
-    # 4. Out of range option in submenu
-    resp, query, handled, buttons = navigation_engine.process_input("99", session_id)
-    assert handled is True
-    assert "no forma parte de este submenú" in resp
+    # 4. Free query or unknown query is passed seamlessly to RAG without blocking errors
+    resp, query, handled, buttons = navigation_engine.process_input("cursos para ejecutivos", session_id)
+    assert handled is False
+    assert query == "cursos para ejecutivos"
+    assert len(buttons) >= 4
 
     # 5. Return to root menu
     resp, query, handled, buttons = navigation_engine.process_input("0", session_id)
     assert handled is True
-    assert "¡Bienvenido a la Oficina de Admisiones" in resp
+    assert "Bienvenido a Nova Idiomas" in resp
 
-    # 6. Select Option 5 from root (Specialized Labs GPU H100)
-    resp, query, handled, buttons = navigation_engine.process_input("5", session_id)
+    # 6. Select Option 3 from root (Precios y Financiacion)
+    resp, query, handled, buttons = navigation_engine.process_input("3", session_id)
     assert handled is True
-    assert "5. Laboratorios Especializados" in resp
+    assert "3. Precios Oficiales en COP" in resp
     assert len(buttons) >= 5
 
-    # 7. Select leaf option 5.1 (NVIDIA H100 Cluster)
-    resp, query, handled, buttons = navigation_engine.process_input("5.1", session_id)
+    # 7. Select leaf option 3.2 (Plan Contado)
+    resp, query, handled, buttons = navigation_engine.process_input("3.2", session_id)
     assert handled is False
-    assert "NVIDIA H100" in query
+    assert "descuento" in query.lower() or "contado" in query.lower()
 
-    # 8. Select Option 9 (OpenCode Advisor)
-    resp, query, handled, buttons = navigation_engine.process_input("9", session_id)
-    assert handled is True
-    assert "Asesor de Admisiones" in resp
+    # 8. Natural language intent normalization for conversational questions
+    resp, query, handled, buttons = navigation_engine.process_input("horarios disponibles", session_id)
+    assert handled is False
+    assert "horarios" in query.lower()
 
-    # 9. Return to root menu
-    resp, query, handled, buttons = navigation_engine.process_input("0", session_id)
+    # 9. Natural language intent normalization for prices
+    resp, query, handled, buttons = navigation_engine.process_input("cuanto cuesta", session_id)
+    assert handled is False
+    assert "cuanto cuesta" in query.lower() or "precio" in query.lower()
+
+    # 10. Explicit advisor request (recondite advisor activation)
+    resp, query, handled, buttons = navigation_engine.process_input("asesor", session_id)
     assert handled is True
-    assert "¡Bienvenido a la Oficina de Admisiones" in resp
+    assert "Asesor" in resp or "Nova Idiomas" in resp
 
 
 @pytest.mark.asyncio
@@ -62,14 +68,15 @@ async def test_navigation_end_to_end_in_rag_engine():
     # Ask for root menu
     r0 = await rag_engine.answer_query("0", session_id=session_id)
     assert r0["status"] == "success"
-    assert "¡Bienvenido a la Oficina de Admisiones" in r0["response"]
+    assert "Bienvenido a Nova Idiomas" in r0["response"]
 
-    # Select Option 2 (Tuition)
-    r2 = await rag_engine.answer_query("2", session_id=session_id)
-    assert r2["status"] == "success"
-    assert "Aranceles" in r2["response"]
+    # Select Option 3 (Precios en COP)
+    r3 = await rag_engine.answer_query("3", session_id=session_id)
+    assert r3["status"] == "success"
+    assert "Precios" in r3["response"]
 
-    # Select Option 2.2 (Plan A Upfront Payment)
-    r22 = await rag_engine.answer_query("2.2", session_id=session_id)
-    assert r22["status"] == "success"
-    assert "Plan A" in r22["response"] or "10%" in r22["response"] or "descuento" in r22["response"].lower()
+    # Select Option 3.2 (Plan Contado)
+    r32 = await rag_engine.answer_query("3.2", session_id=session_id)
+    assert r32["status"] == "success"
+    assert "10%" in r32["response"] or "descuento" in r32["response"].lower() or "contado" in r32["response"].lower()
+

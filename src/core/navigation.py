@@ -2,240 +2,316 @@ from typing import Dict, Any, Optional, Tuple
 from src.core.memory import applicant_memory
 
 
-ROOT_MENU_TEXT = """🎓 **¡Bienvenido a la Oficina de Admisiones de Nova Tech University!**
-¿Qué área de información deseas consultar hoy? Digita el número de la opción o haz clic en los botones:
+ROOT_MENU_TEXT = """### 🎓 ¡Bienvenido a Nova Idiomas Colombia!
 
-1️⃣ **Carreras, Mallas y Sílabos de Asignaturas** (Software, IA, Cyber, Sílabos CS-201, SE-302, AI-401...)
-2️⃣ **Aranceles, Cuotas y Convenios Bancarios** (Precios, Plan A 10%, Plan B cuotas sin interés, tarjetas, USDC)
-3️⃣ **Calendario, Requisitos y Movilidad Internacional** (Otoño 2026, Visas I-20, TU Munich, Tokyo Tech, Berkeley)
-4️⃣ **Becas, Ayudas Financieras y Trabajo-Estudio** (Beca Turing 50%, Ada Lovelace 35%, empleo en campus $12/hr)
-5️⃣ **Laboratorios Especializados e Investigación** (Clúster GPU NVIDIA H100, MakerSpace 3D, Cyber Range, XR Lab)
-6️⃣ **Vida Estudiantil, Salud, Deportes y Campus** (Residencias $400-$650, Centro Médico gratis, Gym, Arena e-Sports)
-7️⃣ **Empleabilidad, Startups y Alianzas Tech** (Incubadora Nova Ventures $100k, Microsoft, AWS, Google, Pasantías)
-8️⃣ **Reglamentos, Titulación y Posgrados** (Maestrías M.Sc. IA/Cyber, Capstone, 100% Propiedad Intelectual)
-9️⃣ **Hablar con un Asesor de Admisiones (Vía OpenCode)**
+Soy tu asistente virtual de admisiones, programas y servicios académicos. Puedes hacer clic en cualquiera de nuestras áreas o escribir tu pregunta con total libertad:
 
-💡 *(Puedes escribir **0** en cualquier momento para regresar a este Menú Principal)*"""
+- **1. Cursos & Certificaciones:** Programas de Inglés, Francés, Alemán, Italiano, Portugués, MCER (A1-C2), IELTS, DELF, TOEFL y Cambridge.
 
-SUBMENU_1_TEXT = """📚 **1. Carreras de Grado, Mallas Curriculares y Sílabos**
-Digita el número de la opción que deseas consultar en detalle:
+- **2. Horarios & Modalidades:** Madrugadores (6-8am), Diurnos, Nocturno After Work (6:30-8:30pm), Sabatinos y Modalidad Virtual.
 
-1.1 💻 Lic. en Ingeniería de Software & Sílabo Algoritmos (CS-201)
-1.2 🤖 Lic. en Inteligencia Artificial Aplicada & Sílabo Deep Learning (AI-401)
-1.3 🛡️ Lic. en Ciberseguridad & Sílabo Operaciones SOC (SEC-305)
-1.4 ☁️ Cloud Computing, DevOps (CC-303) & Bases de Datos NoSQL / Vectoriales (DB-204)
-1.5 🌐 Desarrollo Web Full Stack Moderno (WD-205: React, Next.js, TypeScript)
-1.6 ⚛️ Introducción a la Computación Cuántica (QC-405: Qubits y Algoritmo de Shor)
-1.7 🏛️ Modalidades de Estudio (100% Online Asíncrono, Híbrido y Presencial)
-0. ↩️ Volver al Menú Principal"""
+- **3. Precios & Financiación:** Tarifas 2026 en COP, 10% Descuento Contado, Plan 3 Cuotas 0% Interés, PSE/Nequi y Convenios.
 
-SUBMENU_2_TEXT = """💰 **2. Aranceles, Métodos de Pago y Financiación**
-Digita el número de la opción que deseas revisar:
+- **4. Admisiones & Sedes:** Placement Test 100% Gratuito, Sedes Bogotá, Medellín y Cali, Matrículas y Speaking Clubs Ilimitados.
 
-2.1 📊 Tabla Oficial de Aranceles por Semestre de cada Carrera ($3,000 - $3,200 USD)
-2.2 💵 Plan A: Pago Contado por Semestre (10% de Descuento Inmediato)
-2.3 💳 Plan B: Financiación Directa en 4 Cuotas Mensuales con 0% de Interés
-2.4 🏦 Convenios Bancarios Oficiales (Chase, Santander, Davivienda, Stripe, Crypto USDC)
-2.5 🔄 Política Oficial de Cancelación, Reembolsos y Devoluciones de Matrícula
-0. ↩️ Volver al Menú Principal"""
+*(Haz clic en una de las opciones abajo o escribe tu consulta en el chat)*"""
 
-SUBMENU_3_TEXT = """📅 **3. Calendario Académico, Admisión y Trámites Internacionales**
-Digita el número de la opción que deseas revisar:
+SUBMENU_1_TEXT = """### 📚 1. Cursos, Idiomas y Certificaciones Internacionales
+Selecciona el tema que deseas consultar en detalle:
 
-3.1 🍂 Convocatoria Principal Otoño 2026 (Cierre de postulaciones: 15 de julio de 2026)
-3.2 🌸 Convocatoria de Primavera 2027 y Términos Intensivos
-3.3 🛂 Guía de Trámite de Visa de Estudiante Formulario I-20 y Seguro Médico
-3.4 🌍 Programas de Intercambio Internacional (TU Munich en Alemania, Tokyo Tech en Japón, UC Berkeley)
-3.5 🔄 Transferencias Externas y Convalidación de Materias (Homologación hasta 50%)
-0. ↩️ Volver al Menú Principal"""
+- **1.1** Programas de Ingles General para Adultos (Niveles A1 a C2)
 
-SUBMENU_4_TEXT = """🏆 **4. Becas de Excelencia, Ayudas Económicas y Empleo en Campus**
-Digita el número de la opción que deseas explorar:
+- **1.2** Ingles Intensivo Acelerado (40 horas mensuales)
 
-4.1 🌟 Beca Alan Turing a la Excelencia Académica (50% de Cobertura en toda la carrera)
-4.2 👩‍💻 Beca Ada Lovelace para Mujeres en Tecnología (35% de Descuento + Mentoría)
-4.3 💼 Programa Trabajo-Estudio en Campus (Hasta 15 hrs/semana con pago de $12 USD/hora)
-4.4 ⚽ Beca para Deportistas Destacados, e-Sports y Descuentos por Hermanos (15% - 20%)
-0. ↩️ Volver al Menú Principal"""
+- **1.3** Cursos de Frances, Aleman, Italiano y Portugues
 
-SUBMENU_5_TEXT = """🔬 **5. Laboratorios Especializados e Investigación Científica**
-Digita el número de la infraestructura que deseas conocer:
+- **1.4** Preparacion Oficial para Examenes IELTS, TOEFL iBT y Cambridge (FCE/CAE)
 
-5.1 ⚡ Clúster de Supercómputo GPU NVIDIA H100 (64 GPUs Tensor Core, Slurm y Cuotas de Grado)
-5.2 🖨️ MakerSpace, Impresión 3D de Resina / Carbono y Corte Láser CNC
-5.3 🛡️ Cyber Range y Laboratorio de Red Team Aislado para Simulaciones de Ciberataque
-5.4 🥽 XR Lab: Tecnologías Inmersivas, Apple Vision Pro, Meta Quest 3 y Manus Prime
-5.5 🤖 Laboratorio de Robótica Móvil, Drones Autónomos y Bioinformática con AlphaFold 3
-0. ↩️ Volver al Menú Principal"""
+- **1.5** Certificaciones de Frances DELF/DALF y Aleman Goethe/TestDaF
 
-SUBMENU_6_TEXT = """🌿 **6. Vida Universitaria, Salud, Deportes y Residencias**
-Digita el número del servicio de bienestar que deseas consultar:
+- **1.6** Metodologia Flipped Classroom y Grupos Reducidos (maximo 12 alumnos)
 
-6.1 🏠 Residencias Universitarias en Campus (Studio Tech $650/mes, Doble $400/mes y política de mascotas)
-6.2 🏥 Centro Médico de Urgencias y Atención Psicológica Gratuita (8 sesiones/semestre)
-6.3 🏋️ Gimnasio Universitario, CrossFit, Nutrición y Cafeterías Saludables ($90/mes)
-6.4 🎮 Arena Gamer Oficial y Club de Deportes Electrónicos Nova eSports (Monitores 240Hz, RTX 4080)
-6.5 🚌 Transporte Universitario Gratuito Nova Shuttle y Estaciones de Carga para Autos Eléctricos
-0. ↩️ Volver al Menú Principal"""
+*(Digita '0' para regresar al Menu Principal)*"""
 
-SUBMENU_7_TEXT = """💼 **7. Empleabilidad, Startups y Alianzas Empresariales**
-Digita el número de la iniciativa laboral que deseas consultar:
+SUBMENU_2_TEXT = """### ⏰ 2. Horarios Oficiales y Modalidades de Estudio
+Selecciona la franja o modalidad de tu interes:
 
-7.1 🚀 Incubadora Nova Ventures ($100,000 USD anuales en capital semilla para proyectos estudiantiles)
-7.2 🤝 Alianzas Oficiales con Microsoft Learn, AWS Academy y Google Cloud (Vouchers gratis)
-7.3 📈 Nova Career Hub (94% de inserción laboral), Tech Career Expo y Pasantías Remuneradas ($600-$1400/mes)
-7.4 🌐 Red de Graduados Alumni Network con presencia en más de 25 países
-0. ↩️ Volver al Menú Principal"""
+- **2.1** Franja Madrugadores (6:00 a.m. a 8:00 a.m. Lunes a Viernes)
 
-SUBMENU_8_TEXT = """📜 **8. Reglamentos Académicos, Titulación y Posgrados**
-Digita el número del tema normativo o posgrado que deseas explorar:
+- **2.2** Franjas Diurnas (Mananas 8-10am / 10-12m y Tardes 2-4pm / 4-6pm)
 
-8.1 ⚖️ Código de Honor, Integridad Académica y Normativa Disciplinaria Anti-Plagio
-8.2 🎓 Guía de Titulación Capstone y 100% de Propiedad Intelectual del Software para el Alumno
-8.3 🤖 Maestría M.Sc. en Inteligencia Artificial Generativa y LLMs (18 meses, 100% Online)
-8.4 🛡️ Maestría M.Sc. en Ciberseguridad Ofensiva y Cloud (Preparación OSCP / CISSP)
-8.5 💼 Convalidación de Asignaturas por Trayectoria Laboral Demostrada (RPL)
-0. ↩️ Volver al Menú Principal"""
+- **2.3** Franja Nocturna After Work (6:30 p.m. a 8:30 p.m. Lunes a Viernes)
+
+- **2.4** Cursos Intensivos de Fin de Semana (Sabados 8am-1pm / 2-7pm o Domingos 8:30am-1:30pm)
+
+- **2.5** Modalidad 100% Virtual Sincronica con Docente en Vivo y Grabaciones 24/7
+
+- **2.6** Aulas Hibridas HyFlex con Camaras Inteligentes 360 grados
+
+*(Digita '0' para regresar al Menu Principal)*"""
+
+SUBMENU_3_TEXT = """### 💰 3. Precios Oficiales en COP, Financiacion y Descuentos
+Selecciona la opcion que deseas conocer:
+
+- **3.1** Tarifas Oficiales por Modulo Regular ($650.000 COP) e Intensivo ($720.000 COP)
+
+- **3.2** Plan Pago de Contado con 10% de Descuento Inmediato
+
+- **3.3** Financiacion Directa en 3 Cuotas sin Interes (40% matricula, 30% sem 4, 30% sem 7)
+
+- **3.4** Convenios con Cajas de Compensacion (Compensar, Colsubsidio, Cafam, Comfama - 15% Dcto)
+
+- **3.5** Medios de Pago Digitales Autorizados (PSE, Nequi, Daviplata, Tarjetas y Bancolombia)
+
+*(Digita '0' para regresar al Menu Principal)*"""
+
+SUBMENU_4_TEXT = """### 📝 4. Admisiones, Placement Test Gratuito y Sedes en Colombia
+Selecciona el tema de consulta:
+
+- **4.1** Examen de Clasificacion (Placement Test) 100% Gratuito (Escrito + Oral)
+
+- **4.2** Paso a Paso para Matricularse Online o en Counter de Sede
+
+- **4.3** Sedes en Bogota D.C. (Chico Norte Cra 15 # 98-42 y Chapinero Calle 63 # 9-28)
+
+- **4.4** Sedes en Medellin (El Poblado One Plaza y Laureles Av. Nutibara)
+
+- **4.5** Sede en Cali (Barrio Granada Av. 9N # 14N-35)
+
+- **4.6** Politicas de Asistencia (80%), Congelamiento de Curso (hasta 90 dias) y Reembolsos
+
+*(Digita '0' para regresar al Menu Principal)*"""
 
 LEAF_QUERY_MAP = {
-    # Cluster 1: Programas y Sílabos
-    "1.1": "¿Cuál es la duración, malla curricular y sílabo del curso de Algoritmos CS-201 en Ingeniería de Software?",
-    "1.2": "¿Qué materias, laboratorios GPU y sílabo de Deep Learning AI-401 tiene la carrera de Inteligencia Artificial?",
-    "1.3": "¿Cuáles son los pilares, certificaciones y sílabo del curso de Ciberseguridad Defensiva y SOC SEC-305?",
-    "1.4": "¿Qué temas se estudian en Cloud Computing CC-303 y Bases de Datos NoSQL y Vectoriales DB-204?",
-    "1.5": "¿En qué consiste el curso de Desarrollo Web Full Stack Moderno WD-205 con React y Next.js?",
-    "1.6": "¿Cuáles son los contenidos del curso electivo de Introducción a la Computación Cuántica QC-405?",
-    "1.7": "¿Qué modalidades de estudio existen, incluyendo 100% online asíncrona, híbrida y presencial?",
+    # Macropilar 1: Cursos y Certificaciones
+    "1.1": "Cuales son los niveles del MCER (A1 a C2), duracion y enfoque del programa de ingles general?",
+    "1.2": "En que consiste el curso de ingles intensivo acelerado de 40 horas mensuales y cuanto se avanza?",
+    "1.3": "Que programas ofrecen en frances, aleman, italiano, portugues y espanol para extranjeros?",
+    "1.4": "Como es el curso preparatorio para examenes internacionales IELTS, TOEFL iBT y Cambridge FCE/CAE?",
+    "1.5": "Que certificaciones oficiales de frances DELF/DALF y aleman Goethe/TestDaF preparan?",
+    "1.6": "En que consiste la metodologia comunicativa Flipped Classroom y el tamano maximo de grupos?",
 
-    # Cluster 2: Aranceles y Pagos
-    "2.1": "¿Cuánto cuesta el semestre de cada carrera universitaria y cuál es el costo total estimado?",
-    "2.2": "¿Cómo funciona el Plan A de pago único con 10% de descuento y cuál es el ahorro?",
-    "2.3": "¿Cómo funciona el Plan B de financiamiento en 4 cuotas mensuales sin intereses?",
-    "2.4": "¿Cuáles son los convenios bancarios autorizados y canales de pago como Chase, Santander, Stripe y USDC?",
-    "2.5": "¿Cuál es la política oficial de reembolsos y devoluciones por semanas de retiro?",
+    # Macropilar 2: Horarios y Modalidades
+    "2.1": "Que horarios y caracteristicas tiene la franja de madrugadores de 6:00 a 8:00 a.m.?",
+    "2.2": "Cuales son los horarios de las franjas diurnas de mananas y tardes de lunes a viernes?",
+    "2.3": "Como funciona la franja nocturna after work de 6:30 a 8:30 p.m. de lunes a viernes?",
+    "2.4": "Cuales son los horarios y duracion de los cursos intensivos de fin de semana en sabados y domingos?",
+    "2.5": "Cuales son las ventajas de la modalidad 100% virtual sincronica con clases en vivo y grabaciones?",
+    "2.6": "En que consisten las aulas hibridas HyFlex con camaras inteligentes 360 grados?",
 
-    # Cluster 3: Calendario y Movilidad
-    "3.1": "¿Cuáles son las fechas límite de postulación e inicio de clases para la convocatoria de Otoño 2026?",
-    "3.2": "¿Cuáles son las fechas para Primavera 2027 y términos intensivos de verano?",
-    "3.3": "¿Cuáles son los requisitos para la visa de estudiante I-20 y el seguro médico internacional obligatorio?",
-    "3.4": "¿Cómo funcionan los programas de intercambio con TU Munich, Tokyo Tech con beca JASSO y Berkeley?",
-    "3.5": "¿Cuáles son los requisitos para transferencias externas y convalidación de hasta el 50% de materias?",
+    # Macropilar 3: Precios y Financiacion
+    "3.1": "Cuanto cuesta el modulo regular e intensivo en pesos colombianos (COP) y que incluye la tarifa?",
+    "3.2": "Como funciona el 10% de descuento por pago de contado en modulos y paquetes de idiomas?",
+    "3.3": "Como es el plan de financiacion directa en 3 cuotas sin interes y que porcentaje se paga?",
+    "3.4": "Que convenios y descuentos del 15% tienen con Cajas de Compensacion como Compensar, Colsubsidio y Cafam?",
+    "3.5": "Que medios de pago digitales como PSE, Nequi, Daviplata y tarjetas estan habilitados?",
 
-    # Cluster 4: Becas
-    "4.1": "¿Cuáles son los requisitos y porcentaje de cobertura de la Beca Alan Turing del 50%?",
-    "4.2": "¿En qué consiste la Beca Ada Lovelace para Mujeres en Tecnología del 35% y mentorías?",
-    "4.3": "¿Cómo funciona el Programa Trabajo-Estudio on-campus de $12 dólares por hora?",
-    "4.4": "¿Qué becas deportivas existen y cómo aplican los descuentos familiares por hermanos?",
-
-    # Cluster 5: Laboratorios
-    "5.1": "¿Qué infraestructura tiene el Clúster de Supercómputo GPU NVIDIA H100 y cómo se asignan las horas de uso?",
-    "5.2": "¿Qué maquinarias y normas de seguridad tiene el MakerSpace y laboratorio de impresión 3D?",
-    "5.3": "¿Qué características tiene el Cyber Range y laboratorio de Red Team aislado para pruebas de ataque?",
-    "5.4": "¿Qué equipamiento tiene el Laboratorio de Tecnologías Inmersivas y Realidad Mixta XR Lab?",
-    "5.5": "¿Qué investigaciones se realizan en robótica autónoma, drones y bioinformática con AlphaFold 3?",
-
-    # Cluster 6: Vida Estudiantil
-    "6.1": "¿Cuáles son las tarifas de residencias universitarias, tipos de habitación y políticas sobre mascotas?",
-    "6.2": "¿Qué servicios médicos gratuitos y sesiones de atención psicológica ofrece el centro de salud?",
-    "6.3": "¿Qué equipamiento tiene el gimnasio universitario y cuánto cuesta el plan de comidas en las cafeterías?",
-    "6.4": "¿Qué equipamiento tiene la Arena Gamer y el club de e-Sports de Nova Tech?",
-    "6.5": "¿Cuáles son las rutas del transporte universitario gratuito Nova Shuttle y cargadores eléctricos?",
-
-    # Cluster 7: Empleabilidad
-    "7.1": "¿Cómo apoya la incubadora Nova Ventures con capital semilla de 100 mil dólares a startups estudiantiles?",
-    "7.2": "¿Qué certificaciones gratuitas ofrecen las alianzas con Microsoft Learn, AWS Academy y Google Cloud?",
-    "7.3": "¿Cómo funciona la bolsa de empleo Nova Career Hub y cuánto pagan las pasantías remuneradas?",
-    "7.4": "¿Cómo está conformada la red de egresados Alumni Network y qué beneficios ofrece?",
-
-    # Cluster 8: Reglamentos y Posgrados
-    "8.1": "¿Qué establece el código de honor respecto a la integridad académica y sanciones por plagio?",
-    "8.2": "¿Cómo es la rúbrica de defensa de tesis Capstone y de quién es la propiedad intelectual del software?",
-    "8.3": "¿Cuáles son los requisitos y aranceles de la Maestría en IA Generativa y LLMs?",
-    "8.4": "¿Qué duración y certificaciones tiene la Maestría en Ciberseguridad Ofensiva?",
-    "8.5": "¿Cómo funciona la convalidación de materias por experiencia laboral demostrada RPL?"
+    # Macropilar 4: Admisiones y Sedes
+    "4.1": "Como se realiza el examen de clasificacion (Placement Test) gratuito y como se agendan los resultados?",
+    "4.2": "Cual es el paso a paso para inscribirse y matricularse en linea o de forma presencial?",
+    "4.3": "Donde quedan ubicadas las sedes en Bogota D.C. (Chico Norte y Chapinero) y que instalaciones tienen?",
+    "4.4": "Donde quedan las sedes en Medellin (El Poblado One Plaza y Laureles) y como llegar?",
+    "4.5": "Donde queda la sede de Cali en el Barrio Granada y que horarios de atencion maneja?",
+    "4.6": "Cuales son las politicas de asistencia minima del 80%, congelamiento hasta 90 dias y devoluciones?"
 }
 
 SUBMENU_BUTTONS_MAP = {
     "root": [
-        {"label": "1. Carreras y Sílabos", "value": "1"},
-        {"label": "2. Aranceles y Pagos", "value": "2"},
-        {"label": "3. Fechas y Visas", "value": "3"},
-        {"label": "4. Becas y Empleo", "value": "4"},
-        {"label": "5. Labs GPU H100", "value": "5"},
-        {"label": "6. Residencias y Campus", "value": "6"},
-        {"label": "7. Startups y Alianzas", "value": "7"},
-        {"label": "8. Titulación y Posgrados", "value": "8"},
-        {"label": "9. Asesor OpenCode", "value": "9"}
+        {"label": "1. Cursos & Certificaciones", "value": "1"},
+        {"label": "2. Horarios & Modalidades", "value": "2"},
+        {"label": "3. Precios & Financiación", "value": "3"},
+        {"label": "4. Admisiones & Sedes", "value": "4"}
     ],
     "submenu_1": [
-        {"label": "1.1 Ing. de Software (CS-201)", "value": "1.1"},
-        {"label": "1.2 IA & Deep Learning (AI-401)", "value": "1.2"},
-        {"label": "1.3 Ciberseguridad (SEC-305)", "value": "1.3"},
-        {"label": "1.4 Cloud & DevOps (CC-303)", "value": "1.4"},
-        {"label": "1.5 Full Stack (WD-205)", "value": "1.5"},
-        {"label": "1.6 Cuántica (QC-405)", "value": "1.6"},
-        {"label": "1.7 Modalidades de Estudio", "value": "1.7"},
+        {"label": "1.1 Inglés (A1 a C2)", "value": "1.1"},
+        {"label": "1.2 Intensivo 40h/mes", "value": "1.2"},
+        {"label": "1.3 Otros Idiomas", "value": "1.3"},
+        {"label": "1.4 IELTS / TOEFL / Cambridge", "value": "1.4"},
+        {"label": "1.5 DELF / Goethe", "value": "1.5"},
+        {"label": "1.6 Metodología Flipped", "value": "1.6"},
         {"label": "0. Menú Principal", "value": "0"}
     ],
     "submenu_2": [
-        {"label": "2.1 Tabla de Aranceles", "value": "2.1"},
-        {"label": "2.2 Plan A (10% Dcto)", "value": "2.2"},
-        {"label": "2.3 Plan B (4 Cuotas)", "value": "2.3"},
-        {"label": "2.4 Convenios Bancarios", "value": "2.4"},
-        {"label": "2.5 Reembolsos", "value": "2.5"},
+        {"label": "2.1 Madrugadores (6-8am)", "value": "2.1"},
+        {"label": "2.2 Diurnos (Mañanas/Tardes)", "value": "2.2"},
+        {"label": "2.3 Nocturno (6:30-8:30pm)", "value": "2.3"},
+        {"label": "2.4 Sabatinos y Domingos", "value": "2.4"},
+        {"label": "2.5 Virtual Sincrónico", "value": "2.5"},
+        {"label": "2.6 Aulas HyFlex 360", "value": "2.6"},
         {"label": "0. Menú Principal", "value": "0"}
     ],
     "submenu_3": [
-        {"label": "3.1 Convocatoria Otoño 2026", "value": "3.1"},
-        {"label": "3.2 Primavera & Verano 2027", "value": "3.2"},
-        {"label": "3.3 Visa I-20 & Seguro", "value": "3.3"},
-        {"label": "3.4 Intercambios (TUM/Japón/Berkeley)", "value": "3.4"},
-        {"label": "3.5 Transferencias & Convalidación", "value": "3.5"},
+        {"label": "3.1 Tarifas Oficiales COP", "value": "3.1"},
+        {"label": "3.2 Plan Contado (10% Dcto)", "value": "3.2"},
+        {"label": "3.3 Plan 3 Cuotas 0%", "value": "3.3"},
+        {"label": "3.4 Cajas Compensación", "value": "3.4"},
+        {"label": "3.5 PSE, Nequi y Tarjetas", "value": "3.5"},
         {"label": "0. Menú Principal", "value": "0"}
     ],
     "submenu_4": [
-        {"label": "4.1 Beca Turing (50%)", "value": "4.1"},
-        {"label": "4.2 Beca Ada Lovelace (35%)", "value": "4.2"},
-        {"label": "4.3 Trabajo-Estudio ($12/hr)", "value": "4.3"},
-        {"label": "4.4 Becas Atletas & Familia", "value": "4.4"},
-        {"label": "0. Menú Principal", "value": "0"}
-    ],
-    "submenu_5": [
-        {"label": "5.1 Clúster GPU NVIDIA H100", "value": "5.1"},
-        {"label": "5.2 MakerSpace & 3D", "value": "5.2"},
-        {"label": "5.3 Cyber Range Red Team", "value": "5.3"},
-        {"label": "5.4 XR Lab (Vision Pro)", "value": "5.4"},
-        {"label": "5.5 Robótica & AlphaFold 3", "value": "5.5"},
-        {"label": "0. Menú Principal", "value": "0"}
-    ],
-    "submenu_6": [
-        {"label": "6.1 Residencias & Mascotas", "value": "6.1"},
-        {"label": "6.2 Centro Médico & Psicología", "value": "6.2"},
-        {"label": "6.3 Gym, CrossFit & Cafeterías", "value": "6.3"},
-        {"label": "6.4 Arena Gamer e-Sports", "value": "6.4"},
-        {"label": "6.5 Nova Shuttle & Autos EV", "value": "6.5"},
-        {"label": "0. Menú Principal", "value": "0"}
-    ],
-    "submenu_7": [
-        {"label": "7.1 Nova Ventures ($100k Seed)", "value": "7.1"},
-        {"label": "7.2 Microsoft / AWS / Google", "value": "7.2"},
-        {"label": "7.3 Career Hub & Pasantías", "value": "7.3"},
-        {"label": "7.4 Alumni Network Global", "value": "7.4"},
-        {"label": "0. Menú Principal", "value": "0"}
-    ],
-    "submenu_8": [
-        {"label": "8.1 Código de Honor & Ética", "value": "8.1"},
-        {"label": "8.2 Tesis & 100% Propiedad Intelectual", "value": "8.2"},
-        {"label": "8.3 Maestría M.Sc. en IA Generativa", "value": "8.3"},
-        {"label": "8.4 Maestría M.Sc. en Ciberseguridad", "value": "8.4"},
-        {"label": "8.5 Convalidación Laboral RPL", "value": "8.5"},
+        {"label": "4.1 Placement Test Gratis", "value": "4.1"},
+        {"label": "4.2 Proceso de Matrícula", "value": "4.2"},
+        {"label": "4.3 Sedes Bogotá", "value": "4.3"},
+        {"label": "4.4 Sedes Medellín", "value": "4.4"},
+        {"label": "4.5 Sede Cali", "value": "4.5"},
+        {"label": "4.6 Asistencia & Congelar", "value": "4.6"},
         {"label": "0. Menú Principal", "value": "0"}
     ]
 }
 
+# Semantic Intent Map for Natural Language Normalization
+INTENT_SYNONYMS = {
+    "horario": "Cuales son los horarios, franjas y modalidades de estudio disponibles?",
+    "horarios": "Cuales son los horarios, franjas y modalidades de estudio disponibles?",
+    "horarios disponibles": "Cuales son los horarios, franjas y modalidades de estudio disponibles?",
+    "horarios existentes": "Cuales son los horarios, franjas y modalidades de estudio disponibles?",
+    "que horarios tienen": "Cuales son los horarios, franjas y modalidades de estudio disponibles?",
+    "que horarios hay": "Cuales son los horarios, franjas y modalidades de estudio disponibles?",
+    "a que hora dan clases": "Cuales son los horarios, franjas y modalidades de estudio disponibles?",
+    "jornadas": "Cuales son los horarios, franjas y modalidades de estudio disponibles?",
+    "turnos": "Cuales son los horarios, franjas y modalidades de estudio disponibles?",
+    "madrugadores": "Que horarios y caracteristicas tiene la franja de madrugadores de 6:00 a 8:00 a.m.?",
+    "after work": "Como funciona la franja nocturna after work de 6:30 a 8:30 p.m. de lunes a viernes?",
+    "sabados": "Cuales son los horarios y duracion de los cursos intensivos de fin de semana en sabados y domingos?",
+    "precio": "Cuanto cuesta el modulo regular e intensivo en pesos colombianos (COP) y que incluye la tarifa?",
+    "precios": "Cuanto cuesta el modulo regular e intensivo en pesos colombianos (COP) y que incluye la tarifa?",
+    "precios disponibles": "Cuanto cuesta el modulo regular e intensivo en pesos colombianos (COP) y que incluye la tarifa?",
+    "precios vigentes": "Cuanto cuesta el modulo regular e intensivo en pesos colombianos (COP) y que incluye la tarifa?",
+    "costo": "Cuanto cuesta el modulo regular e intensivo en pesos colombianos (COP) y que incluye la tarifa?",
+    "costos": "Cuanto cuesta el modulo regular e intensivo en pesos colombianos (COP) y que incluye la tarifa?",
+    "tarifas": "Cuanto cuesta el modulo regular e intensivo en pesos colombianos (COP) y que incluye la tarifa?",
+    "cuanto vale": "Cuanto cuesta el modulo regular e intensivo en pesos colombianos (COP) y que incluye la tarifa?",
+    "cuanto cuesta": "Cuanto cuesta el modulo regular e intensivo en pesos colombianos (COP) y que incluye la tarifa?",
+    "planes de pago": "Como es el plan de financiacion directa en 3 cuotas sin interes y que porcentaje se paga?",
+    "cuotas": "Como es el plan de financiacion directa en 3 cuotas sin interes y que porcentaje se paga?",
+    "descuento": "Como funciona el 10% de descuento por pago de contado en modulos y paquetes de idiomas?",
+    "descuentos": "Como funciona el 10% de descuento por pago de contado en modulos y paquetes de idiomas?",
+    "inscripcion": "Cual es el paso a paso para inscribirse y matricularse en linea o de forma presencial?",
+    "inscripciones": "Cual es el paso a paso para inscribirse y matricularse en linea o de forma presencial?",
+    "matricula": "Cual es el paso a paso para inscribirse y matricularse en linea o de forma presencial?",
+    "matriculas": "Cual es el paso a paso para inscribirse y matricularse en linea o de forma presencial?",
+    "como entrar": "Cual es el paso a paso para inscribirse y matricularse en linea o de forma presencial?",
+    "test gratis": "Como se realiza el examen de clasificacion (Placement Test) gratuito y como se agendan los resultados?",
+    "placement test": "Como se realiza el examen de clasificacion (Placement Test) gratuito y como se agendan los resultados?",
+    "examen de clasificacion": "Como se realiza el examen de clasificacion (Placement Test) gratuito y como se agendan los resultados?",
+    "sedes": "Donde quedan ubicadas las sedes en Bogota, Medellin y Cali y como contactarlos?",
+    "donde quedan": "Donde quedan ubicadas las sedes en Bogota, Medellin y Cali y como contactarlos?",
+    "ubicacion": "Donde quedan ubicadas las sedes en Bogota, Medellin y Cali y como contactarlos?",
+    "direcciones": "Donde quedan ubicadas las sedes en Bogota, Medellin y Cali y como contactarlos?",
+    "bogota": "Donde quedan ubicadas las sedes en Bogota D.C. (Chico Norte y Chapinero) y que instalaciones tienen?",
+    "medellin": "Donde quedan las sedes en Medellin (El Poblado One Plaza y Laureles) y como llegar?",
+    "cali": "Donde queda la sede de Cali en el Barrio Granada y que horarios de atencion maneja?",
+    "ielts": "Como es el curso preparatorio para examenes internacionales IELTS, TOEFL iBT y Cambridge FCE/CAE?",
+    "toefl": "Como es el curso preparatorio para examenes internacionales IELTS, TOEFL iBT y Cambridge FCE/CAE?",
+    "cambridge": "Como es el curso preparatorio para examenes internacionales IELTS, TOEFL iBT y Cambridge FCE/CAE?",
+    "delf": "Que certificaciones oficiales de frances DELF/DALF y aleman Goethe/TestDaF preparan?",
+    "goethe": "Que certificaciones oficiales de frances DELF/DALF y aleman Goethe/TestDaF preparan?",
+    "congelar": "Cuales son las politicas de asistencia minima del 80%, congelamiento hasta 90 dias y devoluciones?",
+    "reembolso": "Cuales son las politicas de asistencia minima del 80%, congelamiento hasta 90 dias y devoluciones?",
+    "asistencia": "Cuales son las politicas de asistencia minima del 80%, congelamiento hasta 90 dias y devoluciones?",
+    "speaking clubs": "Como funcionan los clubes de conversacion semanales y tutorias gratuitas?",
+    "clubes": "Como funcionan los clubes de conversacion semanales y tutorias gratuitas?"
+}
+
+
+def get_contextual_buttons(key: str) -> list:
+    """Returns smart contextual sibling and cross-pillar buttons for leaf selections."""
+    if key.startswith("1."):
+        if key == "1.1":
+            return [
+                {"label": "1.2 Intensivo 40h/mes", "value": "1.2"},
+                {"label": "1.4 IELTS / TOEFL / Cambridge", "value": "1.4"},
+                {"label": "2. Horarios & Modalidades", "value": "2"},
+                {"label": "3. Precios & Financiación", "value": "3"},
+                {"label": "0. Menú Principal", "value": "0"}
+            ]
+        elif key == "1.2":
+            return [
+                {"label": "1.1 Inglés General (A1-C2)", "value": "1.1"},
+                {"label": "2.1 Madrugadores (6-8am)", "value": "2.1"},
+                {"label": "3.1 Tarifas Oficiales COP", "value": "3.1"},
+                {"label": "0. Menú Principal", "value": "0"}
+            ]
+        elif key == "1.3":
+            return [
+                {"label": "1.5 DELF / Goethe", "value": "1.5"},
+                {"label": "2. Horarios & Modalidades", "value": "2"},
+                {"label": "3. Precios & Financiación", "value": "3"},
+                {"label": "0. Menú Principal", "value": "0"}
+            ]
+        else:
+            return [
+                {"label": "1.1 Inglés General", "value": "1.1"},
+                {"label": "1.2 Intensivo", "value": "1.2"},
+                {"label": "3. Precios & Financiación", "value": "3"},
+                {"label": "4. Placement Test Gratis", "value": "4.1"},
+                {"label": "0. Menú Principal", "value": "0"}
+            ]
+    elif key.startswith("2."):
+        if key == "2.1":
+            return [
+                {"label": "2.3 Nocturno (6:30-8:30pm)", "value": "2.3"},
+                {"label": "2.5 Virtual Sincrónico", "value": "2.5"},
+                {"label": "3. Precios & Financiación", "value": "3"},
+                {"label": "0. Menú Principal", "value": "0"}
+            ]
+        elif key == "2.3":
+            return [
+                {"label": "2.4 Sabatinos y Domingos", "value": "2.4"},
+                {"label": "2.5 Virtual Sincrónico", "value": "2.5"},
+                {"label": "3. Precios & Financiación", "value": "3"},
+                {"label": "0. Menú Principal", "value": "0"}
+            ]
+        else:
+            return [
+                {"label": "2.1 Madrugadores (6-8am)", "value": "2.1"},
+                {"label": "2.3 Nocturno After Work", "value": "2.3"},
+                {"label": "1. Cursos & Certificaciones", "value": "1"},
+                {"label": "3. Precios & Financiación", "value": "3"},
+                {"label": "0. Menú Principal", "value": "0"}
+            ]
+    elif key.startswith("3."):
+        return [
+            {"label": "3.1 Tarifas Oficiales COP", "value": "3.1"},
+            {"label": "3.2 Plan Contado (10% Dcto)", "value": "3.2"},
+            {"label": "3.3 Plan 3 Cuotas 0%", "value": "3.3"},
+            {"label": "4. Placement Test Gratis", "value": "4.1"},
+            {"label": "0. Menú Principal", "value": "0"}
+        ]
+    elif key.startswith("4."):
+        if key == "4.1":
+            return [
+                {"label": "4.2 Proceso de Matrícula", "value": "4.2"},
+                {"label": "4.3 Sedes Bogotá", "value": "4.3"},
+                {"label": "4.4 Sedes Medellín", "value": "4.4"},
+                {"label": "4.5 Sede Cali", "value": "4.5"},
+                {"label": "0. Menú Principal", "value": "0"}
+            ]
+        elif key in ("4.3", "4.4", "4.5"):
+            return [
+                {"label": "4.1 Placement Test Gratis", "value": "4.1"},
+                {"label": "2. Horarios & Modalidades", "value": "2"},
+                {"label": "3. Precios & Financiación", "value": "3"},
+                {"label": "0. Menú Principal", "value": "0"}
+            ]
+        else:
+            return [
+                {"label": "4.1 Placement Test Gratis", "value": "4.1"},
+                {"label": "4.3 Sedes Bogotá", "value": "4.3"},
+                {"label": "1. Cursos & Certificaciones", "value": "1"},
+                {"label": "0. Menú Principal", "value": "0"}
+            ]
+    return [
+        {"label": "1. Cursos & Certificaciones", "value": "1"},
+        {"label": "2. Horarios & Modalidades", "value": "2"},
+        {"label": "3. Precios & Financiación", "value": "3"},
+        {"label": "4. Admisiones & Sedes", "value": "4"},
+        {"label": "0. Menú Principal", "value": "0"}
+    ]
+
 
 class GuidedNavigationEngine:
-    # State machine for guided menu navigation in Spanish with clickable button actions.
+    """State machine for universal omnicanal menu navigation without deadlocks."""
 
     def __init__(self):
         pass
@@ -247,73 +323,72 @@ class GuidedNavigationEngine:
         return SUBMENU_BUTTONS_MAP.get(state, SUBMENU_BUTTONS_MAP["root"])
 
     def process_input(self, raw_input: str, session_id: str) -> Tuple[Optional[str], Optional[str], bool, list]:
-        # Returns (response_text, query_to_rag, is_navigation_handled, action_buttons)
+        """
+        Universal Omnicanal Navigation Resolver.
+        Returns: (response_text, query_to_rag, is_navigation_handled, action_buttons)
+        """
         text = raw_input.strip().lower()
-        session = applicant_memory.get_session(session_id)
-        current_state = session.get("attributes", {}).get("menu_state", "root")
 
-        # Global return to root menu
+        # 1. Global Reset to Root Menu
         if text in ("0", "menu", "inicio", "volver", "back", "home", "menu principal", "principal"):
             applicant_memory.update_attributes(session_id, "menu_state", "root")
             return ROOT_MENU_TEXT, None, True, self.get_buttons_for_state("root")
 
-        # Switch to advisor mode (OpenCode powered)
-        if text in ("9", "asesor", "hablar con asesor", "humano", "contacto", "asesoria"):
+        # 2. Global Advisor Invocation (OpenCode)
+        advisor_keywords = ("asesor", "humano", "agente", "operador", "persona real", "coordinador", "asesoria personalizada")
+        if text == "9" or any(kw in text for kw in advisor_keywords):
             applicant_memory.update_attributes(session_id, "menu_state", "advisor_mode")
             prompt = (
-                "👨‍💼 **Conectando con el Asesor de Admisiones (Vía OpenCode)...**\n\n"
-                "¡Hola! Estás en contacto directo con nuestro Asesor de Admisiones de Nova Tech University.\n"
-                "Escribe cualquier consulta sobre tu perfil, carreras, laboratorios GPU H100, intercambios internacionales, convalidaciones, residencias o becas, "
-                "y te responderé con atención personalizada.\n\n"
-                "💡 *(Escribe **0** en cualquier momento para regresar al Menú Principal)*"
+                "**Conectando con el Asesor de Admisiones de Nova Idiomas (OpenCode)...**\n\n"
+                "Estás en comunicación con el Asesor Académico.\n"
+                "Formula tu consulta sobre cualquier caso especial, convenio empresarial o programa de idiomas y te ayudaremos con gusto.\n\n"
+                "*(Escribe '0' para regresar al Menú Principal)*"
             )
-            return prompt, None, True, [{"label": "0. Volver al Menú", "value": "0"}]
+            return prompt, None, True, [
+                {"label": "1. Cursos & Certificaciones", "value": "1"},
+                {"label": "3. Precios & Financiación", "value": "3"},
+                {"label": "0. Menú Principal", "value": "0"}
+            ]
 
-        # Direct shortcut for leaf options from any state
+        # 3. Universal Main Pillar Navigation (1, 2, 3, 4) - Works seamlessly from ANY state
+        if text in ("1", "cursos", "programas", "idiomas"):
+            applicant_memory.update_attributes(session_id, "menu_state", "submenu_1")
+            return SUBMENU_1_TEXT, None, True, self.get_buttons_for_state("submenu_1")
+        elif text in ("2", "horario", "horarios", "modalidades"):
+            applicant_memory.update_attributes(session_id, "menu_state", "submenu_2")
+            return SUBMENU_2_TEXT, None, True, self.get_buttons_for_state("submenu_2")
+        elif text in ("3", "precio", "precios", "costos", "financiacion", "tarifas"):
+            applicant_memory.update_attributes(session_id, "menu_state", "submenu_3")
+            return SUBMENU_3_TEXT, None, True, self.get_buttons_for_state("submenu_3")
+        elif text in ("4", "admision", "admisiones", "sedes", "test", "matricula", "matriculas"):
+            applicant_memory.update_attributes(session_id, "menu_state", "submenu_4")
+            return SUBMENU_4_TEXT, None, True, self.get_buttons_for_state("submenu_4")
+
+        # 4. Universal Leaf Shortcuts (1.1, 1.2 ... 4.6) - Works seamlessly from ANY state
         if text in LEAF_QUERY_MAP:
-            return None, LEAF_QUERY_MAP[text], False, [{"label": "0. Menú Principal", "value": "0"}, {"label": "9. Asesor OpenCode", "value": "9"}]
+            # Set state corresponding to the pillar prefix
+            prefix = text.split(".")[0]
+            applicant_memory.update_attributes(session_id, "menu_state", f"submenu_{prefix}")
+            return None, LEAF_QUERY_MAP[text], False, get_contextual_buttons(text)
 
-        # Handle Root Menu
-        if current_state == "root":
-            if text == "1":
-                applicant_memory.update_attributes(session_id, "menu_state", "submenu_1")
-                return SUBMENU_1_TEXT, None, True, self.get_buttons_for_state("submenu_1")
-            elif text == "2":
-                applicant_memory.update_attributes(session_id, "menu_state", "submenu_2")
-                return SUBMENU_2_TEXT, None, True, self.get_buttons_for_state("submenu_2")
-            elif text == "3":
-                applicant_memory.update_attributes(session_id, "menu_state", "submenu_3")
-                return SUBMENU_3_TEXT, None, True, self.get_buttons_for_state("submenu_3")
-            elif text == "4":
-                applicant_memory.update_attributes(session_id, "menu_state", "submenu_4")
-                return SUBMENU_4_TEXT, None, True, self.get_buttons_for_state("submenu_4")
-            elif text == "5":
-                applicant_memory.update_attributes(session_id, "menu_state", "submenu_5")
-                return SUBMENU_5_TEXT, None, True, self.get_buttons_for_state("submenu_5")
-            elif text == "6":
-                applicant_memory.update_attributes(session_id, "menu_state", "submenu_6")
-                return SUBMENU_6_TEXT, None, True, self.get_buttons_for_state("submenu_6")
-            elif text == "7":
-                applicant_memory.update_attributes(session_id, "menu_state", "submenu_7")
-                return SUBMENU_7_TEXT, None, True, self.get_buttons_for_state("submenu_7")
-            elif text == "8":
-                applicant_memory.update_attributes(session_id, "menu_state", "submenu_8")
-                return SUBMENU_8_TEXT, None, True, self.get_buttons_for_state("submenu_8")
-            else:
-                # Direct natural language query at root level
-                return None, raw_input, False, self.get_buttons_for_state("root")
+        # 5. Natural Language Intent Normalization (Mapped to targeted queries)
+        if text in INTENT_SYNONYMS:
+            return None, INTENT_SYNONYMS[text], False, [
+                {"label": "1. Cursos & Certificaciones", "value": "1"},
+                {"label": "2. Horarios & Modalidades", "value": "2"},
+                {"label": "3. Precios & Financiación", "value": "3"},
+                {"label": "4. Admisiones & Sedes", "value": "4"},
+                {"label": "0. Menú Principal", "value": "0"}
+            ]
 
-        # Handle Submenu States
-        if current_state.startswith("submenu_"):
-            # Check for invalid single digit or unrecognized code
-            sub_id = current_state.replace("submenu_", "")
-            err_msg = (
-                f"⚠️ La opción *\"{raw_input}\"* no forma parte de este submenú.\n\n"
-                f"Por favor selecciona una de las opciones válidas (ej. {sub_id}.1, {sub_id}.2...) o digita **0** para regresar al Menú Principal."
-            )
-            return err_msg, None, True, self.get_buttons_for_state(current_state)
-
-        return None, raw_input, False, self.get_buttons_for_state("root")
+        # 6. Fallback: Any free-form natural language query is passed to RAG seamlessly without state errors
+        return None, raw_input, False, [
+            {"label": "1. Cursos & Certificaciones", "value": "1"},
+            {"label": "2. Horarios & Modalidades", "value": "2"},
+            {"label": "3. Precios & Financiación", "value": "3"},
+            {"label": "4. Admisiones & Sedes", "value": "4"},
+            {"label": "0. Menú Principal", "value": "0"}
+        ]
 
 
 navigation_engine = GuidedNavigationEngine()

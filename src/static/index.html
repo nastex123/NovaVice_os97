@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nova Tech University - Asistente de Admisiones</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-layout">
+        <!-- Sidebar Navigation & Telemetry -->
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="logo-circle">NTU</div>
+                <div class="brand-text">
+                    <h2>Nova Tech</h2>
+                    <span>Oficina de Admisiones</span>
+                </div>
+            </div>
+
+            <div class="telemetry-panel">
+                <h3>Telemetría en Vivo</h3>
+                <div class="metric-card">
+                    <span class="metric-label">Consultas Procesadas</span>
+                    <span class="metric-value" id="metric-queries">0</span>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-label">Aciertos en Caché</span>
+                    <span class="metric-value" id="metric-cache">0.0%</span>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-label">Escalamientos a Humano</span>
+                    <span class="metric-value" id="metric-escalations">0</span>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-label">Costo Estimado (USD)</span>
+                    <span class="metric-value" id="metric-cost">$0.0000</span>
+                </div>
+            </div>
+
+            <div class="mode-selector">
+                <label for="opencode-toggle">Motor de Razonamiento</label>
+                <div class="toggle-container">
+                    <input type="checkbox" id="opencode-toggle">
+                    <label for="opencode-toggle" class="toggle-label">
+                        <span class="mode-text">Modo Asesor OpenCode</span>
+                    </label>
+                </div>
+                <p class="mode-caption">Alterna entre RAG Directo Ultrarrápido y el razonamiento del Asesor Humano OpenCode.</p>
+            </div>
+
+            <div class="quick-links">
+                <a href="/docs" target="_blank" class="link-btn">Documentación Swagger API</a>
+                <a href="/metrics/prometheus" target="_blank" class="link-btn">Métricas Prometheus</a>
+            </div>
+        </aside>
+
+        <!-- Main Chat Area -->
+        <main class="chat-main">
+            <header class="chat-header">
+                <div class="status-indicator">
+                    <span class="dot online"></span>
+                    <span>Base de Conocimiento: <strong>Documentos Oficiales Verificados</strong></span>
+                </div>
+                <div class="badge-tag">Búsqueda Híbrida Activa</div>
+            </header>
+
+            <div class="chat-history" id="chat-history">
+                <div class="message assistant-msg">
+                    <div class="avatar">NTU</div>
+                    <div class="msg-bubble">
+                        <p>🎓 <strong>¡Bienvenido a la Oficina de Admisiones de Nova Tech University!</strong><br><br>
+Explora nuestra base de conocimiento de <strong>87 documentos oficiales (234+ chunks)</strong> digitando el número de la opción o usando los botones:<br><br>
+1️⃣ <strong>Carreras de Grado, Mallas y Sílabos</strong> (Software, IA, Cyber, Cloud, Cuántica, Full Stack)<br>
+2️⃣ <strong>Aranceles, Cuotas y Convenios Bancarios</strong> (Plan A 10%, Plan B 4 cuotas, USDC)<br>
+3️⃣ <strong>Calendario, Requisitos y Visas I-20</strong> (Otoño 2026, TU Munich, Tokyo Tech, Berkeley)<br>
+4️⃣ <strong>Becas de Excelencia y Trabajo-Estudio</strong> (Turing 50%, Ada Lovelace 35%, Empleo $12/hr)<br>
+5️⃣ <strong>Laboratorios e Investigación</strong> (Clúster GPU NVIDIA H100, MakerSpace 3D, Cyber Range)<br>
+6️⃣ <strong>Vida Universitaria y Residencias</strong> (Dormitorios $400-$650, Centro Médico Gratis, e-Sports)<br>
+7️⃣ <strong>Empleabilidad, Startups y Alianzas</strong> (Nova Ventures $100k, Microsoft, AWS, Google)<br>
+8️⃣ <strong>Reglamentos, Titulación y Posgrados</strong> (Maestrías M.Sc. IA/Cyber, 100% IP del Alumno)<br>
+9️⃣ <strong>Hablar con un Asesor de Admisiones (OpenCode)</strong><br><br>
+💡 <em>(Escribe <strong>0</strong> en cualquier momento para volver a este Menú Principal)</em></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Suggestions -->
+            <div class="chips-row" id="chips-container">
+                <button class="chip" data-query="1">1. Carreras & Sílabos</button>
+                <button class="chip" data-query="2">2. Aranceles & Pagos</button>
+                <button class="chip" data-query="3">3. Fechas & Visas</button>
+                <button class="chip" data-query="4">4. Becas & Empleo</button>
+                <button class="chip" data-query="5">5. Labs GPU H100</button>
+                <button class="chip" data-query="6">6. Residencias & Campus</button>
+                <button class="chip" data-query="7">7. Startups & Alianzas</button>
+                <button class="chip" data-query="8">8. Titulación & Posgrados</button>
+                <button class="chip" data-query="9">9. Asesor OpenCode</button>
+                <button class="chip" data-query="0">0. Menú Principal</button>
+            </div>
+
+            <!-- Chat Input Area -->
+            <footer class="chat-footer">
+                <form id="chat-form" class="input-form">
+                    <button type="button" id="voice-btn" class="icon-btn" title="Dictado por Voz (Web Speech API)">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                            <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                            <line x1="12" y1="19" x2="12" y2="23"></line>
+                            <line x1="8" y1="23" x2="16" y2="23"></line>
+                        </svg>
+                    </button>
+                    <input type="text" id="query-input" placeholder="Escribe tu consulta o digita un número (ej. 1, 2, 0)..." autocomplete="off" required>
+                    <button type="submit" id="send-btn" class="send-btn">
+                        <span>Enviar</span>
+                    </button>
+                </form>
+            </footer>
+        </main>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>

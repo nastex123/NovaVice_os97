@@ -1,0 +1,642 @@
+[
+  {
+    "ticket_id": "ESC-20260830-2A515C",
+    "created_at": "2026-08-30T20:39:27-0500",
+    "user_id": "test_applicant_01",
+    "query": "What are the application deadlines for Fall 2026?",
+    "confidence_score": 0.3235,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admissions@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260830-9EFA7B",
+    "created_at": "2026-08-30T20:39:27-0500",
+    "user_id": "guest_applicant",
+    "query": "What are the tuition payment options for Software Engineering?",
+    "confidence_score": 0.426,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admissions@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260830-40AB51",
+    "created_at": "2026-08-30T20:41:00-0500",
+    "user_id": "guest_applicant",
+    "query": "Can I adopt a penguin in the university dorms?",
+    "confidence_score": 0.2646,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admissions@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260830-67AED8",
+    "created_at": "2026-08-30T20:43:05-0500",
+    "user_id": "guest_applicant",
+    "query": "Can I adopt a penguin in the university dorms?",
+    "confidence_score": 0.1737,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admissions@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260830-A45E2E",
+    "created_at": "2026-08-30T20:43:58-0500",
+    "user_id": "hermes_agent_applicant",
+    "query": "Can I adopt a penguin in the university dorms?",
+    "confidence_score": 0.1737,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admissions@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260830-709F82",
+    "created_at": "2026-08-30T20:49:09-0500",
+    "user_id": "student_web_user",
+    "query": "hi",
+    "confidence_score": 0.0,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admissions@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260830-9DF9A4",
+    "created_at": "2026-08-30T20:49:56-0500",
+    "user_id": "student_web_user",
+    "query": "what programs are there?",
+    "confidence_score": 0.4765,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admissions@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260830-D9B9BC",
+    "created_at": "2026-08-30T20:51:27-0500",
+    "user_id": "student_web_user",
+    "query": "hola",
+    "confidence_score": 0.0,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admissions@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260830-77736C",
+    "created_at": "2026-08-30T20:52:19-0500",
+    "user_id": "student_web_user",
+    "query": "What scholarships are available for new students?",
+    "confidence_score": 0.25,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admissions@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260830-DD2DF3",
+    "created_at": "2026-08-30T20:52:24-0500",
+    "user_id": "student_web_user",
+    "query": "Can I study Artificial Intelligence 100% online?",
+    "confidence_score": 0.6,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admissions@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260830-BABBEA",
+    "created_at": "2026-08-30T20:52:28-0500",
+    "user_id": "student_web_user",
+    "query": "Can I adopt a monkey in the campus library?",
+    "confidence_score": 0.2373,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admissions@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260830-917F53",
+    "created_at": "2026-08-30T20:55:35-0500",
+    "user_id": "guest_applicant",
+    "query": "Can I adopt a monkey in the campus library?",
+    "confidence_score": 0.0337,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admissions@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260830-8D8847",
+    "created_at": "2026-08-30T20:55:42-0500",
+    "user_id": "guest_applicant",
+    "query": "What are the application deadlines for Fall 2026?",
+    "confidence_score": 0.1705,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admissions@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260830-C5C41D",
+    "created_at": "2026-08-30T20:57:44-0500",
+    "user_id": "guest_applicant",
+    "query": "Can I adopt a monkey in the campus library?",
+    "confidence_score": 0.2373,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admissions@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260830-F82CE2",
+    "created_at": "2026-08-30T20:58:55-0500",
+    "user_id": "guest_applicant",
+    "query": "Can I study Artificial Intelligence 100% online?",
+    "confidence_score": 0.169,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admissions@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260830-B6A3DC",
+    "created_at": "2026-08-30T20:58:55-0500",
+    "user_id": "guest_applicant",
+    "query": "What are the application deadlines for Fall 2026?",
+    "confidence_score": 0.1756,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admissions@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260830-D86E2B",
+    "created_at": "2026-08-30T20:59:53-0500",
+    "user_id": "guest_applicant",
+    "query": "Can I adopt a monkey in the campus library?",
+    "confidence_score": 0.2373,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admissions@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260830-82DAD5",
+    "created_at": "2026-08-30T21:00:24-0500",
+    "user_id": "guest_applicant",
+    "query": "Can I adopt a penguin in the university dorms?",
+    "confidence_score": 0.1578,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admissions@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260830-A88533",
+    "created_at": "2026-08-30T21:05:33-0500",
+    "user_id": "student_web_user",
+    "query": "Can I adopt a monkey in the campus library?",
+    "confidence_score": 0.2373,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admissions@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260830-8194E8",
+    "created_at": "2026-08-30T21:05:39-0500",
+    "user_id": "student_web_user",
+    "query": "Can I adopt a monkey in the campus library?",
+    "confidence_score": 0.2373,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admissions@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260830-5CB804",
+    "created_at": "2026-08-30T21:05:40-0500",
+    "user_id": "student_web_user",
+    "query": "Can I adopt a monkey in the campus library?",
+    "confidence_score": 0.2373,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admissions@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260830-988D00",
+    "created_at": "2026-08-30T21:05:40-0500",
+    "user_id": "student_web_user",
+    "query": "Can I adopt a monkey in the campus library?",
+    "confidence_score": 0.2373,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admissions@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260830-21583D",
+    "created_at": "2026-08-30T21:05:41-0500",
+    "user_id": "student_web_user",
+    "query": "Can I adopt a monkey in the campus library?",
+    "confidence_score": 0.2373,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admissions@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260830-A23784",
+    "created_at": "2026-08-30T21:05:41-0500",
+    "user_id": "student_web_user",
+    "query": "Can I adopt a monkey in the campus library?",
+    "confidence_score": 0.2373,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admissions@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260830-F52BE2",
+    "created_at": "2026-08-30T21:05:41-0500",
+    "user_id": "student_web_user",
+    "query": "Can I adopt a monkey in the campus library?",
+    "confidence_score": 0.2373,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admissions@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260830-CBB28B",
+    "created_at": "2026-08-30T21:05:41-0500",
+    "user_id": "student_web_user",
+    "query": "Can I adopt a monkey in the campus library?",
+    "confidence_score": 0.2373,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admissions@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260830-C089EE",
+    "created_at": "2026-08-30T21:05:41-0500",
+    "user_id": "student_web_user",
+    "query": "Can I adopt a monkey in the campus library?",
+    "confidence_score": 0.2373,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admissions@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260830-F53648",
+    "created_at": "2026-08-30T21:05:42-0500",
+    "user_id": "student_web_user",
+    "query": "Can I adopt a monkey in the campus library?",
+    "confidence_score": 0.2373,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admissions@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260830-42C6AE",
+    "created_at": "2026-08-30T21:05:42-0500",
+    "user_id": "student_web_user",
+    "query": "Can I adopt a monkey in the campus library?",
+    "confidence_score": 0.2373,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admissions@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260830-282757",
+    "created_at": "2026-08-30T21:05:52-0500",
+    "user_id": "student_web_user",
+    "query": "What scholarships are available for new students?",
+    "confidence_score": 0.25,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admissions@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260830-9DEBF9",
+    "created_at": "2026-08-30T21:05:52-0500",
+    "user_id": "student_web_user",
+    "query": "Can I adopt a monkey in the campus library?",
+    "confidence_score": 0.2373,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admissions@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260830-09CA9A",
+    "created_at": "2026-08-30T21:05:53-0500",
+    "user_id": "student_web_user",
+    "query": "What scholarships are available for new students?",
+    "confidence_score": 0.25,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admissions@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260830-CAC578",
+    "created_at": "2026-08-30T21:05:54-0500",
+    "user_id": "student_web_user",
+    "query": "Can I adopt a monkey in the campus library?",
+    "confidence_score": 0.2373,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admissions@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260830-8CA10A",
+    "created_at": "2026-08-30T21:05:56-0500",
+    "user_id": "student_web_user",
+    "query": "What scholarships are available for new students?",
+    "confidence_score": 0.25,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admissions@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260830-E43CAC",
+    "created_at": "2026-08-30T21:05:56-0500",
+    "user_id": "student_web_user",
+    "query": "Can I adopt a monkey in the campus library?",
+    "confidence_score": 0.2373,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admissions@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260830-999637",
+    "created_at": "2026-08-30T21:05:57-0500",
+    "user_id": "student_web_user",
+    "query": "What scholarships are available for new students?",
+    "confidence_score": 0.25,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admissions@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260830-8CBFEE",
+    "created_at": "2026-08-30T21:05:59-0500",
+    "user_id": "student_web_user",
+    "query": "What scholarships are available for new students?",
+    "confidence_score": 0.25,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admissions@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260830-C020C8",
+    "created_at": "2026-08-30T21:21:21-0500",
+    "user_id": "guest_applicant",
+    "query": "Can I adopt a penguin in the university dorms?",
+    "confidence_score": 0.1578,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admissions@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260830-FA3900",
+    "created_at": "2026-08-30T21:36:33-0500",
+    "user_id": "guest_applicant",
+    "query": "\u00bfPuedo adoptar un mono en la biblioteca?",
+    "confidence_score": 0.0,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admissions@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260830-0BD5DC",
+    "created_at": "2026-08-30T21:37:40-0500",
+    "user_id": "guest_applicant",
+    "query": "\u00bfPuedo adoptar un mono en la biblioteca?",
+    "confidence_score": 0.0,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admissions@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260830-B1220F",
+    "created_at": "2026-08-30T21:38:38-0500",
+    "user_id": "guest_applicant",
+    "query": "\u00bfPuedo adoptar un mono en la biblioteca?",
+    "confidence_score": 0.0,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admissions@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260830-52A594",
+    "created_at": "2026-08-30T21:40:11-0500",
+    "user_id": "postulante_web",
+    "query": "1.2",
+    "confidence_score": 0.4,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admissions@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260830-08824D",
+    "created_at": "2026-08-30T21:51:57-0500",
+    "user_id": "guest_applicant",
+    "query": "\u00bfPuedo adoptar un mono en la biblioteca?",
+    "confidence_score": 0.25,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admissions@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260830-1A8E70",
+    "created_at": "2026-08-30T21:52:37-0500",
+    "user_id": "guest_applicant",
+    "query": "\u00bfPuedo adoptar un mono en la biblioteca?",
+    "confidence_score": 0.25,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admissions@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260830-454705",
+    "created_at": "2026-08-30T22:03:08-0500",
+    "user_id": "postulante_web",
+    "query": "\u00bfPuedo adoptar un mono en la biblioteca?",
+    "confidence_score": 0.25,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admissions@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260830-A7BC8B",
+    "created_at": "2026-08-30T22:14:26-0500",
+    "user_id": "guest_applicant",
+    "query": "\u00bfPuedo adoptar un mono en la biblioteca?",
+    "confidence_score": 0.25,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admissions@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260830-AA93C7",
+    "created_at": "2026-08-30T22:14:50-0500",
+    "user_id": "guest_applicant",
+    "query": "\u00bfPuedo adoptar un mono en la biblioteca?",
+    "confidence_score": 0.25,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admissions@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260830-F08EDF",
+    "created_at": "2026-08-30T22:15:40-0500",
+    "user_id": "postulante_web",
+    "query": "1.2",
+    "confidence_score": 0.4,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admissions@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260830-305665",
+    "created_at": "2026-08-30T22:17:28-0500",
+    "user_id": "guest_applicant",
+    "query": "\u00bfPuedo adoptar un mono en la biblioteca?",
+    "confidence_score": 0.25,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admisiones@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260830-132A01",
+    "created_at": "2026-08-30T22:24:14-0500",
+    "user_id": "guest_applicant",
+    "query": "\u00bfPuedo adoptar un mono en la biblioteca?",
+    "confidence_score": 0.25,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admisiones@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260830-00EB59",
+    "created_at": "2026-08-30T22:29:25-0500",
+    "user_id": "guest_applicant",
+    "query": "\u00bfPuedo adoptar un mono en la biblioteca?",
+    "confidence_score": 0.25,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admisiones@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260830-572F81",
+    "created_at": "2026-08-30T22:41:05-0500",
+    "user_id": "guest_applicant",
+    "query": "\u00bfPuedo adoptar un mono en la biblioteca?",
+    "confidence_score": 0.25,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admisiones@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260830-7C816D",
+    "created_at": "2026-08-30T22:43:53-0500",
+    "user_id": "guest_applicant",
+    "query": "\u00bfPuedo adoptar un mono en la biblioteca?",
+    "confidence_score": 0.25,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admisiones@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260830-29CBF2",
+    "created_at": "2026-08-30T22:46:39-0500",
+    "user_id": "postulante_nextjs",
+    "query": "cuantas becas hay?",
+    "confidence_score": 0.3333,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admisiones@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260830-5F3980",
+    "created_at": "2026-08-30T22:49:36-0500",
+    "user_id": "guest_applicant",
+    "query": "\u00bfPuedo adoptar un mono en la biblioteca?",
+    "confidence_score": 0.25,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admisiones@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260830-A13720",
+    "created_at": "2026-08-30T22:49:54-0500",
+    "user_id": "guest_applicant",
+    "query": "\u00bfPuedo adoptar un mono en la biblioteca?",
+    "confidence_score": 0.25,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admisiones@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260830-ECE26F",
+    "created_at": "2026-08-30T22:51:18-0500",
+    "user_id": "guest_applicant",
+    "query": "\u00bfPuedo adoptar un mono en la biblioteca?",
+    "confidence_score": 0.25,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admisiones@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260830-8EBEF5",
+    "created_at": "2026-08-30T22:54:32-0500",
+    "user_id": "postulante_nextjs",
+    "query": "precios",
+    "confidence_score": 0.0,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admisiones@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260830-5AC808",
+    "created_at": "2026-08-30T22:54:42-0500",
+    "user_id": "postulante_nextjs",
+    "query": "precio",
+    "confidence_score": 0.0,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admisiones@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260830-4BF9A3",
+    "created_at": "2026-08-30T22:54:46-0500",
+    "user_id": "postulante_nextjs",
+    "query": "viaje",
+    "confidence_score": 0.0,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admisiones@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260830-58760D",
+    "created_at": "2026-08-30T23:01:48-0500",
+    "user_id": "guest_applicant",
+    "query": "\u00bfPuedo adoptar un mono en la biblioteca?",
+    "confidence_score": 0.25,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admisiones@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260830-D1C302",
+    "created_at": "2026-08-30T23:10:28-0500",
+    "user_id": "guest_applicant",
+    "query": "\u00bfPuedo adoptar un mono en la biblioteca?",
+    "confidence_score": 0.25,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admisiones@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260830-F8E751",
+    "created_at": "2026-08-30T23:14:59-0500",
+    "user_id": "guest_applicant",
+    "query": "\u00bfPuedo adoptar un mono en la biblioteca?",
+    "confidence_score": 0.25,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admisiones@novatech.edu",
+    "status": "pending_human_review"
+  },
+  {
+    "ticket_id": "ESC-20260830-ECF4DE",
+    "created_at": "2026-08-30T23:19:51-0500",
+    "user_id": "guest_applicant",
+    "query": "\u00bfPuedo adoptar un mono en la biblioteca?",
+    "confidence_score": 0.25,
+    "escalation_reason": "low_relevance",
+    "assigned_to": "admisiones@novatech.edu",
+    "status": "pending_human_review"
+  }
+]

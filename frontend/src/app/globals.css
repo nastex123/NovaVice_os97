@@ -228,6 +228,26 @@ body {
   animation: cloudDriftL2R 48s linear infinite 6s;
 }
 
+.animate-cloud-l2r-5 {
+  animation: cloudDriftL2R 50s linear infinite 3s;
+}
+
+.animate-cloud-l2r-6 {
+  animation: cloudDriftL2R 60s linear infinite 9s;
+}
+
+.animate-cloud-l2r-7 {
+  animation: cloudDriftL2R 44s linear infinite 15s;
+}
+
+.animate-cloud-l2r-8 {
+  animation: cloudDriftL2R 58s linear infinite 20s;
+}
+
+.animate-cloud-l2r-9 {
+  animation: cloudDriftL2R 46s linear infinite 27s;
+}
+
 .animate-cloud-r2l-1 {
   animation: cloudDriftR2L 46s linear infinite 2s;
 }
@@ -242,6 +262,42 @@ body {
 
 .animate-cloud-r2l-4 {
   animation: cloudDriftR2L 74s linear infinite 36s;
+}
+
+.animate-cloud-r2l-5 {
+  animation: cloudDriftR2L 48s linear infinite 1s;
+}
+
+.animate-cloud-r2l-6 {
+  animation: cloudDriftR2L 54s linear infinite 8s;
+}
+
+.animate-cloud-r2l-7 {
+  animation: cloudDriftR2L 64s linear infinite 18s;
+}
+
+.animate-cloud-r2l-8 {
+  animation: cloudDriftR2L 40s linear infinite 21s;
+}
+
+.animate-cloud-r2l-9 {
+  animation: cloudDriftR2L 70s linear infinite 30s;
+}
+
+/* Grass tuft sway (only tufts, base stays static) */
+@keyframes grassSway {
+  0%, 100% {
+    transform: skewX(0deg);
+  }
+  50% {
+    transform: skewX(0.7deg);
+  }
+}
+
+.animate-grass {
+  animation: grassSway 3.5s ease-in-out infinite;
+  transform-origin: bottom center;
+  will-change: transform;
 }
 
 .animate-seagull-l2r-1 {

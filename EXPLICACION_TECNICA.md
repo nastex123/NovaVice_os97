@@ -22,7 +22,7 @@
 | **Frontend** | Next.js 15 (App Router), React 19, TypeScript, Tailwind CSS, Lucide Icons |
 | **Estética Visual** | "Nova OS '97" Retro Macintosh OS + Poolsuite.net + GTA Vice City 80s/90s |
 | **Filtro Óptico** | CRT Anti-Glare & Warm Phosphor con interruptor interactivo `[📺 CRT: ON/OFF]` |
-| **Fondo Animado** | Palmeras multi-capa con balanceo, nubes volumétricas y bandadas de gaviotas en pixel-art (GPU 60 FPS) |
+| **Fondo Animado** | 8 palmas con balanceo, 18 nubes bidireccionales (9 L2R + 9 R2L), 6 bandadas gaviotas 2estados, alfombra hierba verde seco 28 mechones (GPU 60 FPS) |
 | **Calidad y Pruebas** | **25/25 Tests Unitarios y E2E Aprobados en Pytest** • Next.js Build 0 errores (2.0s) |
 
 ---
@@ -102,7 +102,7 @@ synapse-admissions-ai/ (NovaVice_os97)
 │   Next.js 15 (App Router) + TypeScript + Tailwind CSS                  │
 │   ├── Ventana Retro Macintosh OS '97 (Barra rayada + Botones retro)   │
 │   ├── Filtro Óptico CRT Anti-Glare (Scanlines + Fósforo Ámbar + Switch)│
-│   ├── Oasis Pixel-Art Dinámico (8 Palmeras con balanceo + Nubes)      │
+│   ├── Oasis Pixel-Art (8 Palmeras + 18 Nubes Bidireccionales + Gaviotas + Hierba Pixel) │
 │   ├── Renderizador Markdown GFM Seguro con Sanitización               │
 │   └── Modal de Telemetría en Tiempo Real (Costos, Tokens, Latencia)   │
 └───────────────────────────────────┬────────────────────────────────────┘
@@ -249,9 +249,10 @@ El diseño combina la nostalgia retro de los sistemas operativos Macintosh de 19
   * **Interruptor `[ 📺 CRT: ON / OFF ]`:** Control interactivo en la barra superior con persistencia local.
 
 ### 6.3 Oasis Tropical Pixel-Art Animado (GPU 60 FPS)
-* **8 Palmeras en 4 Planos de Profundidad:** Palmeras gigantes de primer plano (380px), intermedias y esbeltas de fondo con animación de balanceo orgánico (*sway*) simulando la brisa marina.
-* **8 Nubes Volumétricas 16-Bit:** Formaciones con sombreado pixel-art navegando continuamente a distintas alturas.
-* **6 Bandadas de Gaviotas:** Vuelo en V y planeadores solitarios con aleteo activo.
+* **8 Palmeras en 4 Planos de Profundidad:** Palmeras gigantes de primer plano (380px), intermedias y esbeltas de fondo con animación de balanceo orgánico (*sway* `palmSwayLeft/Right` 5-7s).
+* **18 Nubes Volumétricas 16-Bit (9 L2R + 9 R2L):** Formaciones con sombreado pixel-art navegando continuamente a distintas alturas (duraciones 40-74s, delays 1-30s) vía `cloudDriftL2R`/`R2L` y clases `animate-cloud-l2r-1..9` / `r2l-1..9` — entrada garantizada desde ambos bordes.
+* **6 Bandadas de Gaviotas:** Vuelo en V y planeadores solitarios con aleteo activo 2 estados `0.38s steps(1)`.
+* **Alfombra de Hierba Verde Seco Retro (`#8A9A6A`):** Capa densa `48-54px` con base continua estática `14-16px` + highlight `#A8B88E` y 28 mechones (12 en móvil) de 3 blades cada uno (`#6B7D5A`/`#8A9A6A`/`#9AB08A`). Solo los mechones animan vía `grassSway 3.5s ease-in-out skewX(0.7deg)` — base estática para calma visual.
 * **Cero consumo de CPU:** Gráficos SVG acelerados por hardware en CSS3 puro con `pointer-events-none`.
 
 ---

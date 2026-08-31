@@ -93,7 +93,7 @@ synapse-admissions-ai/ (NovaVice_os97)
 │   Next.js 15 (App Router) + React 19 + TypeScript + Tailwind CSS       │
 │   ├── Macintosh OS '97 Window (Pinstripe titlebar, vintage controls)   │
 │   ├── CRT Anti-Glare Optical Filter (Scanlines + Amber Phosphor + SW)  │
-│   ├── Living Pixel-Art Background (8 Swaying Palms + Clouds + Gulls)   │
+│   ├── Living Pixel-Art Background (8 Palms + 18 Bidirectional Clouds + Gulls + Pixel Grass) │
 │   ├── Safe GFM Markdown Renderer with HTML Sanitization                │
 │   └── Real-time Telemetry Modal (Latency, Tokens, Cost, Cache Ratio)   │
 └───────────────────────────────────┬────────────────────────────────────┘
@@ -164,7 +164,7 @@ synapse-admissions-ai/ (NovaVice_os97)
 3. **Retro "Nova OS '97" Frontend with Anti-Glare CRT Filter:**
    - Nostalgic design inspired by Poolsuite.net and GTA Vice City 80s/90s aesthetics.
    - **Optical CRT Screen Filter:** Subtle horizontal scanlines and warm amber phosphor actively reducing eye fatigue, with an interactive `[ 📺 CRT: ON/OFF ]` switch.
-   - **Living Tropical Pixel-Art Landscape:** 8 depth-layered swaying palm trees, 8 bidirectional volumetric drifting clouds, and 6 flocks of seagulls with authentic **2-state wing flapping** at 60 FPS GPU hardware acceleration.
+   - **Living Tropical Pixel-Art Landscape:** 8 depth-layered swaying palm trees, **18 bidirectional volumetric drifting clouds (9 L2R + 9 R2L)**, 6 flocks of seagulls with authentic **2-state wing flapping**, and a **dense verde seco retro pixel-grass carpet (#8A9A6A) with 28 swaying tufts** at 60 FPS GPU hardware acceleration (static base + `grassSway` tufts only).
 
 4. **Deterministic Guided Navigation & Zero Hallucination Guardrails:**
    - Structured 4-pillar menu navigation (1. Courses, 2. Schedules, 3. COP Pricing, 4. Admissions/Campuses, with 0 root reset).

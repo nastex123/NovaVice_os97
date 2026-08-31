@@ -87,7 +87,7 @@ const PixelSeagull: React.FC<PixelSeagullProps> = ({
 
 export const PixiParticleBackground: React.FC = () => {
   return (
-    <div className="absolute inset-0 pointer-events-none select-none overflow-hidden z-0">
+    <div className="fixed inset-0 pointer-events-none select-none overflow-hidden z-0">
       {/* Drifting 16-bit volumetric pixel clouds (Bidirectional: Left-to-Right & Right-to-Left) */}
 
       {/* Cloud 1: Giant Top Stratocumulus (L2R) */}
@@ -174,6 +174,106 @@ export const PixiParticleBackground: React.FC = () => {
         </svg>
       </div>
 
+      {/* Cloud 9: Upper Wispy Cirrus (L2R) */}
+      <div className="absolute top-2 left-0 animate-cloud-l2r-5 opacity-32">
+        <svg width="200" height="46" viewBox="0 0 200 46" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="42" y="6" width="72" height="13" fill="#FAF6EE" />
+          <rect x="18" y="15" width="128" height="17" fill="#FAF6EE" />
+          <rect x="6" y="26" width="168" height="13" fill="#FAF6EE" />
+          <rect x="12" y="36" width="158" height="4" fill="#E8DEC8" />
+        </svg>
+      </div>
+
+      {/* Cloud 10: Small Fast Puff (R2L) */}
+      <div className="absolute top-6 left-0 animate-cloud-r2l-5 opacity-30">
+        <svg width="140" height="40" viewBox="0 0 140 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="26" y="7" width="52" height="12" fill="#FAF6EE" />
+          <rect x="12" y="16" width="88" height="14" fill="#FAF6EE" />
+          <rect x="4" y="26" width="112" height="10" fill="#FAF6EE" />
+          <rect x="8" y="33" width="105" height="3" fill="#E8DEC8" />
+        </svg>
+      </div>
+
+      {/* Cloud 11: Mid Upper Dense (L2R) */}
+      <div className="absolute top-10 left-0 animate-cloud-l2r-6 opacity-38">
+        <svg width="180" height="50" viewBox="0 0 180 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="38" y="8" width="66" height="14" fill="#FAF6EE" />
+          <rect x="16" y="18" width="118" height="18" fill="#FAF6EE" />
+          <rect x="4" y="30" width="150" height="14" fill="#FAF6EE" />
+          <rect x="10" y="40" width="140" height="4" fill="#E8DEC8" />
+        </svg>
+      </div>
+
+      {/* Cloud 12: Broad High Stratocumulus (R2L) */}
+      <div className="absolute top-14 left-0 animate-cloud-r2l-6 opacity-28">
+        <svg width="260" height="62" viewBox="0 0 260 62" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="58" y="10" width="100" height="17" fill="#FAF6EE" />
+          <rect x="28" y="22" width="168" height="23" fill="#FAF6EE" />
+          <rect x="8" y="36" width="222" height="18" fill="#FAF6EE" />
+          <rect x="16" y="50" width="210" height="5" fill="#E8DEC8" />
+        </svg>
+      </div>
+
+      {/* Cloud 13: Tiny Low Drift (L2R) */}
+      <div className="absolute top-20 left-0 animate-cloud-l2r-7 opacity-25">
+        <svg width="130" height="36" viewBox="0 0 130 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="22" y="6" width="48" height="10" fill="#FAF6EE" />
+          <rect x="10" y="14" width="82" height="13" fill="#FAF6EE" />
+          <rect x="4" y="23" width="105" height="9" fill="#FAF6EE" />
+          <rect x="8" y="29" width="98" height="3" fill="#E8DEC8" />
+        </svg>
+      </div>
+
+      {/* Cloud 14: Mid Horizon Wide (R2L) */}
+      <div className="absolute top-24 left-0 animate-cloud-r2l-7 opacity-33">
+        <svg width="220" height="52" viewBox="0 0 220 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="46" y="8" width="84" height="15" fill="#FAF6EE" />
+          <rect x="20" y="18" width="142" height="19" fill="#FAF6EE" />
+          <rect x="6" y="30" width="186" height="15" fill="#FAF6EE" />
+          <rect x="12" y="41" width="176" height="4" fill="#E8DEC8" />
+        </svg>
+      </div>
+
+      {/* Cloud 15: Lower Mid Puffy (L2R) */}
+      <div className="absolute top-32 left-0 animate-cloud-l2r-8 opacity-27">
+        <svg width="160" height="42" viewBox="0 0 160 42" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="30" y="7" width="58" height="12" fill="#FAF6EE" />
+          <rect x="14" y="16" width="102" height="15" fill="#FAF6EE" />
+          <rect x="4" y="26" width="132" height="11" fill="#FAF6EE" />
+          <rect x="9" y="34" width="124" height="3" fill="#E8DEC8" />
+        </svg>
+      </div>
+
+      {/* Cloud 16: Compact Upper-Mid (R2L) */}
+      <div className="absolute top-40 left-0 animate-cloud-r2l-8 opacity-36">
+        <svg width="175" height="46" viewBox="0 0 175 46" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="34" y="7" width="62" height="13" fill="#FAF6EE" />
+          <rect x="16" y="17" width="112" height="17" fill="#FAF6EE" />
+          <rect x="4" y="27" width="145" height="12" fill="#FAF6EE" />
+          <rect x="10" y="36" width="136" height="4" fill="#E8DEC8" />
+        </svg>
+      </div>
+
+      {/* Cloud 17: Very Low Horizon Massive (L2R) */}
+      <div className="absolute top-56 left-0 animate-cloud-l2r-9 opacity-20">
+        <svg width="290" height="68" viewBox="0 0 290 68" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="66" y="10" width="116" height="19" fill="#FAF6EE" />
+          <rect x="32" y="23" width="196" height="25" fill="#FAF6EE" />
+          <rect x="10" y="37" width="254" height="21" fill="#FAF6EE" />
+          <rect x="18" y="53" width="240" height="6" fill="#E8DEC8" />
+        </svg>
+      </div>
+
+      {/* Cloud 18: High Thin Cirrus (R2L) */}
+      <div className="absolute top-48 left-0 animate-cloud-r2l-9 opacity-31">
+        <svg width="150" height="38" viewBox="0 0 150 38" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="28" y="6" width="52" height="11" fill="#FAF6EE" />
+          <rect x="12" y="14" width="90" height="13" fill="#FAF6EE" />
+          <rect x="4" y="23" width="118" height="10" fill="#FAF6EE" />
+          <rect x="9" y="30" width="110" height="3" fill="#E8DEC8" />
+        </svg>
+      </div>
+
       {/* High-density flocks of pixel-art seagulls (Bidirectional + 2-State Flapping) */}
 
       {/* Flock 1: V-Formation Trio (High Altitude, Left-to-Right) */}
@@ -218,8 +318,8 @@ export const PixiParticleBackground: React.FC = () => {
 
       {/* Left palm grove */}
 
-      {/* Left Palm 4: Deep Background Slender Palm */}
-      <div className="absolute -bottom-8 left-28 sm:left-48 opacity-30 scale-[0.65] origin-bottom-left animate-palm-left-bg hidden md:block">
+      {/* Left Palm 4: Deep Background Slender Palm - scaled up, bottom-0 like grass */}
+      <div className="absolute bottom-0 left-28 sm:left-48 opacity-30 scale-[0.85] origin-bottom-left animate-palm-left-bg hidden md:block">
         <svg width="240" height="320" viewBox="0 0 240 320" fill="none" xmlns="http://www.w3.org/2000/svg">
           <rect x="90" y="270" width="18" height="50" fill="#240E12" />
           <rect x="94" y="220" width="16" height="52" fill="#240E12" />
@@ -234,8 +334,8 @@ export const PixiParticleBackground: React.FC = () => {
         </svg>
       </div>
 
-      {/* Left Palm 3: Mid-Depth Leaning Palm */}
-      <div className="absolute -bottom-6 left-16 sm:left-28 opacity-45 scale-[0.80] origin-bottom-left animate-palm-left-mid hidden sm:block">
+      {/* Left Palm 3: Mid-Depth Leaning Palm - scaled up, bottom-0 like grass */}
+      <div className="absolute bottom-0 left-16 sm:left-28 opacity-45 scale-[1.0] origin-bottom-left animate-palm-left-mid hidden sm:block">
         <svg width="260" height="340" viewBox="0 0 260 340" fill="none" xmlns="http://www.w3.org/2000/svg">
           <rect x="100" y="290" width="22" height="50" fill="#2E1418" />
           <rect x="104" y="240" width="20" height="52" fill="#2E1418" />
@@ -250,8 +350,8 @@ export const PixiParticleBackground: React.FC = () => {
         </svg>
       </div>
 
-      {/* Left Palm 2: Secondary Foreground Palm */}
-      <div className="absolute -bottom-6 left-4 sm:left-10 opacity-60 scale-[0.95] origin-bottom-left animate-palm-left-bg">
+      {/* Left Palm 2: Secondary Foreground Palm - scaled up, bottom-0 like grass */}
+      <div className="absolute bottom-0 left-4 sm:left-10 opacity-60 scale-[1.15] origin-bottom-left animate-palm-left-bg">
         <svg width="270" height="360" viewBox="0 0 270 360" fill="none" xmlns="http://www.w3.org/2000/svg">
           <rect x="85" y="300" width="24" height="60" fill="#35181D" />
           <rect x="90" y="240" width="22" height="64" fill="#35181D" />
@@ -266,8 +366,8 @@ export const PixiParticleBackground: React.FC = () => {
         </svg>
       </div>
 
-      {/* Left Palm 1: Giant Foreground Majestic Palm */}
-      <div className="absolute -bottom-6 -left-6 sm:left-0 opacity-75 sm:opacity-85 scale-100 sm:scale-125 origin-bottom-left animate-palm-left">
+      {/* Left Palm 1: Giant Foreground Majestic Palm - scaled up, bottom-0 like grass */}
+      <div className="absolute bottom-0 -left-6 sm:left-0 opacity-75 sm:opacity-85 scale-100 sm:scale-[1.55] origin-bottom-left animate-palm-left">
         <svg width="300" height="380" viewBox="0 0 300 380" fill="none" xmlns="http://www.w3.org/2000/svg">
           <rect x="95" y="320" width="26" height="60" fill="#3D1C22" />
           <rect x="100" y="260" width="24" height="64" fill="#3D1C22" />
@@ -296,8 +396,8 @@ export const PixiParticleBackground: React.FC = () => {
 
       {/* Right palm grove */}
 
-      {/* Right Palm 4: Deep Background Slender Palm */}
-      <div className="absolute -bottom-8 right-28 sm:right-48 opacity-30 scale-[0.65] origin-bottom-right animate-palm-right-bg hidden md:block">
+      {/* Right Palm 4: Deep Background Slender Palm - scaled up, bottom-0 like grass */}
+      <div className="absolute bottom-0 right-28 sm:right-48 opacity-30 scale-[0.85] origin-bottom-right animate-palm-right-bg hidden md:block">
         <svg width="240" height="320" viewBox="0 0 240 320" fill="none" xmlns="http://www.w3.org/2000/svg">
           <rect x="132" y="270" width="18" height="50" fill="#240E12" />
           <rect x="130" y="220" width="16" height="52" fill="#240E12" />
@@ -312,8 +412,8 @@ export const PixiParticleBackground: React.FC = () => {
         </svg>
       </div>
 
-      {/* Right Palm 3: Mid-Depth Leaning Palm */}
-      <div className="absolute -bottom-6 right-16 sm:right-28 opacity-45 scale-[0.80] origin-bottom-right animate-palm-right-mid hidden sm:block">
+      {/* Right Palm 3: Mid-Depth Leaning Palm - scaled up, bottom-0 like grass */}
+      <div className="absolute bottom-0 right-16 sm:right-28 opacity-45 scale-[1.0] origin-bottom-right animate-palm-right-mid hidden sm:block">
         <svg width="260" height="340" viewBox="0 0 260 340" fill="none" xmlns="http://www.w3.org/2000/svg">
           <rect x="138" y="290" width="22" height="50" fill="#2E1418" />
           <rect x="134" y="240" width="20" height="52" fill="#2E1418" />
@@ -328,8 +428,8 @@ export const PixiParticleBackground: React.FC = () => {
         </svg>
       </div>
 
-      {/* Right Palm 2: Secondary Foreground Palm */}
-      <div className="absolute -bottom-6 right-4 sm:right-10 opacity-60 scale-[0.95] origin-bottom-right animate-palm-right-bg">
+      {/* Right Palm 2: Secondary Foreground Palm - scaled up, bottom-0 like grass */}
+      <div className="absolute bottom-0 right-4 sm:right-10 opacity-60 scale-[1.15] origin-bottom-right animate-palm-right-bg">
         <svg width="270" height="360" viewBox="0 0 270 360" fill="none" xmlns="http://www.w3.org/2000/svg">
           <rect x="160" y="300" width="24" height="60" fill="#35181D" />
           <rect x="156" y="240" width="22" height="64" fill="#35181D" />
@@ -344,8 +444,8 @@ export const PixiParticleBackground: React.FC = () => {
         </svg>
       </div>
 
-      {/* Right Palm 1: Giant Foreground Majestic Palm */}
-      <div className="absolute -bottom-6 -right-6 sm:right-0 opacity-75 sm:opacity-85 scale-100 sm:scale-125 origin-bottom-right animate-palm-right">
+      {/* Right Palm 1: Giant Foreground Majestic Palm - scaled up, bottom-0 like grass */}
+      <div className="absolute bottom-0 -right-6 sm:right-0 opacity-75 sm:opacity-85 scale-100 sm:scale-[1.55] origin-bottom-right animate-palm-right">
         <svg width="300" height="380" viewBox="0 0 300 380" fill="none" xmlns="http://www.w3.org/2000/svg">
           <rect x="175" y="320" width="26" height="60" fill="#3D1C22" />
           <rect x="170" y="260" width="24" height="64" fill="#3D1C22" />
@@ -370,6 +470,52 @@ export const PixiParticleBackground: React.FC = () => {
           <rect x="95" y="82" width="60" height="14" fill="#243D2D" />
           <rect x="52" y="98" width="50" height="16" fill="#243D2D" />
         </svg>
+      </div>
+
+      {/* Tropical Pixel-Art Grass Layer - Verde Seco Retro (fixed to viewport bottom) */}
+      <div className="fixed bottom-0 left-0 w-screen h-[48px] sm:h-[54px] pointer-events-none z-[5] overflow-hidden">
+        {/* Static continuous base */}
+        <div className="absolute bottom-0 left-0 w-full h-[14px] sm:h-[16px] bg-[#8A9A6A] border-t-[2px] border-black/60" />
+        <div className="absolute bottom-[14px] sm:bottom-[16px] left-0 w-full h-[3px] bg-[#A8B88E] opacity-80" />
+        <div className="absolute bottom-[14px] sm:bottom-[16px] left-0 w-full h-[2px] bg-[#6B7D5A] opacity-60" style={{ marginTop: "3px" }} />
+        {/* Swaying tufts row - only tufts animate, base stays static */}
+        <div className="absolute bottom-[14px] sm:bottom-[16px] left-0 w-full h-[34px] sm:h-[38px] flex items-end justify-between px-1 sm:px-3 gap-[1px] sm:gap-[2px]">
+          {[18, 26, 14, 22, 28, 16, 24, 20, 30, 15, 26, 18, 22, 28, 16, 24, 20, 26, 14, 30, 18, 22, 16, 28, 20, 24, 18, 26].map((h, i) => (
+            <div
+              key={i}
+              className="animate-grass flex-shrink-0 hidden sm:flex"
+              style={{ animationDelay: `${(i * 0.18) % 2.8}s`, animationDuration: `${3.2 + (i % 4) * 0.4}s` } as React.CSSProperties}
+            >
+              <svg width="14" height={h} viewBox={`0 0 14 ${h}`} fill="none" xmlns="http://www.w3.org/2000/svg" className="block">
+                <rect x="2" y={h - 10} width="2" height="10" fill={i % 3 === 0 ? "#6B7D5A" : i % 3 === 1 ? "#8A9A6A" : "#9AB08A"} />
+                <rect x="6" y={h - h} width="3" height={h} fill={i % 2 === 0 ? "#8A9A6A" : "#A8B88E"} />
+                <rect x="10" y={h - 12} width="2" height="12" fill={i % 3 === 2 ? "#6B7D5A" : "#7A8F5A"} />
+                <rect x="6" y={h - h} width="3" height="3" fill="#B8C8A0" opacity="0.7" />
+              </svg>
+            </div>
+          ))}
+          {/* Mobile: fewer tufts */}
+          {[18, 26, 14, 22, 28, 16, 24, 20, 30, 15, 26, 18].map((h, i) => (
+            <div
+              key={`m-${i}`}
+              className="animate-grass flex-shrink-0 flex sm:hidden"
+              style={{ animationDelay: `${(i * 0.22) % 2.5}s` } as React.CSSProperties}
+            >
+              <svg width="12" height={h} viewBox={`0 0 12 ${h}`} fill="none" xmlns="http://www.w3.org/2000/svg" className="block">
+                <rect x="1" y={h - 9} width="2" height="9" fill="#6B7D5A" />
+                <rect x="5" y={h - h} width="3" height={h} fill="#8A9A6A" />
+                <rect x="9" y={h - 11} width="2" height="11" fill="#7A8F5A" />
+              </svg>
+            </div>
+          ))}
+        </div>
+        {/* Dense ground pixel texture */}
+        <div
+          className="absolute bottom-0 left-0 w-full h-[14px] sm:h-[16px] opacity-30 pointer-events-none"
+          style={{
+            backgroundImage: `repeating-linear-gradient(90deg, transparent 0px, transparent 6px, rgba(0,0,0,0.15) 6px, rgba(0,0,0,0.15) 7px)`,
+          }}
+        />
       </div>
     </div>
   );

@@ -93,7 +93,7 @@ synapse-admissions-ai/ (NovaVice_os97)
 │   Next.js 15 (App Router) + TypeScript + Tailwind CSS                  │
 │   ├── Ventana Retro Macintosh OS '97 (Barra rayada + Botones retro)   │
 │   ├── Filtro Óptico CRT Anti-Glare (Scanlines + Fósforo Ámbar + Switch)│
-│   ├── Oasis Tropical Pixel-Art (8 Palmeras con balanceo + Nubes)      │
+│   ├── Oasis Pixel-Art (8 Palmeras + 18 Nubes Bidireccionales + Gaviotas + Hierba Pixel) │
 │   ├── Renderizador Markdown GFM Seguro con Sanitización               │
 │   └── Modal de Telemetría en Tiempo Real (Costos, Tokens, Latencia)   │
 └───────────────────────────────────┬────────────────────────────────────┘
@@ -155,7 +155,7 @@ synapse-admissions-ai/ (NovaVice_os97)
 3. **Frontend Retro "Nova OS '97" & Filtro CRT Anti-Fatiga:**
    - Estética inspirada en Poolsuite.net y GTA Vice City de los 80s/90s.
    - **Filtro Óptico CRT:** Scanlines horizontales sutiles y fósforo ámbar que inhiben activamente la fatiga ocular, con interruptor `[ 📺 CRT: ON/OFF ]`.
-   - **Oasis Pixel-Art Animado:** 8 palmeras multi-capa con balanceo tropical, 8 nubes a la deriva bidireccionales y bandadas de gaviotas con aleteo de 2 estados a 60 FPS aceleradas por hardware (GPU).
+   - **Oasis Pixel-Art Animado:** 8 palmeras multi-capa con balanceo, **18 nubes volumétricas bidireccionales (9 L2R + 9 R2L)** y 6 bandadas de gaviotas con aleteo 2 estados, más **alfombra densa de hierba verde seco retro (#8A9A6A) con 28 mechones con sway** a 60 FPS GPU (base estática + tufts `grassSway`).
 
 4. **Navegación Guiada Determinista y Cero Alucinaciones:**
    - Menú interactivo estructurado (1. Cursos, 2. Horarios, 3. Precios COP, 4. Sedes/Admisiones y retorno 0).

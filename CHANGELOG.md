@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [2026-08-31 11:30] [Added/Enhanced]
+- **Cielo Ultra-Denso de 18 Nubes Bidireccionales + Alfombra de Hierba Pixel-Art Verde Seco Retro (`PixiParticleBackground.tsx`, `globals.css`):**
+  - **18 Nubes Volumétricas 16-bit (9 L2R + 9 R2L):** Expandido de 8 a 18 nubes estratocúmulos/cirros con trayectorias estrictamente alternas (L2R: `cloudDriftL2R` y R2L: `cloudDriftR2L` con `scaleX(-1)` para gaviotas). Nuevas clases `animate-cloud-l2r-5..9` y `animate-cloud-r2l-5..9` en [`frontend/src/app/globals.css`](frontend/src/app/globals.css:215) con duraciones 40-70s y delays escalonados 1-30s para flujo continuo sin huecos visuales. Garantiza aparición simultánea desde borde derecho e izquierdo en todos los viewports (375px a 1920px).
+  - **Alfombra de Hierba Pixel-Art Verde Seco Retro (`#8A9A6A`):** Implementada capa inferior tropical `48px` móvil / `54px` desktop en [`frontend/src/components/PixiParticleBackground.tsx`](frontend/src/components/PixiParticleBackground.tsx:374) con: (a) **Base continua estática** `14-16px` en `#8A9A6A` con borde `2px` y highlight `#A8B88E` + textura dithered; (b) **28 tufts pixelados** en dos densidades (28 desktop + 12 móvil) con 3 blades por tuft (`#6B7D5A`/`#8A9A6A`/`#A8B88E`) y highlight `#B8C8A0`. Solo los tufts animan con `@keyframes grassSway` `3.5s ease-in-out` `skewX(0.7deg)` (`globals.css:260`) con `transform-origin: bottom center` y delays `0.18s` incrementales, base permanece estática para no marear. `pointer-events-none` y `z-[1]` detrás de ventana `z-10` garantizan cero interferencia con chat.
+  - **Preservación de Contexto:** Respetada arquitectura documentada en `docs/03-architecture/system-architecture.md`, `PRD.md` y `frontend-nextjs-pixijs-guide.md` (PixiJS desacoplado, fondo GPU pura). Sin cambios en backend RAG, navegación ni guardrails.
+  - **Validación Automatizada:** 25/25 Pytest PASSED en 25.85s y Next.js 15 static build `2.6s` con 0 errores, `94.7 kB` route `/`.
+- Motivo: Cumplir pedido explícito del usuario de nubes visibles desde ambos bordes y enriquecer flora inferior con hierba densa verde seco retro sin romper animaciones existentes.
+
 ### [2026-08-31 10:45] [Refactor/Optimization]
 - **Optimized AGY Advisor Model Configuration (`backend/src/config.py`, `.env.example`, `TECHNICAL_EXPLANATION.md`):**
   - **Model Switch:** Updated default AGY model from `gemini-2.5-pro` to `gemini-3.7-flash` to reduce token consumption and inference latency.

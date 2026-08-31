@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { PixiParticleBackground } from "../components/PixiParticleBackground";
 
 export const metadata: Metadata = {
   title: "Nova Idiomas Colombia | Asistente de Admisiones",
@@ -16,7 +15,6 @@ export default function RootLayout({
   return (
     <html lang="es" className="dark">
       <body className="antialiased bg-background text-slate-100 flex h-screen w-screen overflow-hidden">
-        <PixiParticleBackground />
         {children}
       </body>
     </html>

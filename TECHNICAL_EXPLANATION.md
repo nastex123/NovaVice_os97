@@ -22,7 +22,7 @@
 | **Frontend Framework** | Next.js 15 (App Router), React 19, TypeScript, Tailwind CSS, Lucide Icons |
 | **Visual Design** | "Nova OS '97" Retro Macintosh OS + Poolsuite.net + GTA Vice City 80s/90s Aesthetics |
 | **Optical Filter** | CRT Anti-Glare & Warm Phosphor Screen Shader with interactive `[📺 CRT: ON/OFF]` switch |
-| **Living Background** | Multi-layer swaying palms, volumetric clouds, and 2-state flapping seagulls (CSS3 GPU 60 FPS) |
+| **Living Background** | 8 swaying palms, 18 bidirectional clouds (9 L2R + 9 R2L), 6 seagull flocks 2-state flap, verde seco retro grass carpet 28 tufts (CSS3 GPU 60 FPS) |
 | **Test Pass Rate** | **25/25 Automated Unit & E2E Pytest Suite PASSED** • Next.js Static Build 0 errors (1.3s) |
 
 ---
@@ -115,7 +115,7 @@ synapse-admissions-ai/ (NovaVice_os97)
 │   Next.js 15 (App Router) + React 19 + TypeScript + Tailwind CSS       │
 │   ├── Macintosh OS '97 Window (Pinstripe titlebar, vintage controls)   │
 │   ├── CRT Anti-Glare Optical Filter (Scanlines + Amber Phosphor + SW)  │
-│   ├── Living Pixel-Art Background (8 Swaying Palms + Clouds + Gulls)   │
+│   ├── Living Pixel-Art Background (8 Palms + 18 Bidirectional Clouds + Gulls + Pixel Grass) │
 │   ├── Safe GFM Markdown Renderer with HTML Sanitization                │
 │   └── Real-time Telemetry Modal (Latency, Tokens, Cost, Cache Ratio)   │
 └───────────────────────────────────┬────────────────────────────────────┘
@@ -252,9 +252,10 @@ Combines the retro nostalgia of 1997 Macintosh OS desktop environments, the vint
   * **Interactive `[ 📺 CRT: ON / OFF ]` Switch** with local persistence.
 
 ### 7.3 Living Pixel-Art Background (GPU 60 FPS)
-* **8 Depth-Layered Palms:** Majestic foreground (380px), mid-depth leaning, and slender background palms swaying with organic breeze keyframes.
-* **8 Volumetric 16-Bit Clouds:** Bidirectional drift (Left-to-Right and Right-to-Left) across the sky at staggered altitudes.
+* **8 Depth-Layered Palms:** Majestic foreground (380px), mid-depth leaning, and slender background palms swaying with organic breeze keyframes (`palmSwayLeft/Right` 5-7s).
+* **18 Volumetric 16-Bit Clouds (9 L2R + 9 R2L):** Bidirectional drift across the sky at staggered altitudes (durations 40-74s, delays 1-30s) via `cloudDriftL2R`/`R2L` and classes `animate-cloud-l2r-1..9` / `r2l-1..9` — guaranteed entry from both left and right edges on all viewports.
 * **6 Bidirectional Flocks of Seagulls:** Featuring a custom `PixelSeagull` component with **2-state discrete wing flapping** (Wings-Up vs Wings-Down) running at `0.38s steps(1) infinite`.
+* **Verde Seco Retro Grass Carpet:** Dense `48-54px` pixel-grass layer in `#8A9A6A` with static continuous base (`14-16px`) + highlight `#A8B88E` and **28 swaying tufts** (12 on mobile) with 3 blades each (`#6B7D5A`/`#8A9A6A`/`#9AB08A`). Only tufts animate via `grassSway 3.5s ease-in-out skewX(0.7deg)` — base static for visual calm.
 
 ---
 

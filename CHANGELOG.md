@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [2026-08-31 10:05] [Refactor/Clean]
+- **Estandarización de Comentarios a Formato Estricto de Una Sola Línea (`.env.example`, `PixiParticleBackground.tsx`):**
+  - Eliminados todos los comentarios decorativos de tipo banner multi-línea (`# ===...===` y `/* ===...===`).
+  - Convertidos todos los comentarios de código fuente a enunciados concisos, directos y estrictamente de una sola línea (`# ...` / `{/* ... */}`).
+  - **Validación Automatizada:** 25/25 tests en `pytest` en verde y compilación estática de Next.js 15 en 1.5s con 0 errores.
+- Motivo: Cumplir con la política de código sobrio y eliminación de ruido visual en comentarios de código fuente.
+
 ### [2026-08-31 09:50] [Added/Enhanced]
 - **Alta Densidad de Oasis Tropical Pixel-Art, Bandadas de Gaviotas y Múltiples Capas de Nubes (`PixiParticleBackground.tsx`, `globals.css`):**
   - **Bosque de Palmeras Multi-Capa (8 Palmeras en Total):** 4 palmeras a la izquierda y 4 palmeras a la derecha en 4 planos de profundidad (Foreground Majestic, Secondary, Mid-Depth Leaning, Deep Background Slender) con animaciones de balanceo coordinadas y desfasadas.

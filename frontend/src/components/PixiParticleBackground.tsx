@@ -5,9 +5,7 @@ import React from "react";
 export const PixiParticleBackground: React.FC = () => {
   return (
     <div className="absolute inset-0 pointer-events-none select-none overflow-hidden z-0">
-      {/* ============================================================ */}
-      {/* ☁️ HIGH-DENSITY DRIFTING 16-BIT VOLUMETRIC PIXEL CLOUDS       */}
-      {/* ============================================================ */}
+      {/* Drifting 16-bit volumetric pixel clouds */}
 
       {/* Cloud 1: Giant Top Stratocumulus */}
       <div className="absolute top-4 left-0 animate-cloud-1 opacity-45">
@@ -93,9 +91,7 @@ export const PixiParticleBackground: React.FC = () => {
         </svg>
       </div>
 
-      {/* ============================================================ */}
-      {/* 🦅 HIGH-DENSITY FLOCKS OF PIXEL-ART SEAGULLS                 */}
-      {/* ============================================================ */}
+      {/* High-density flocks of pixel-art seagulls */}
 
       {/* Flock 1: V-Formation Trio (High Altitude) */}
       <div className="absolute top-14 left-0 animate-seagull-1 opacity-75">
@@ -217,11 +213,7 @@ export const PixiParticleBackground: React.FC = () => {
         </svg>
       </div>
 
-      {/* ============================================================ */}
-      {/* 🌴 DENSE MULTI-LAYERED PIXEL-ART PALM OASIS FORESTS          */}
-      {/* ============================================================ */}
-
-      {/* -------------------- LEFT PALM GROVE -------------------- */}
+      {/* Left palm grove */}
 
       {/* Left Palm 4: Deep Background Slender Palm */}
       <div className="absolute -bottom-8 left-28 sm:left-48 opacity-30 scale-[0.65] origin-bottom-left animate-palm-left-bg hidden md:block">
@@ -299,7 +291,7 @@ export const PixiParticleBackground: React.FC = () => {
         </svg>
       </div>
 
-      {/* -------------------- RIGHT PALM GROVE -------------------- */}
+      {/* Right palm grove */}
 
       {/* Right Palm 4: Deep Background Slender Palm */}
       <div className="absolute -bottom-8 right-28 sm:right-48 opacity-30 scale-[0.65] origin-bottom-right animate-palm-right-bg hidden md:block">

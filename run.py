@@ -74,13 +74,22 @@ def free_port(port: int):
 
 
 def ensure_node_in_path():
-    """Detect Node/NPM in common install locations (NVM, fnm, volta, local bin) and add to PATH if needed."""
+    """Detect Node/NPM across common install locations (NVM, FNM, Volta, Homebrew, Program Files) and add to PATH."""
     home = Path.home()
     possible_paths = [
         home / ".local" / "bin",
         home / "bin",
         Path("/usr/local/bin"),
+        Path("/opt/homebrew/bin"),
+        Path("/usr/bin"),
     ]
+    if IS_WINDOWS:
+        possible_paths.extend([
+            Path("C:/Program Files/nodejs"),
+            Path("C:/Program Files (x86)/nodejs"),
+            home / "AppData" / "Roaming" / "npm",
+            home / "AppData" / "Local" / "Programs" / "node",
+        ])
     # Check NVM directories
     nvm_versions_dir = home / ".nvm" / "versions" / "node"
     if nvm_versions_dir.exists():

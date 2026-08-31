@@ -17,15 +17,25 @@ FRONTEND_DIR = BASE_DIR / "frontend"
 VENV_DIR = BASE_DIR / "venv"
 
 def ensure_node_in_path():
-    """Detect Node/NPM in common install locations (NVM, fnm, volta, local bin) and add to PATH if needed."""
-    if shutil.which("node") and shutil.which("npm"):
+    """Detect Node/NPM across common install locations (NVM, FNM, Volta, Homebrew, Program Files) and add to PATH."""
+    if shutil.which("node") and (shutil.which("npm") or shutil.which("npm.cmd")):
         return
     home = Path.home()
+    is_win = platform.system() == "Windows"
     possible_paths = [
         home / ".local" / "bin",
         home / "bin",
         Path("/usr/local/bin"),
+        Path("/opt/homebrew/bin"),
+        Path("/usr/bin"),
     ]
+    if is_win:
+        possible_paths.extend([
+            Path("C:/Program Files/nodejs"),
+            Path("C:/Program Files (x86)/nodejs"),
+            home / "AppData" / "Roaming" / "npm",
+            home / "AppData" / "Local" / "Programs" / "node",
+        ])
     # Check NVM directories
     nvm_versions_dir = home / ".nvm" / "versions" / "node"
     if nvm_versions_dir.exists():
@@ -41,7 +51,7 @@ def ensure_node_in_path():
 
     current_path = os.environ.get("PATH", "")
     for p in possible_paths:
-        if p.exists() and (p / ("node.exe" if platform.system() == "Windows" else "node")).exists():
+        if p.exists() and (p / ("node.exe" if is_win else "node")).exists():
             if str(p) not in current_path:
                 os.environ["PATH"] = f"{p}{os.pathsep}{current_path}"
                 current_path = os.environ["PATH"]
@@ -70,23 +80,24 @@ def check_prerequisites():
     print("\n--- Verifying System Prerequisites ---")
     # Check Python version
     py_ver = sys.version_info
-    print(f"[✓] Python {py_ver.major}.{py_ver.minor}.{py_ver.micro} detectado.")
+    print(f"[✓] Python {py_ver.major}.{py_ver.minor}.{py_ver.micro} detected.")
     if py_ver < (3, 10):
-        print("[!] ERROR: Se requiere Python 3.10 o superior.")
+        print("[!] ERROR: Python 3.10 or higher is required.")
         sys.exit(1)
         
     # Check Node.js and npm
     ensure_node_in_path()
-    node_path = shutil.which("node")
-    npm_path = shutil.which("npm")
+    is_win = platform.system() == "Windows"
+    node_path = shutil.which("node") or shutil.which("node.exe")
+    npm_path = shutil.which("npm") or shutil.which("npm.cmd")
     
     if not node_path or not npm_path:
-        print("[!] ADVERTENCIA: Node.js o npm no fueron encontrados en el PATH del sistema.")
+        print("[!] WARNING: Node.js or npm were not found in the system PATH.")
         print("    To run the modern Next.js frontend, please install Node.js (v18+).")
     else:
         try:
-            node_v = subprocess.check_output([node_path, "-v"], text=True).strip()
-            npm_v = subprocess.check_output([npm_path, "-v"], text=True).strip()
+            node_v = subprocess.check_output([node_path, "-v"], text=True, env=os.environ).strip()
+            npm_v = subprocess.check_output([npm_path, "-v"], text=True, env=os.environ).strip()
             print(f"[✓] Node.js {node_v} and npm {npm_v} detected.")
         except Exception:
             pass
@@ -129,13 +140,14 @@ def setup_frontend_environment():
 
     print("\n--- Setting up Next.js 15 Frontend ---")
     ensure_node_in_path()
-    npm_path = shutil.which("npm")
+    is_win = platform.system() == "Windows"
+    npm_path = shutil.which("npm") or shutil.which("npm.cmd")
     if npm_path:
         print("[+] Installing Node.js packages (Next.js, Tailwind CSS, Lucide)...")
         try:
-            is_win = platform.system() == "Windows"
+            env = os.environ.copy()
             cmd = "npm install" if is_win else [npm_path, "install"]
-            subprocess.check_call(cmd, cwd=str(FRONTEND_DIR), shell=is_win)
+            subprocess.check_call(cmd, cwd=str(FRONTEND_DIR), shell=is_win, env=env)
             print("[✓] Frontend dependencies installed successfully.")
         except Exception as e:
             print(f"[!] Error installing npm packages: {e}")

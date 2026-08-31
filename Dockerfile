@@ -10,15 +10,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy and install dependencies
-COPY requirements.txt .
+COPY backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy application source and knowledge base
-COPY data/ ./data/
-COPY docs/ ./docs/
-COPY hermes_skills/ ./hermes_skills/
-COPY src/ ./src/
-COPY tests/ ./tests/
+# Copy backend application source and knowledge base
+COPY backend/data/ ./data/
+COPY backend/hermes_skills/ ./hermes_skills/
+COPY backend/src/ ./src/
+COPY backend/tests/ ./tests/
 COPY .env.example .env
 
 # Expose FastAPI application port

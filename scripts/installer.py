@@ -11,7 +11,8 @@ import subprocess
 import shutil
 from pathlib import Path
 
-BASE_DIR = Path(__file__).resolve().parent
+BASE_DIR = Path(__file__).resolve().parent.parent
+BACKEND_DIR = BASE_DIR / "backend"
 FRONTEND_DIR = BASE_DIR / "frontend"
 VENV_DIR = BASE_DIR / "venv"
 
@@ -107,18 +108,18 @@ def setup_python_environment(os_type):
         pip_bin = VENV_DIR / "bin" / "pip"
 
     # Install Python dependencies
-    req_file = BASE_DIR / "requirements.txt"
+    req_file = BACKEND_DIR / "requirements.txt"
     if req_file.exists():
-        print(f"\n[+] Instalando dependencias de Python desde requirements.txt...")
+        print(f"\n[+] Instalando dependencias de Python desde {req_file}...")
         subprocess.check_call([str(py_bin), "-m", "pip", "install", "--upgrade", "pip"])
         subprocess.check_call([str(py_bin), "-m", "pip", "install", "-r", str(req_file)])
         print("[✓] Dependencias de Python instaladas con éxito.")
 
     # Ingest Knowledge Base
-    print("\n--- Indexando Base de Conocimiento RAG (87 Documentos Oficiales) ---")
+    print("\n--- Indexando Base de Conocimiento RAG (82 Documentos Oficiales) ---")
     try:
-        subprocess.check_call([str(py_bin), "-m", "src.rag.ingestion"], cwd=str(BASE_DIR))
-        print("[✓] 87 Documentos Oficiales indexados en ChromaDB y BM25.")
+        subprocess.check_call([str(py_bin), "-m", "src.rag.ingestion"], cwd=str(BACKEND_DIR))
+        print("[✓] 82 Documentos Oficiales indexados en ChromaDB y BM25.")
     except Exception as e:
         print(f"[!] Error indexando documentos: {e}")
 

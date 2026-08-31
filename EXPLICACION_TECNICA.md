@@ -46,7 +46,53 @@ Un **Asistente Inteligente de Admisiones Híbrido** que combina:
 
 ---
 
-## 🏗️ 3. Arquitectura del Sistema (Diagrama de Capas)
+## 📂 3. Estructura de Directorios (Monorepo Limpio y Desacoplado)
+
+```text
+synapse-admissions-ai/ (NovaVice_os97)
+├── backend/                               # 🐍 Backend FastAPI & Inteligencia Artificial
+│   ├── data/                              # Base de conocimiento (82 docs) y tickets
+│   │   ├── documents/                     # Archivos Markdown con programas y reglamentos
+│   │   └── escalations.json               # Registro de tickets humanos
+│   ├── hermes_skills/                     # Skills y herramientas para agentes
+│   ├── src/                               # Código fuente backend (API, bot, core, rag)
+│   ├── tests/                             # Suite completa de 25 pruebas en Pytest
+│   └── requirements.txt                   # Dependencias Python
+│
+├── frontend/                              # 🌐 Aplicación Web Retro Next.js 15
+│   ├── src/                               # Componentes, App Router y Estilos CRT
+│   ├── package.json
+│   └── tailwind.config.ts
+│
+├── docs/                                  # 📚 Documentación Técnica y Arquitectónica
+│   ├── assets/                            # Recursos y PDFs (Enunciado original)
+│   ├── 01-product/                        # PRD
+│   ├── 03-architecture/                   # Arquitectura y propuestas
+│   ├── 04-engineering/                    # Guías de ingeniería y diseño técnico
+│   ├── 05-ai/                             # Integraciones de IA y OpenCode/AGY
+│   ├── 08-operations/                     # Optimización y rendimiento
+│   └── 09-decisions/                      # Architecture Decision Records (ADRs)
+│
+├── scripts/                               # 🛠️ Scripts auxiliares e instaladores
+│   ├── installer.py                       # Lógica de instalación multiplataforma
+│   ├── install.sh                         # Instalador para Linux / macOS
+│   └── install.bat                        # Instalador para Windows
+│
+├── .agents/                               # Reglas y configuraciones de agentes
+├── .env.example                           # Plantilla de variables de entorno
+├── AGENTS.md                              # Definición de agentes y comandos
+├── CHANGELOG.md                           # Historial cronológico estricto
+├── EXPLICACION_TECNICA.md                 # Guía maestra de exposición y presentación
+├── Dockerfile                             # Contenedor Docker de producción
+├── pytest.ini                             # Configuración centralizada de Pytest
+├── run.py                                 # Supervisor raíz multi-proceso con selector
+├── start.sh                               # Lanzador rápido Linux/macOS
+└── start.bat                              # Lanzador rápido Windows
+```
+
+---
+
+## 🏗️ 4. Arquitectura del Sistema (Diagrama de Capas)
 
 ```text
 ┌────────────────────────────────────────────────────────────────────────┐

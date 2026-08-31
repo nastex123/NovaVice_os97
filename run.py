@@ -26,6 +26,7 @@ import webbrowser
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent
+BACKEND_DIR = BASE_DIR / "backend"
 FRONTEND_DIR = BASE_DIR / "frontend"
 VENV_DIR = BASE_DIR / "venv"
 
@@ -143,7 +144,7 @@ def start_fastapi(py_exec: str) -> subprocess.Popen:
     cmd = [py_exec, "-m", "uvicorn", "src.main:app", "--host", "127.0.0.1", "--port", "8000"]
     p = subprocess.Popen(
         cmd,
-        cwd=str(BASE_DIR),
+        cwd=str(BACKEND_DIR),
         shell=IS_WINDOWS,
         env=os.environ,
         preexec_fn=None if IS_WINDOWS else os.setsid

@@ -1,7 +1,7 @@
 @echo off
-title Instalador - Nova Tech University RAG Assistant
+title Nova Tech University - Admissions Assistant Installer
 echo ================================================================
-echo   Iniciando Instalador para Windows...
+echo   Iniciando Instalador Multiplataforma para Windows...
 echo ================================================================
-python installer.py
+python scripts\installer.py %*
 pause

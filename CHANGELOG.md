@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [2026-08-31 10:12] [Refactor/Architecture]
+- **Reorganización Estructural a Monorepo Limpio y Desacoplado (`backend/`, `scripts/`, `docs/assets/`):**
+  - **Encapsulación de Backend (`backend/`):** Agrupados `src/`, `data/` (82 documentos y tickets), `tests/` (25 tests de pytest), `hermes_skills/` y `requirements.txt` bajo `backend/` con resolución de rutas relativa y auto-contenida.
+  - **Directorio de Scripts Centralizado (`scripts/`):** Reubicado el instalador multiplataforma `scripts/installer.py` con delegación directa desde la raíz (`install.sh`, `install.bat`).
+  - **Organización de Recursos y Documentación (`docs/assets/`):** Reubicado el enunciado original en PDF y recursos a `docs/assets/`.
+  - **Configuración de Pytest en Raíz (`pytest.ini`):** Añadido `pytest.ini` con `pythonpath = backend` y `testpaths = backend/tests` para ejecución universal de pruebas tanto desde la raíz como desde `backend/`.
+  - **Supervisor Raíz (`run.py`):** Actualizado para invocar el backend dentro de `backend/` preservando el selector interactivo de asesor (`OpenCode` vs `AGY`).
+  - **Validación Automatizada:** 25/25 tests en Pytest en verde y compilación estática de Next.js 15 en 1.3s con 0 errores.
+- Motivo: Proporcionar una arquitectura de monorepo profesional, ordenada, modular y con separación de responsabilidades clara.
+
 ### [2026-08-31 10:05] [Refactor/Clean]
 - **Estandarización de Comentarios a Formato Estricto de Una Sola Línea (`.env.example`, `PixiParticleBackground.tsx`):**
   - Eliminados todos los comentarios decorativos de tipo banner multi-línea (`# ===...===` y `/* ===...===`).

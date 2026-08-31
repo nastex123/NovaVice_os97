@@ -1,7 +1,8 @@
 @echo off
-title Nova Tech University - Admissions Assistant Installer
+REM Quick installer script for Windows
+title Nova Idiomas Colombia - Admissions Assistant Installer
 echo ================================================================
-echo   Iniciando Instalador Multiplataforma para Windows...
+echo   Starting Automated Installer (Windows)...
 echo ================================================================
 python scripts\installer.py %*
 pause

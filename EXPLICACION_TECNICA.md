@@ -2,6 +2,7 @@
 ## Nova Idiomas Colombia — "Nova OS '97" Admissions AI (v2.6.0)
 
 > **Documento de Referencia para Exposición Oral, Defensa Técnica y Demostración en Vivo.**  
+> *This document is also available in English at [`TECHNICAL_EXPLANATION.md`](TECHNICAL_EXPLANATION.md).*  
 > Este documento contiene la explicación exhaustiva y detallada de cada componente, algoritmo, decisión arquitectónica y flujo de datos del proyecto para enseñarlo con máxima solidez técnica.
 
 ---

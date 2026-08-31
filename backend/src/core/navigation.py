@@ -83,7 +83,7 @@ Selecciona el tema de consulta:
 *(Digita '0' para regresar al Menu Principal)*"""
 
 LEAF_QUERY_MAP = {
-    # Macropilar 1: Cursos y Certificaciones
+    # Pillar 1: Courses and Certifications
     "1.1": "Cuales son los niveles del MCER (A1 a C2), duracion y enfoque del programa de ingles general?",
     "1.2": "En que consiste el curso de ingles intensivo acelerado de 40 horas mensuales y cuanto se avanza?",
     "1.3": "Que programas ofrecen en frances, aleman, italiano, portugues y espanol para extranjeros?",
@@ -91,7 +91,7 @@ LEAF_QUERY_MAP = {
     "1.5": "Que certificaciones oficiales de frances DELF/DALF y aleman Goethe/TestDaF preparan?",
     "1.6": "En que consiste la metodologia comunicativa Flipped Classroom y el tamano maximo de grupos?",
 
-    # Macropilar 2: Horarios y Modalidades
+    # Pillar 2: Schedules and Modalities
     "2.1": "Que horarios y caracteristicas tiene la franja de madrugadores de 6:00 a 8:00 a.m.?",
     "2.2": "Cuales son los horarios de las franjas diurnas de mananas y tardes de lunes a viernes?",
     "2.3": "Como funciona la franja nocturna after work de 6:30 a 8:30 p.m. de lunes a viernes?",
@@ -99,14 +99,14 @@ LEAF_QUERY_MAP = {
     "2.5": "Cuales son las ventajas de la modalidad 100% virtual sincronica con clases en vivo y grabaciones?",
     "2.6": "En que consisten las aulas hibridas HyFlex con camaras inteligentes 360 grados?",
 
-    # Macropilar 3: Precios y Financiacion
+    # Pillar 3: Tuition Fees and Financing
     "3.1": "Cuanto cuesta el modulo regular e intensivo en pesos colombianos (COP) y que incluye la tarifa?",
     "3.2": "Como funciona el 10% de descuento por pago de contado en modulos y paquetes de idiomas?",
     "3.3": "Como es el plan de financiacion directa en 3 cuotas sin interes y que porcentaje se paga?",
     "3.4": "Que convenios y descuentos del 15% tienen con Cajas de Compensacion como Compensar, Colsubsidio y Cafam?",
     "3.5": "Que medios de pago digitales como PSE, Nequi, Daviplata y tarjetas estan habilitados?",
 
-    # Macropilar 4: Admisiones y Sedes
+    # Pillar 4: Admissions and Campuses
     "4.1": "Como se realiza el examen de clasificacion (Placement Test) gratuito y como se agendan los resultados?",
     "4.2": "Cual es el paso a paso para inscribirse y matricularse en linea o de forma presencial?",
     "4.3": "Donde quedan ubicadas las sedes en Bogota D.C. (Chico Norte y Chapinero) y que instalaciones tienen?",

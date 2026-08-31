@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Nova Idiomas Colombia - Asistente Inteligente de Atención al Cliente con RAG
-Instalador Automático Multiplataforma (Windows / Linux / macOS)
+Nova Idiomas Colombia - Admissions Assistant RAG
+Multiplatform Automated Installer (Windows / Linux / macOS)
 """
 
 import os
@@ -48,18 +48,18 @@ def ensure_node_in_path():
 
 def print_banner():
     print("=" * 70)
-    print("  🎓 NOVA IDIOMAS - ASISTENTE INTELIGENTE DE ATENCIÓN AL CLIENTE (RAG)")
-    print("  🚀 INSTALADOR AUTOMÁTICO MULTIPLATAFORMA (WINDOWS / LINUX / MACOS)")
+    print("  🎓 NOVA IDIOMAS - ADMISSIONS INTELLIGENT ASSISTANT (RAG)")
+    print("  🚀 MULTIPLATFORM AUTOMATED INSTALLER (WINDOWS / LINUX / MACOS)")
     print("=" * 70)
 
 def detect_or_ask_os():
     detected = platform.system()
-    print(f"\n[+] Sistema operativo detectado automáticamente: {detected}")
-    print("\nPor favor confirma o selecciona tu sistema operativo:")
+    print(f"\n[+] Automatically detected operating system: {detected}")
+    print("\nPlease confirm or select your operating system:")
     print("  [1] Windows")
     print("  [2] Linux / macOS")
     
-    choice = input("\nDigita una opción [1 o 2, Enter para autodetectar]: ").strip()
+    choice = input("\nEnter option [1 or 2, press Enter for auto-detect]: ").strip()
     if choice == "1":
         return "Windows"
     elif choice == "2":
@@ -67,7 +67,7 @@ def detect_or_ask_os():
     return detected
 
 def check_prerequisites():
-    print("\n--- Verificando Requisitos Previos ---")
+    print("\n--- Verifying System Prerequisites ---")
     # Check Python version
     py_ver = sys.version_info
     print(f"[✓] Python {py_ver.major}.{py_ver.minor}.{py_ver.micro} detectado.")
@@ -82,23 +82,23 @@ def check_prerequisites():
     
     if not node_path or not npm_path:
         print("[!] ADVERTENCIA: Node.js o npm no fueron encontrados en el PATH del sistema.")
-        print("    Para ejecutar el frontend moderno en Next.js, por favor instala Node.js (v18+).")
+        print("    To run the modern Next.js frontend, please install Node.js (v18+).")
     else:
         try:
             node_v = subprocess.check_output([node_path, "-v"], text=True).strip()
             npm_v = subprocess.check_output([npm_path, "-v"], text=True).strip()
-            print(f"[✓] Node.js {node_v} y npm {npm_v} detectados.")
+            print(f"[✓] Node.js {node_v} and npm {npm_v} detected.")
         except Exception:
             pass
 
 def setup_python_environment(os_type):
-    print("\n--- Configurando Entorno Virtual de Python ---")
+    print("\n--- Setting up Python Virtual Environment ---")
     if not VENV_DIR.exists():
-        print("[+] Creando entorno virtual 'venv'...")
+        print("[+] Creating virtual environment 'venv'...")
         subprocess.check_call([sys.executable, "-m", "venv", str(VENV_DIR)])
-        print("[✓] Entorno virtual creado exitosamente.")
+        print("[✓] Virtual environment created successfully.")
     else:
-        print("[✓] Entorno virtual 'venv' ya existe.")
+        print("[✓] Virtual environment 'venv' already exists.")
 
     if os_type == "Windows":
         py_bin = VENV_DIR / "Scripts" / "python.exe"
@@ -110,53 +110,53 @@ def setup_python_environment(os_type):
     # Install Python dependencies
     req_file = BACKEND_DIR / "requirements.txt"
     if req_file.exists():
-        print(f"\n[+] Instalando dependencias de Python desde {req_file}...")
+        print(f"\n[+] Installing Python dependencies from {req_file}...")
         subprocess.check_call([str(py_bin), "-m", "pip", "install", "--upgrade", "pip"])
         subprocess.check_call([str(py_bin), "-m", "pip", "install", "-r", str(req_file)])
-        print("[✓] Dependencias de Python instaladas con éxito.")
+        print("[✓] Python dependencies installed successfully.")
 
     # Ingest Knowledge Base
-    print("\n--- Indexando Base de Conocimiento RAG (82 Documentos Oficiales) ---")
+    print("\n--- Indexing RAG Knowledge Base (82 Official Documents) ---")
     try:
         subprocess.check_call([str(py_bin), "-m", "src.rag.ingestion"], cwd=str(BACKEND_DIR))
-        print("[✓] 82 Documentos Oficiales indexados en ChromaDB y BM25.")
+        print("[✓] 82 Official Documents indexed in ChromaDB and BM25.")
     except Exception as e:
-        print(f"[!] Error indexando documentos: {e}")
+        print(f"[!] Error indexing documents: {e}")
 
 def setup_frontend_environment():
     if not FRONTEND_DIR.exists():
         return
 
-    print("\n--- Configurando Frontend en Next.js + PixiJS ---")
+    print("\n--- Setting up Next.js 15 Frontend ---")
     ensure_node_in_path()
     npm_path = shutil.which("npm")
     if npm_path:
-        print("[+] Instalando paquetes de Node.js (Next.js, PixiJS, Tailwind CSS, Lucide, Framer Motion)...")
+        print("[+] Installing Node.js packages (Next.js, Tailwind CSS, Lucide)...")
         try:
             is_win = platform.system() == "Windows"
             cmd = "npm install" if is_win else [npm_path, "install"]
             subprocess.check_call(cmd, cwd=str(FRONTEND_DIR), shell=is_win)
-            print("[✓] Dependencias del Frontend instaladas con éxito.")
+            print("[✓] Frontend dependencies installed successfully.")
         except Exception as e:
-            print(f"[!] Error instalando dependencias de npm: {e}")
+            print(f"[!] Error installing npm packages: {e}")
     else:
-        print("[!] Omitiendo 'npm install' porque npm no está disponible en este momento.")
+        print("[!] Skipping 'npm install' because npm is not currently available.")
 
 def check_opencode():
-    print("\n--- Verificando Servidor OpenCode ---")
+    print("\n--- Verifying OpenCode Server ---")
     ensure_node_in_path()
     opencode_path = shutil.which("opencode")
     if opencode_path:
-        print("[✓] OpenCode CLI detectado en el sistema.")
+        print("[✓] OpenCode CLI detected on system.")
     else:
-        print("[i] OpenCode CLI no detectado globalmente.")
-        print("    El sistema utilizará síntesis de contingencia instantánea o puedes instalarlo con:")
+        print("[i] OpenCode CLI not detected globally.")
+        print("    The system will use built-in fallback synthesis or you can install it with:")
         print("    npm install -g opencode-ai")
 
 def main():
     print_banner()
     os_type = detect_or_ask_os()
-    print(f"\n[+] Procediendo con instalación optimizada para: {os_type}")
+    print(f"\n[+] Proceeding with optimized installation for: {os_type}")
     
     check_prerequisites()
     setup_python_environment(os_type)
@@ -164,14 +164,14 @@ def main():
     check_opencode()
     
     print("\n" + "=" * 70)
-    print("  🎉 ¡INSTALACIÓN COMPLETADA CON ÉXITO!")
+    print("  🎉 INSTALLATION COMPLETED SUCCESSFULLY!")
     print("=" * 70)
-    print("\nPara iniciar todo el sistema (Backend FastAPI + OpenCode + Frontend Next.js):")
+    print("\nTo start all services (FastAPI Backend + OpenCode/AGY + Next.js Frontend):")
     if os_type == "Windows":
-        print("  ▶ Ejecuta: .\\start.bat   o   python run.py")
+        print("  ▶ Run: .\\start.bat   or   python run.py")
     else:
-        print("  ▶ Ejecuta: ./start.sh   o   python3 run.py")
-    print("\nEl navegador se abrirá automáticamente en: http://localhost:3000\n")
+        print("  ▶ Run: ./start.sh   or   python3 run.py")
+    print("\nThe browser will automatically open at: http://localhost:3000\n")
 
 if __name__ == "__main__":
     main()

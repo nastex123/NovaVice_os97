@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [2026-08-31 10:33] [Documentation/Refactor]
+- **Bilingual Documentation with Primary English Presentation on GitHub (`README.md`, `README.es.md`, `TECHNICAL_EXPLANATION.md`, `EXPLICACION_TECNICA.md`):**
+  - **Primary English README (`README.md`):** Configured as the main repository landing page with badges, English technical overviews, Monorepo directory maps, and quickstart commands.
+  - **Spanish Companion README (`README.es.md`):** Full parallel translation linked via language switcher badges.
+  - **Master Technical Presentation Guide in English (`TECHNICAL_EXPLANATION.md`):** Comprehensive defense and oral presentation guide with layer diagrams, mathematical formulas for BM25 and RRF, and evaluator Q&A defense.
+  - **Spanish Technical Presentation Guide (`EXPLICACION_TECNICA.md`):** Synchronized parallel version.
+  - **Pure English Source Code Comments:** Translated all remaining source code, shell script, configuration (`.env.example`), and installer comments to concise, single-line English.
+  - **Automated Validation:** 25/25 Pytest tests PASSED and Next.js 15 static build completed in 2.5s with 0 errors.
+- Reason: Comply with repository internationalization standards, GitHub primary English display requirements, and unified English codebase comments.
+
 ### [2026-08-31 10:26] [Added/Enhanced]
 - **Nubes y Gaviotas Bidireccionales con Animación de Aleteo en 2 Estados (`globals.css`, `PixiParticleBackground.tsx`):**
   - **Flujo Bidireccional de Nubes:** Implementadas trayectorias simultáneas de izquierda a derecha (`cloudDriftL2R`, Nubes 1, 3, 5, 7) y de derecha a izquierda (`cloudDriftR2L`, Nubes 2, 4, 6, 8) para dotar al cielo de dinamismo y profundidad atmosférica.

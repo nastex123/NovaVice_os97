@@ -1,225 +1,248 @@
 # 🌴 Nova Idiomas Colombia — "Nova OS '97" Admissions Assistant (v2.6.0)
 
-> **Asistente Inteligente de Admisiones con RAG Híbrido (FastAPI + Next.js 15), Switch Dual de Razonamiento (OpenCode / AGY Antigravity) y Experiencia Visual Retro 90s con Filtro CRT Anti-Fatiga.**  
-> Diseñado para responder con precisión quirúrgica sobre **cursos de idiomas, franjas horarias, tarifas oficiales en COP, certificaciones internacionales (IELTS, TOEFL, DELF, Goethe) y sedes en Colombia**, garantizando cero alucinaciones y escalamiento estructurado a asesores humanos.
+<div align="center">
+
+[![Language: English](https://img.shields.io/badge/Language-English-blue.svg)](README.md)
+[![Language: Español](https://img.shields.io/badge/Language-Español-green.svg)](README.es.md)
+[![Tests: 25/25 Passed](https://img.shields.io/badge/Tests-25%2F25%20Passed-brightgreen.svg)](backend/tests/)
+[![Next.js 15](https://img.shields.io/badge/Frontend-Next.js%2015-black.svg)](frontend/)
+[![FastAPI](https://img.shields.io/badge/Backend-FastAPI%200.115-009688.svg)](backend/)
+[![ChromaDB](https://img.shields.io/badge/Vector%20Store-ChromaDB-orange.svg)](backend/data/chroma_db/)
+
+</div>
+
+> **Intelligent Admissions & Student Support Assistant with Hybrid RAG (FastAPI + Next.js 15), Dual Deep Reasoning Engine Switch (OpenCode / AGY Antigravity), and a 90s Retro Desktop Experience with an Optical CRT Anti-Glare Filter.**  
+> Designed to provide verified, zero-hallucination answers regarding **language courses, official schedules, tuition in Colombian Pesos (COP), international certifications (IELTS, TOEFL, Cambridge, DELF, Goethe), and campus locations**, with seamless automated escalation to human counselors.
 
 ---
 
-## 📚 Documentación Técnica y Exposición
+## 📚 Technical Documentation & Oral Presentation
 
-* 📖 **[Guía Maestra de Explicación Técnica y Presentación](EXPLICACION_TECNICA.md):** Documento exhaustivo paso a paso para exponer, enseñar y defender la arquitectura técnica del proyecto ante evaluadores y equipos de desarrollo.
-* 📜 **[Registro de Cambios (Changelog)](CHANGELOG.md):** Historial cronológico estricto de todas las modificaciones y versiones bajo zona horaria `America/Bogota`.
-* 🏛️ **[Directorio de Arquitectura y Decisiones (docs/)](docs/):** Documentación técnica organizada por PRD, Arquitectura, Ingeniería, IA y ADRs.
-
----
-
-## 📌 Caso de Uso y Objetivos de Negocio
-
-La academia de idiomas **Nova Idiomas Colombia** cuenta con sedes en **Bogotá (Chicó y Chapinero)**, **Medellín (Poblado y Laureles)**, **Cali (Granada)** y una división **100% Virtual Sincrónica**. Recibe cientos de consultas diarias:
-- **Cursos y Metodología:** Inglés General, Intensivo, Business English, Francés DELF/DALF, Alemán Goethe, Portugués, Español para extranjeros. Metodología *Flipped Classroom* comunicativa.
-- **Horarios y Franjas:** Madrugadores (6:00-8:00 AM), Diurnos, Nocturnos (After Work 6:30-8:30 PM), Sabatinos y Dominicales.
-- **Precios y Financiación en COP:** Tarifas oficiales en Pesos Colombianos, 10% de descuento por pago de contado, 3 cuotas sin interés con Nequi/PSE/Bancolombia y convenios con cajas de compensación (Compensar, Colsubsidio, Comfama).
-- **Examen de Clasificación:** Placement Test 100% gratuito con agendamiento inmediato.
-- **Certificaciones Oficiales:** Preparación y registro para IELTS Academic/General, TOEFL iBT, Cambridge B2/C1, DELF/DALF y Goethe.
+* 📖 **[Master Technical Presentation & Architecture Guide](TECHNICAL_EXPLANATION.md):** Complete technical breakdown and script for oral evaluations, architecture defense, and live demos (*[Spanish Version: EXPLICACION_TECNICA.md](EXPLICACION_TECNICA.md)*).
+* 📜 **[Changelog](CHANGELOG.md):** Chronological log of all additions, refactors, and releases tracked under `America/Bogota` timezone.
+* 🏛️ **[Architecture & Decision Records (docs/)](docs/):** System PRD, engineering guides, AI integrations, and ADRs (ADR-001 through ADR-007).
 
 ---
 
-## 📂 Estructura del Repositorio (Monorepo Limpio)
+## 📌 Business Use Case & Solution Overview
+
+**Nova Idiomas Colombia** operates physical campuses across **Bogotá (Chicó & Chapinero)**, **Medellín (El Poblado & Laureles)**, **Cali (Granada)**, and an active **100% Virtual Synchronous** division. It handles hundreds of daily inquiries:
+- **Language Programs:** General English, Intensive 40h/month, Business English, French DELF/DALF, German Goethe, Italian, Portuguese, Spanish for foreigners. Communicative *Flipped Classroom* methodology.
+- **Schedules & Shifts:** Early Birds (6:00-8:00 AM), Daytime (Mornings/Afternoons), After-Work Evenings (6:30-8:30 PM), Saturdays, and Sundays.
+- **Tuition & Financing (COP):** Official rates in Colombian Pesos, 10% lump-sum cash discount, 3-installment interest-free plans (PSE, Nequi, Bancolombia), and compensation fund partnerships (Compensar, Colsubsidio, Cafam).
+- **Placement Testing:** 100% free online Diagnostic Placement Test with automated scheduling.
+- **Official Certificaciones:** Complete preparation for IELTS Academic/General, TOEFL iBT, Cambridge B2/C1, DELF/DALF, and Goethe.
+
+---
+
+## 📂 Repository Architecture (Clean Monorepo)
 
 ```text
 synapse-admissions-ai/ (NovaVice_os97)
-├── backend/                               # 🐍 Backend FastAPI & Inteligencia Artificial
-│   ├── data/                              # Base de conocimiento (82 docs) y escalaciones
-│   │   ├── documents/
-│   │   └── escalations.json
-│   ├── hermes_skills/                     # Skills y herramientas para agentes
-│   ├── src/                               # Código fuente backend (API, bot, core, rag)
-│   ├── tests/                             # Suite completa de 25 pruebas en Pytest
-│   └── requirements.txt                   # Dependencias Python
+├── backend/                               # 🐍 FastAPI Backend & AI Pipelines
+│   ├── data/                              # Official Knowledge Base (82 docs) & Ticket Store
+│   │   ├── documents/                     # Structured Markdown files
+│   │   └── escalations.json               # Persisted human escalation tickets
+│   ├── hermes_skills/                     # Agent skill tools & OpenAPI definitions
+│   ├── src/                               # Application source code (API, bot, core, rag)
+│   ├── tests/                             # 25 Automated Pytest tests
+│   └── requirements.txt                   # Python dependencies
 │
-├── frontend/                              # 🌐 Aplicación Web Retro Next.js 15
-│   ├── src/                               # Componentes, App Router y Estilos CRT
+├── frontend/                              # 🌐 Next.js 15 Retro Web Application
+│   ├── src/                               # Components, App Router & CRT global styles
 │   ├── package.json
 │   └── tailwind.config.ts
 │
-├── docs/                                  # 📚 Documentación Técnica y Arquitectónica
-│   ├── assets/                            # Recursos y PDFs (Enunciado original)
-│   ├── 01-product/                        # PRD
-│   ├── 03-architecture/                   # Arquitectura y propuestas
-│   ├── 04-engineering/                    # Guías de ingeniería y diseño técnico
-│   ├── 05-ai/                             # Integraciones de IA y OpenCode/AGY
-│   ├── 08-operations/                     # Optimización y rendimiento
-│   └── 09-decisions/                      # Architecture Decision Records (ADRs)
+├── docs/                                  # 📚 System Documentation & Architectural Records
+│   ├── assets/                            # Static assets and original assignment PDF
+│   ├── 01-product/                        # Product Requirements Document (PRD)
+│   ├── 03-architecture/                   # Architecture diagrams & technical proposals
+│   ├── 04-engineering/                    # Deep-dive guides for backend, frontend & RAG
+│   ├── 05-ai/                             # AI integrations (OpenCode & AGY Antigravity)
+│   ├── 08-operations/                     # Performance tuning & monitoring
+│   └── 09-decisions/                      # Architecture Decision Records (ADR-001 to ADR-007)
 │
-├── scripts/                               # 🛠️ Scripts auxiliares e instaladores
-│   ├── installer.py                       # Lógica de instalación multiplataforma
-│   ├── install.sh                         # Instalador para Linux / macOS
-│   └── install.bat                        # Instalador para Windows
+├── scripts/                               # 🛠️ Multiplatform Automation & Setup
+│   ├── installer.py                       # Cross-platform installation logic
+│   ├── install.sh                         # Linux / macOS install script
+│   └── install.bat                        # Windows install script
 │
-├── .agents/                               # Reglas y configuraciones de agentes
-├── .env.example                           # Plantilla de variables de entorno
-├── AGENTS.md                              # Definición de agentes y comandos
-├── CHANGELOG.md                           # Historial cronológico estricto
-├── EXPLICACION_TECNICA.md                 # Guía maestra de exposición y presentación
-├── Dockerfile                             # Contenedor Docker de producción
-├── pytest.ini                             # Configuración centralizada de Pytest
-├── run.py                                 # Supervisor raíz multi-proceso con selector
-├── start.sh                               # Lanzador rápido Linux/macOS
-└── start.bat                              # Lanzador rápido Windows
+├── .agents/                               # Antigravity agent configurations & rules
+├── .env.example                           # Environment variables template
+├── AGENTS.md                              # Multi-agent roster & invocation shortcuts
+├── CHANGELOG.md                           # Strict chronological changelog (America/Bogota)
+├── TECHNICAL_EXPLANATION.md               # Master technical presentation guide (English)
+├── EXPLICACION_TECNICA.md                 # Master technical presentation guide (Spanish)
+├── README.md                              # Main repository overview (English)
+├── README.es.md                           # Repository overview (Spanish)
+├── Dockerfile                             # Production container definition
+├── pytest.ini                             # Root Pytest discovery configuration
+├── run.py                                 # Process supervisor with advisor engine switch
+├── start.sh                               # Linux / macOS launch wrapper
+└── start.bat                              # Windows launch wrapper
 ```
 
 ---
 
-## 🏗️ Arquitectura del Sistema (100% en Python + Next.js 15)
+## 🏗️ System Layer Architecture (100% Python + Next.js 15)
 
 ```text
 ┌────────────────────────────────────────────────────────────────────────┐
-│               CAPA DE EXPERIENCIA DE USUARIO (FRONTEND)               │
+│                   PRESENTATION LAYER (NEXT.JS 15 FRONTEND)             │
 │                                                                        │
-│   Next.js 15 (App Router) + TypeScript + Tailwind CSS                  │
-│   ├── Ventana Retro Macintosh OS '97 (Barra rayada + Botones retro)   │
-│   ├── Filtro Óptico CRT Anti-Glare (Scanlines + Fósforo Ámbar + Switch)│
-│   ├── Oasis Tropical Pixel-Art (8 Palmeras con balanceo + Nubes)      │
-│   ├── Renderizador Markdown GFM Seguro con Sanitización               │
-│   └── Modal de Telemetría en Tiempo Real (Costos, Tokens, Latencia)   │
+│   Next.js 15 (App Router) + React 19 + TypeScript + Tailwind CSS       │
+│   ├── Macintosh OS '97 Window (Pinstripe titlebar, vintage controls)   │
+│   ├── CRT Anti-Glare Optical Filter (Scanlines + Amber Phosphor + SW)  │
+│   ├── Living Pixel-Art Background (8 Swaying Palms + Clouds + Gulls)   │
+│   ├── Safe GFM Markdown Renderer with HTML Sanitization                │
+│   └── Real-time Telemetry Modal (Latency, Tokens, Cost, Cache Ratio)   │
 └───────────────────────────────────┬────────────────────────────────────┘
                                     │ HTTP / JSON (:3000 -> :8000)
                                     ▼
 ┌────────────────────────────────────────────────────────────────────────┐
-│                 CAPA DE ENTRADA Y API GATEWAY (FASTAPI)                │
+│                   API GATEWAY & ROUTING (FASTAPI BACKEND)              │
 │                                                                        │
-│   FastAPI Core Engine (:8000) + Pydantic v2 Schemas                    │
-│   ├── POST /api/v1/chat       (Consulta conversacional y navegación)  │
-│   ├── GET  /api/v1/health     (Estado, docs indexados, motor asesor)  │
-│   ├── GET  /api/v1/metrics    (Telemetría de tokens, latencia y cache)│
-│   └── POST /api/v1/escalate   (Generación de tickets humanos)         │
+│   FastAPI Core Engine (:8000) + Pydantic v2 Models                     │
+│   ├── POST /api/v1/chat       (Conversational query & menu navigation) │
+│   ├── GET  /api/v1/health     (Health status, indexed docs, advisor)   │
+│   ├── GET  /api/v1/metrics    (Live telemetry, cache rates & tokens)   │
+│   └── POST /api/v1/escalate   (Human escalation ticket creation)       │
 └───────────────────────────────────┬────────────────────────────────────┘
                                     │
                                     ▼
 ┌────────────────────────────────────────────────────────────────────────┐
-│         CAPA DE ENRUTAMIENTO DETERMINISTA Y CACHÉ SEMÁNTICO            │
+│               SECURITY GUARDRAILS LAYER (ZERO-TRUST PIPELINE)          │
 │                                                                        │
-│   ├── Máquina de Estados de Navegación (Opciones 1..4, Submenús y 0)   │
-│   │     └─► Retorno Determinista Inmediato (<5ms, 0 tokens gastados)   │
+│   Pre-Flight Safety Checks                                             │
+│   ├── Prompt Injection Detection (DAN, jailbreaks, instruction bypass) │
+│   └── Input Sanitization, Unicode Normalization & Length Bounds        │
+└───────────────────────────────────┬────────────────────────────────────┘
+                                    │
+                                    ▼
+┌────────────────────────────────────────────────────────────────────────┐
+│              DETERMINISTIC ROUTING & DUAL-LAYER CACHE                  │
+│                                                                        │
+│   ├── Guided State Machine Navigation (Options 1..4, Submenus & 0)     │
+│   │     └─► Instant Deterministic Return (<5ms, 0 tokens spent)        │
 │   │                                                                    │
-│   └── Caché Semántico Dual (Hash SHA-256 + Vectorial)                  │
-│         └─► Cache Hit: Retorno Sub-30ms                                │
+│   └── Dual-Layer Query Cache (SHA-256 Hash + Semantic Similarity)      │
+│         └─► Cache Hit: Sub-30ms Return                                 │
 └───────────────────────────────────┬────────────────────────────────────┘
-                                    │ (Cache Miss / Consulta Abierta)
+                                    │ (Cache Miss / Open-Ended Query)
                                     ▼
 ┌────────────────────────────────────────────────────────────────────────┐
-│                 PIPELINE RAG HÍBRIDO (DENSE + SPARSE)                  │
+│                     HYBRID RAG RETRIEVAL PIPELINE                      │
 │                                                                        │
-│   1. Recuperación Densa (ChromaDB Persistent + Embeddings ONNX Local)  │
-│   2. Recuperación Léxica (BM25 Okapi + Stemming en Español)            │
-│   3. Fusión de Ranking (Reciprocal Rank Fusion RRF, k = 60)            │
-│   4. Guardrail de Relevancia (Umbral 0.50 -> Escalamiento a Humano)    │
+│   1. Dense Vector Store (ChromaDB + Local ONNX `all-MiniLM-L6-v2`)     │
+│   2. Sparse Lexical Store (Pure Python Okapi BM25 + Spanish Stemmer)   │
+│   3. Rank Fusion (Reciprocal Rank Fusion RRF, k = 60)                  │
+│   4. Relevance Guardrail (Threshold 0.50 -> Human Ticket Escalation)   │
 └───────────────────────────────────┬────────────────────────────────────┘
                                     │
                                     ▼
 ┌────────────────────────────────────────────────────────────────────────┐
-│          CAPA DE RAZONAMIENTO DUAL: ASESOR DE ADMISIONES               │
+│                  DUAL ADVISOR DEEP REASONING LAYER                     │
 │                                                                        │
-│   Switch Pre-Lanzamiento (`run.py --advisor [opencode|agy]`):          │
-│   [Opción 1: OpenCode Daemon :4096]   [Opción 2: AGY Antigravity CLI]  │
+│   Pre-Launch Supervisor Switch (`run.py --advisor [opencode|agy]`):    │
+│   [Option 1: OpenCode Daemon :4096]   [Option 2: AGY Antigravity CLI]  │
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 🚀 Características Principales
+## 🚀 Key Features
 
-1. **RAG Híbrido con 82 Documentos Oficiales (245 Chunks):**
-   - Indexación en ChromaDB y BM25 de todos los programas, niveles MCER, precios, sedes y reglamentos.
-   - Respuestas fundamentadas al 100% en información institucional verificada.
+1. **Hybrid RAG over 82 Official Institutional Documents (245 Chunks):**
+   - Grounded ChromaDB vector indexing and BM25 lexical keyword recall over all language courses, schedules, COP pricing, campuses, and regulations.
+   - 100% grounded responses eliminating hallucinations.
 
-2. **Switch Pre-Lanzamiento de Motor de Asesoría (OpenCode vs AGY):**
-   - Permite seleccionar interactivamente o por CLI el motor de inferencia:
+2. **Pre-Launch Advisor Engine Selector (OpenCode vs AGY):**
+   - Choose interactively or via CLI flags at boot time:
      - `[1] 🤖 OpenCode Reasoning Engine (:4096)`
      - `[2] 🚀 AGY (Google Antigravity CLI / Engine)`
 
-3. **Frontend Retro "Nova OS '97" & Filtro CRT Anti-Fatiga:**
-   - Estética inspirada en Poolsuite.net y GTA Vice City de los 80s/90s.
-   - **Filtro Óptico CRT:** Scanlines horizontales sutiles y fósforo ámbar que inhiben activamente la fatiga ocular, con interruptor `[ 📺 CRT: ON/OFF ]`.
-   - **Oasis Pixel-Art Animado:** 8 palmeras multi-capa con balanceo tropical, 8 nubes a la deriva y bandadas de gaviotas a 60 FPS aceleradas por hardware (GPU).
+3. **Retro "Nova OS '97" Frontend with Anti-Glare CRT Filter:**
+   - Nostalgic design inspired by Poolsuite.net and GTA Vice City 80s/90s aesthetics.
+   - **Optical CRT Screen Filter:** Subtle horizontal scanlines and warm amber phosphor actively reducing eye fatigue, with an interactive `[ 📺 CRT: ON/OFF ]` switch.
+   - **Living Tropical Pixel-Art Landscape:** 8 depth-layered swaying palm trees, 8 bidirectional volumetric drifting clouds, and 6 flocks of seagulls with authentic **2-state wing flapping** at 60 FPS GPU hardware acceleration.
 
-4. **Navegación Guiada Determinista y Cero Alucinaciones:**
-   - Menú interactivo estructurado (1. Cursos, 2. Horarios, 3. Precios COP, 4. Sedes/Admisiones y retorno 0).
-   - Umbral de confianza semántica de 0.50: si la consulta está fuera del alcance oficial, genera un ticket `ESC-YYYYMMDD-XXXX` y deriva a secretaría académica.
+4. **Deterministic Guided Navigation & Zero Hallucination Guardrails:**
+   - Structured 4-pillar menu navigation (1. Courses, 2. Schedules, 3. COP Pricing, 4. Admissions/Campuses, with 0 root reset).
+   - Strict 0.50 confidence threshold: automatically generates a tracking ticket `ESC-YYYYMMDD-XXXX` and escalates out-of-scope queries to human admissions staff.
 
-5. **Telemetría y Control de Costos en Vivo:**
-   - Panel de métricas con seguimiento de consultas, tasa de aciertos en caché, tasa de escalamiento a humano, consumo de tokens y costo estimado en USD.
+5. **Real-Time Telemetry & Token Cost Tracking:**
+   - Collapsible telemetry modal tracking total queries, cache hit ratios, human escalation rates, token consumption, and estimated expenditure in USD.
 
 ---
 
-## ⚡ Instalación y Puesta en Marcha
+## ⚡ Quickstart & Installation
 
-### Prerrequisitos
-- **Python 3.10 o superior** (Recomendado 3.12)
-- **Node.js (v18+) y npm**
+### Prerequisites
+- **Python 3.10+** (Python 3.12 recommended)
+- **Node.js (v18+) & npm**
 
-### 1. Instalación Automática
+### 1. Automatic Installation
 ```bash
-# En Linux / macOS:
+# On Linux / macOS:
 ./install.sh
 
-# En Windows:
+# On Windows:
 install.bat
 ```
-*(Crea el entorno virtual `venv`, instala las dependencias de Python y Node.js, e indexa automáticamente los 82 documentos en ChromaDB).*
+*(Automatically initializes the `venv` virtual environment, installs Python and Node.js dependencies, and indexes the 82 knowledge base documents in ChromaDB).*
 
-### 2. Ejecución con Selector de Motor
+### 2. Launch with Advisor Engine Selector
 ```bash
-# Modo interactivo (te preguntará si deseas OpenCode o AGY):
+# Interactive mode (prompts to choose between OpenCode and AGY):
 ./start.sh
-# o en Windows: start.bat
-# o con Python: python3 run.py
+# or on Windows: start.bat
+# or with Python: python3 run.py
 
-# Iniciar directamente con AGY (Google Antigravity CLI):
+# Launch directly with AGY (Google Antigravity CLI):
 ./start.sh -a agy
 
-# Iniciar directamente con OpenCode:
+# Launch directly with OpenCode:
 ./start.sh -a opencode
 ```
 
-Al iniciar, se levantarán automáticamente:
-- 🌐 **Frontend Retro Nova OS '97:** [http://localhost:3000](http://localhost:3000)
-- 🐍 **Backend FastAPI Core:** [http://127.0.0.1:8000](http://127.0.0.1:8000)
-- 📖 **Documentación Swagger UI:** [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
-- 📊 **Métricas Prometheus:** [http://127.0.0.1:8000/metrics/prometheus](http://127.0.0.1:8000/metrics/prometheus)
+When started, all services boot concurrently:
+- 🌐 **Retro Nova OS '97 Frontend:** [http://localhost:3000](http://localhost:3000)
+- 🐍 **FastAPI Core Backend:** [http://127.0.0.1:8000](http://127.0.0.1:8000)
+- 📖 **Interactive Swagger UI:** [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
+- 📊 **Prometheus Metrics:** [http://127.0.0.1:8000/metrics/prometheus](http://127.0.0.1:8000/metrics/prometheus)
 
 ---
 
-## 🔌 Endpoints de la API REST
+## 🔌 REST API Endpoints
 
-- `POST /api/v1/chat`: Consulta interactiva con respuesta RAG estructurada y botones de acción.
-- `POST /api/v1/chat/stream`: Streaming de respuestas token por token (SSE).
-- `POST /api/v1/webhook`: Webhook universal para integración con formularios web y canales externos.
-- `POST /api/v1/tools/quote`: Cálculo dinámico de cotizaciones en COP con descuentos.
-- `POST /api/v1/tools/placement-test`: Registro para examen de nivelación gratuito.
-- `GET /api/v1/metrics`: Telemetría operativa en formato JSON.
-- `GET /api/v1/escalations`: Registro de tickets de escalamiento humano.
-- `GET /api/v1/health`: Estado de salud, documentos indexados y motor de asesor configurado.
+- `POST /api/v1/chat`: Interactive conversational query with structured RAG response and quick action buttons.
+- `POST /api/v1/chat/stream`: Token-by-token streaming responses (Server-Sent Events / SSE).
+- `POST /api/v1/webhook`: Universal webhook endpoint for CRM, form, and external channel integrations.
+- `POST /api/v1/tools/quote`: Dynamic COP course quote calculator with cash and installment discounts.
+- `POST /api/v1/tools/placement-test`: Free diagnostic placement test registration.
+- `GET /api/v1/metrics`: Live JSON telemetry and runtime statistics.
+- `GET /api/v1/escalations`: Persisted log of human escalation tickets.
+- `GET /api/v1/health`: System health status, indexed document count, and active advisor engine.
 
 ---
 
-## 🧪 Pruebas Automatizadas
+## 🧪 Automated Testing
 
-El proyecto cuenta con una suite completa de pruebas unitarias y de integración en `pytest`:
+The project includes a comprehensive suite of unit, integration, and E2E tests in Pytest:
 
 ```bash
 ./venv/bin/pytest -v
 ```
 
 ```text
-============================= 25 passed in 15.97s ==============================
+============================= 25 passed in 14.07s ==============================
 ```
 
-Las 25 pruebas validan:
-- Estado del servidor y detección de motor asesor.
-- Indexación y chunking con solapamiento de los 82 documentos.
-- Búsqueda híbrida (ChromaDB + BM25) y fusión RRF.
-- Escalamiento automático a humanos ante consultas fuera de alcance.
-- Filtros de seguridad ante inyecciones de prompt.
-- Funcionamiento de la máquina de estados de navegación y continuidad de menús.
-- Integración E2E tanto con el motor OpenCode como con el motor AGY Antigravity.
+The 25 test cases validate:
+- API health and advisor engine auto-detection.
+- Overlapping chunking and ingestion across 82 official documents.
+- Hybrid search (dense ChromaDB + sparse BM25) and Reciprocal Rank Fusion.
+- Out-of-scope query detection and human ticket escalation.
+- Prompt injection and adversarial security filters.
+- State-machine navigation continuity and zero-deadlock flow.
+- End-to-end advisor routing for both OpenCode and AGY Antigravity engines.

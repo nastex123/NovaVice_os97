@@ -1,7 +1,8 @@
 @echo off
-title Nova Tech University - Admissions Assistant
+REM Quick launcher script for Windows
+title Nova Idiomas Colombia - Admissions Assistant
 echo ================================================================
-echo   Iniciando Sistema Completo (Backend + Asesor + Frontend)...
+echo   Starting Admissions AI System (Windows)...
 echo ================================================================
 python run.py %*
 pause

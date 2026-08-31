@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [2026-08-31 10:45] [Refactor/Optimization]
+- **Optimized AGY Advisor Model Configuration (`backend/src/config.py`, `.env.example`, `TECHNICAL_EXPLANATION.md`):**
+  - **Model Switch:** Updated default AGY model from `gemini-2.5-pro` to `gemini-3.7-flash` to reduce token consumption and inference latency.
+  - **Reasoning Effort Parameter:** Added explicit `agy_reasoning_effort = "low"` (and `AGY_REASONING_EFFORT=low` in `.env.example`) to streamline reasoning depth for routine admissions queries.
+  - **Metadata Propagation:** Propagated `model` and `reasoning_effort` fields in AGY advisor responses in [`backend/src/core/opencode_client.py`](backend/src/core/opencode_client.py).
+  - **Automated Validation:** 25/25 Pytest tests PASSED in 28.5s and Next.js 15 static build completed in 2.7s with 0 errors.
+- Reason: User-driven optimization to prevent high resource consumption and ensure lightning-fast responses during admissions advising.
+
 ### [2026-08-31 10:33] [Documentation/Refactor]
 - **Bilingual Documentation with Primary English Presentation on GitHub (`README.md`, `README.es.md`, `TECHNICAL_EXPLANATION.md`, `EXPLICACION_TECNICA.md`):**
   - **Primary English README (`README.md`):** Configured as the main repository landing page with badges, English technical overviews, Monorepo directory maps, and quickstart commands.

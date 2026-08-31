@@ -18,7 +18,7 @@
 | **Base Vectorial** | ChromaDB Persistent (Embeddings ONNX `all-MiniLM-L6-v2` / TF-IDF) |
 | **Buscador Léxico** | Algoritmo BM25 puro en Python con *stemming* morfológico en español |
 | **Fusión de Ranking** | Reciprocal Rank Fusion (RRF, $k=60$) |
-| **Motores de Razonamiento** | Switch Dual: **OpenCode Reasoning Daemon (:4096)** o **AGY (Google Antigravity CLI)** |
+| **Motores de Razonamiento** | Switch Dual: **OpenCode Reasoning Daemon (:4096)** o **AGY (Google Antigravity CLI / `gemini-3.7-flash` razonamiento bajo)** |
 | **Frontend** | Next.js 15 (App Router), React 19, TypeScript, Tailwind CSS, Lucide Icons |
 | **Estética Visual** | "Nova OS '97" Retro Macintosh OS + Poolsuite.net + GTA Vice City 80s/90s |
 | **Filtro Óptico** | CRT Anti-Glare & Warm Phosphor con interruptor interactivo `[📺 CRT: ON/OFF]` |

@@ -18,7 +18,7 @@
 | **Vector Store** | ChromaDB Persistent (Local Embeddings ONNX `all-MiniLM-L6-v2` / TF-IDF) |
 | **Lexical Search Engine**| Pure Python Okapi BM25 with Spanish morphological suffix stemming |
 | **Rank Fusion Algorithm**| Reciprocal Rank Fusion (RRF, smoothing factor $k=60$) |
-| **Dual Advisor Engine** | Pre-Launch Switch: **OpenCode Reasoning Daemon (:4096)** or **AGY (Google Antigravity CLI)** |
+| **Dual Advisor Engine** | Pre-Launch Switch: **OpenCode Reasoning Daemon (:4096)** or **AGY (Google Antigravity CLI / `gemini-3.7-flash` low effort)** |
 | **Frontend Framework** | Next.js 15 (App Router), React 19, TypeScript, Tailwind CSS, Lucide Icons |
 | **Visual Design** | "Nova OS '97" Retro Macintosh OS + Poolsuite.net + GTA Vice City 80s/90s Aesthetics |
 | **Optical Filter** | CRT Anti-Glare & Warm Phosphor Screen Shader with interactive `[📺 CRT: ON/OFF]` switch |

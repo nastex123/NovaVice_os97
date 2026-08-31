@@ -218,6 +218,8 @@ class OpenCodeAdvisorIntermediary:
                 "text": dynamic_text,
                 "source": "agy_advisor",
                 "engine": "agy",
+                "model": settings.agy_model,
+                "reasoning_effort": settings.agy_reasoning_effort,
                 "latency_ms": elapsed
             }
 

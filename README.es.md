@@ -237,3 +237,5 @@ Las 25 pruebas validan:
 - Filtros de seguridad ante inyecciones de prompt.
 - Funcionamiento de la máquina de estados de navegación y continuidad de menús.
 - Integración E2E tanto con el motor OpenCode como con el motor AGY Antigravity.
+
+## URL del Repositorio: https://github.com/nastex123/NovaVice_os97.git

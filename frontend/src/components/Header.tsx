@@ -1,14 +1,12 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Sparkles, Gauge, RefreshCw, MessageSquarePlus, Globe, Sun } from "lucide-react";
 
 interface HeaderProps {
   currentMenuLabel: string;
   onReset: () => void;
   onNewChat: () => void;
   onOpenMetrics: () => void;
-  useOpenCodeMode?: boolean;
   crtEnabled?: boolean;
   onToggleCrt?: () => void;
 }

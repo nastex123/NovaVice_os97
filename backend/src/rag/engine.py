@@ -1,6 +1,5 @@
 import time
 import os
-import re
 from typing import Dict, Any, List, Optional, AsyncGenerator
 import httpx
 from src.config import settings
@@ -161,7 +160,7 @@ class PurePythonRAGEngine:
                 "action_buttons": [{"label": "0. Menú Principal", "value": "0"}]
             }
 
-        # 2. Dual-Layer Cache Check
+        # 2. Dual-Layer Cache Check (exact SHA-256 + semantic 0.95)
         cached_result = query_cache.get(effective_query)
         if cached_result:
             latency = time.time() - start_time
@@ -171,6 +170,25 @@ class PurePythonRAGEngine:
             result["latency_ms"] = round(latency * 1000, 1)
             result["action_buttons"] = [{"label": "0. Menú Principal", "value": "0"}, {"label": "5. Pregunta Libre", "value": "5"}]
             return result
+
+        # 2b. Semantic cache via embedding cosine 0.95 (paraphrase hit without exact match)
+        try:
+            from src.rag.vector_store import vector_store as _vs_for_cache
+            q_embedding = _vs_for_cache.embed_query(effective_query)
+            semantic_hit = query_cache.find_semantic_match(q_embedding, threshold=0.95)
+            if semantic_hit:
+                payload, sim = semantic_hit
+                latency = time.time() - start_time
+                metrics_bus.record_query(cached=True, latency=latency)
+                result = dict(payload)
+                result["cached"] = True
+                result["latency_ms"] = round(latency * 1000, 1)
+                # Keep original semantic similarity hint if needed
+                result["semantic_similarity"] = round(sim, 4)
+                result["action_buttons"] = [{"label": "0. Menú Principal", "value": "0"}, {"label": "5. Pregunta Libre", "value": "5"}]
+                return result
+        except Exception:
+            pass
 
         # 3. Hybrid Retrieval
         chunks = hybrid_retriever.retrieve(effective_query, top_k=self.settings.top_k_results)
@@ -297,8 +315,16 @@ class PurePythonRAGEngine:
             ]
         }
 
-        # 8. Cache response
-        query_cache.set(query, final_response)
+        # 8. Cache response (store both exact and semantic embedding)
+        try:
+            from src.rag.vector_store import vector_store as _vs_for_store
+            q_emb = _vs_for_store.embed_query(effective_query)
+        except Exception:
+            q_emb = None
+        # Store under effective_query (canonical) so paraphrases hit semantic layer; also store raw query for exact
+        query_cache.set(effective_query, final_response, embedding=q_emb)
+        if query != effective_query:
+            query_cache.set(query, final_response, embedding=q_emb)
 
         return final_response
 

@@ -1,6 +1,7 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useRef } from "react";
+import * as PIXI from "pixi.js";
 
 interface PixelSeagullProps {
   size?: "lg" | "md" | "sm";
@@ -18,7 +19,6 @@ const PixelSeagull: React.FC<PixelSeagullProps> = ({
   if (size === "lg") {
     return (
       <div className={`relative inline-block w-[32px] h-[14px] ${className}`}>
-        {/* Frame 1: Wings Up */}
         <svg className="absolute inset-0 animate-wing-up" width="32" height="14" viewBox="0 0 32 14" fill="none">
           <rect x="0" y="3" width="6" height="3" fill={color} />
           <rect x="6" y="5" width="6" height="3" fill={color} />
@@ -27,7 +27,6 @@ const PixelSeagull: React.FC<PixelSeagullProps> = ({
           <rect x="26" y="3" width="6" height="3" fill={color} />
           <rect x="14" y="9" width="4" height="2" fill={beakColor} />
         </svg>
-        {/* Frame 2: Wings Down */}
         <svg className="absolute inset-0 animate-wing-down" width="32" height="14" viewBox="0 0 32 14" fill="none">
           <rect x="0" y="9" width="6" height="3" fill={color} />
           <rect x="6" y="6" width="6" height="3" fill={color} />
@@ -39,11 +38,9 @@ const PixelSeagull: React.FC<PixelSeagullProps> = ({
       </div>
     );
   }
-
   if (size === "sm") {
     return (
       <div className={`relative inline-block w-[18px] h-[8px] ${className}`}>
-        {/* Frame 1: Wings Up */}
         <svg className="absolute inset-0 animate-wing-up" width="18" height="8" viewBox="0 0 18 8" fill="none">
           <rect x="0" y="1" width="3" height="2" fill={color} />
           <rect x="3" y="3" width="3" height="2" fill={color} />
@@ -51,7 +48,6 @@ const PixelSeagull: React.FC<PixelSeagullProps> = ({
           <rect x="12" y="3" width="3" height="2" fill={color} />
           <rect x="15" y="1" width="3" height="2" fill={color} />
         </svg>
-        {/* Frame 2: Wings Down */}
         <svg className="absolute inset-0 animate-wing-down" width="18" height="8" viewBox="0 0 18 8" fill="none">
           <rect x="0" y="5" width="3" height="2" fill={color} />
           <rect x="3" y="3" width="3" height="2" fill={color} />
@@ -62,10 +58,8 @@ const PixelSeagull: React.FC<PixelSeagullProps> = ({
       </div>
     );
   }
-
   return (
     <div className={`relative inline-block w-[24px] h-[10px] ${className}`}>
-      {/* Frame 1: Wings Up */}
       <svg className="absolute inset-0 animate-wing-up" width="24" height="10" viewBox="0 0 24 10" fill="none">
         <rect x="0" y="2" width="4" height="2" fill={color} />
         <rect x="4" y="4" width="4" height="2" fill={color} />
@@ -73,7 +67,6 @@ const PixelSeagull: React.FC<PixelSeagullProps> = ({
         <rect x="16" y="4" width="4" height="2" fill={color} />
         <rect x="20" y="2" width="4" height="2" fill={color} />
       </svg>
-      {/* Frame 2: Wings Down */}
       <svg className="absolute inset-0 animate-wing-down" width="24" height="10" viewBox="0 0 24 10" fill="none">
         <rect x="0" y="7" width="4" height="2" fill={color} />
         <rect x="4" y="5" width="4" height="2" fill={color} />
@@ -86,8 +79,220 @@ const PixelSeagull: React.FC<PixelSeagullProps> = ({
 };
 
 export const PixiParticleBackground: React.FC = () => {
+  const pixiContainerRef = useRef<HTMLDivElement>(null);
+  const appRef = useRef<PIXI.Application | null>(null);
+
+  useEffect(() => {
+    if (!pixiContainerRef.current) return;
+    // Prevent double init in React 18 strict mode
+    if (appRef.current) return;
+
+    const container = pixiContainerRef.current;
+    const app = new PIXI.Application({
+      width: window.innerWidth,
+      height: window.innerHeight,
+      backgroundAlpha: 0,
+      antialias: true,
+      resolution: window.devicePixelRatio || 1,
+      autoDensity: true,
+    });
+    // Style canvas to fill container
+    const view = app.view as unknown as HTMLCanvasElement;
+    if (view && view.style) {
+      view.style.position = "absolute";
+      view.style.inset = "0";
+      view.style.width = "100%";
+      view.style.height = "100%";
+      view.style.pointerEvents = "none";
+    }
+    container.appendChild(view as unknown as Node);
+    appRef.current = app;
+
+    // Particle layers
+    const fireflies: PIXI.Graphics[] = [];
+    const dews: PIXI.Graphics[] = [];
+    const spores: PIXI.Graphics[] = [];
+    const velocities: { vx: number; vy: number; baseAlpha: number }[] = [];
+    const graphicsLines = new PIXI.Graphics();
+    app.stage.addChild(graphicsLines);
+
+    const mouse = { x: -9999, y: -9999 };
+    const onMouseMove = (e: MouseEvent) => {
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+    };
+    window.addEventListener("mousemove", onMouseMove);
+
+    const colors = {
+      gold: 0xf59e0b,
+      goldLight: 0xfde68a,
+      emerald: 0x10b981,
+      emeraldLight: 0xa7f3d0,
+      spore: 0xfaf6ee,
+    };
+
+    // Create fireflies (golden, magnetic to cursor)
+    for (let i = 0; i < 18; i++) {
+      const g = new PIXI.Graphics();
+      g.beginFill(colors.gold, 0.85);
+      g.drawCircle(0, 0, 2.2 + Math.random() * 1.5);
+      g.endFill();
+      // inner glow
+      g.beginFill(colors.goldLight, 0.35);
+      g.drawCircle(0, 0, 4.5);
+      g.endFill();
+      g.x = Math.random() * window.innerWidth;
+      g.y = Math.random() * window.innerHeight * 0.85;
+      g.alpha = 0.6 + Math.random() * 0.4;
+      app.stage.addChild(g);
+      fireflies.push(g);
+      velocities.push({
+        vx: (Math.random() - 0.5) * 0.7,
+        vy: (Math.random() - 0.5) * 0.7,
+        baseAlpha: g.alpha,
+      });
+    }
+
+    // Create dew spheres (emerald, slow drift)
+    for (let i = 0; i < 10; i++) {
+      const g = new PIXI.Graphics();
+      g.beginFill(colors.emerald, 0.7);
+      g.drawCircle(0, 0, 1.8 + Math.random() * 1.2);
+      g.endFill();
+      g.beginFill(colors.emeraldLight, 0.25);
+      g.drawCircle(0, 0, 3.5);
+      g.endFill();
+      g.x = Math.random() * window.innerWidth;
+      g.y = Math.random() * window.innerHeight * 0.9;
+      g.alpha = 0.45 + Math.random() * 0.35;
+      app.stage.addChild(g);
+      dews.push(g);
+      velocities.push({
+        vx: (Math.random() - 0.5) * 0.35,
+        vy: (Math.random() - 0.5) * 0.35,
+        baseAlpha: g.alpha,
+      });
+    }
+
+    // Create ascending spores (white, upward)
+    for (let i = 0; i < 8; i++) {
+      const g = new PIXI.Graphics();
+      g.beginFill(colors.spore, 0.6);
+      g.drawCircle(0, 0, 1.2);
+      g.endFill();
+      g.x = Math.random() * window.innerWidth;
+      g.y = window.innerHeight - Math.random() * 200;
+      g.alpha = 0.35 + Math.random() * 0.3;
+      app.stage.addChild(g);
+      spores.push(g);
+      velocities.push({
+        vx: (Math.random() - 0.5) * 0.2,
+        vy: -0.3 - Math.random() * 0.5,
+        baseAlpha: g.alpha,
+      });
+    }
+
+    const allParticles = [...fireflies, ...dews, ...spores];
+
+    // Animation ticker
+    let frame = 0;
+    app.ticker.add(() => {
+      frame += 0.016;
+      graphicsLines.clear();
+
+      // Update fireflies with mouse magnetism
+      fireflies.forEach((p, idx) => {
+        const v = velocities[idx];
+        // gentle attraction to mouse within 160px
+        const dx = mouse.x - p.x;
+        const dy = mouse.y - p.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 160 && dist > 5) {
+          v.vx += (dx / dist) * 0.015;
+          v.vy += (dy / dist) * 0.015;
+        }
+        // friction
+        v.vx *= 0.995;
+        v.vy *= 0.995;
+        // limit speed
+        v.vx = Math.max(-1.2, Math.min(1.2, v.vx));
+        v.vy = Math.max(-1.2, Math.min(1.2, v.vy));
+        p.x += v.vx;
+        p.y += v.vy;
+        // wrap
+        if (p.x < -10) p.x = window.innerWidth + 10;
+        if (p.x > window.innerWidth + 10) p.x = -10;
+        if (p.y < -10) p.y = window.innerHeight + 10;
+        if (p.y > window.innerHeight + 10) p.y = -10;
+        // twinkle
+        p.alpha = v.baseAlpha + Math.sin(frame * 2 + idx) * 0.2;
+      });
+
+      // Update dews slow drift
+      dews.forEach((p, idx) => {
+        const v = velocities[fireflies.length + idx];
+        p.x += v.vx + Math.sin(frame * 0.5 + idx) * 0.15;
+        p.y += v.vy + Math.cos(frame * 0.4 + idx) * 0.15;
+        if (p.x < -10) p.x = window.innerWidth + 10;
+        if (p.x > window.innerWidth + 10) p.x = -10;
+        if (p.y < -10) p.y = window.innerHeight + 10;
+        if (p.y > window.innerHeight + 10) p.y = -10;
+      });
+
+      // Update spores rising
+      spores.forEach((p, idx) => {
+        const v = velocities[fireflies.length + dews.length + idx];
+        p.x += v.vx + Math.sin(frame + idx) * 0.3;
+        p.y += v.vy;
+        if (p.y < -10) {
+          p.y = window.innerHeight + 10;
+          p.x = Math.random() * window.innerWidth;
+        }
+        // subtle opacity by height
+        p.alpha = 0.25 + (1 - p.y / window.innerHeight) * 0.4;
+      });
+
+      // Draw constellation lines between close particles (<120px)
+      graphicsLines.lineStyle(0.6, 0xd97706, 0.12);
+      for (let i = 0; i < allParticles.length; i++) {
+        for (let j = i + 1; j < allParticles.length; j++) {
+          const dx = allParticles[i].x - allParticles[j].x;
+          const dy = allParticles[i].y - allParticles[j].y;
+          const d = Math.sqrt(dx * dx + dy * dy);
+          if (d < 120) {
+            const alpha = (1 - d / 120) * 0.12;
+            graphicsLines.lineStyle(0.7, 0xd97706, alpha);
+            graphicsLines.moveTo(allParticles[i].x, allParticles[i].y);
+            graphicsLines.lineTo(allParticles[j].x, allParticles[j].y);
+          }
+        }
+      }
+    });
+
+    const onResize = () => {
+      app.renderer.resize(window.innerWidth, window.innerHeight);
+    };
+    window.addEventListener("resize", onResize);
+
+    return () => {
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("resize", onResize);
+      app.ticker.stop();
+      app.destroy(true, { children: true });
+      appRef.current = null;
+      container.innerHTML = "";
+    };
+  }, []);
+
   return (
     <div className="fixed inset-0 pointer-events-none select-none overflow-hidden z-0">
+      {/* PIXI WebGL Canvas Layer (hybrid) */}
+      <div
+        ref={pixiContainerRef}
+        className="absolute inset-0 w-full h-full pointer-events-none"
+        style={{ zIndex: 1 }}
+        aria-hidden="true"
+      />
       {/* Drifting 16-bit volumetric pixel clouds (Bidirectional: Left-to-Right & Right-to-Left) */}
 
       {/* Cloud 1: Giant Top Stratocumulus (L2R) */}

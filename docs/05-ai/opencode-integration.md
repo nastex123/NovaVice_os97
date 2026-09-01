@@ -29,7 +29,7 @@ sequenceDiagram
 
     U->>P: POST /api/v1/chat (Option 9 o use_opencode_mode=true)
     P->>R: Recupera fragmentos oficiales relevantes (Top 5 chunks)
-    R-->>P: Chunks con citas oficiales (Becas, Laboratorios, Aranceles, etc.)
+     R-->>P: Chunks con citas oficiales (Precios COP, Cursos MCER, Horarios, Sedes — Becas→Descuentos ver 12_04)
     P->>O: POST /session (Crea hilo aislado para el postulante)
     O-->>P: Retorna opencode_sid (ses_XXXXX)
     P->>O: POST /session/:id/message (Prompt de Razonamiento Profundo + 5 Chunks)
@@ -64,7 +64,7 @@ sequenceDiagram
     "parts": [
       {
         "type": "text",
-        "text": "Eres el Asesor Académico Senior de Admisiones en Nova Tech University...\n\nCONTEXTO OFICIAL VERIFICADO:\n[5 Documentos completos]...\n\nCONSULTA DEL POSTULANTE:\nhay becas disponibles?"
+        "text": "Eres el Asesor Académico Senior de Nova Idiomas...\n\nCONTEXTO OFICIAL VERIFICADO:\n[5 Docs: Becas→Descuentos 12_04 + Precios 10_01 etc]...\n\nCONSULTA DEL POSTULANTE:\n¿qué becas hay? (mapea a descuentos 10%/15%)"
       }
     ]
   }
@@ -75,7 +75,7 @@ sequenceDiagram
     "parts": [
       {
         "type": "text",
-        "text": "¡Hola! ¡Qué alegría que estés considerando a Nova Tech University!...\n\n### 1. Beca Turing a la Excelencia Académica\n• Cobertura: Hasta el 50% de descuento en aranceles..."
+        "text": "¡Hola! En Nova Idiomas no ofrecemos becas merit-based, pero sí descuentos verificados...\n\n### Descuentos Vigentes\n• Contado 10% (585k/648k) • Cajas 15% • Familiar 15% • Bono $100k — ver 12_04"
       }
     ],
     "status": "completed"

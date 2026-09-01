@@ -5,7 +5,7 @@ export interface ActionButton {
 
 export interface ChatMessage {
   id: string;
-  sender: "user" | "bot" | "system";
+  sender: "user" | "bot";
   text: string;
   timestamp: string;
   confidence_score?: number;
@@ -15,7 +15,6 @@ export interface ChatMessage {
   cached?: boolean;
   mode?: "rag_direct" | "opencode_advisor" | "agy_advisor" | "menu_navigation" | "escalation" | "guardrail_defense";
   action_buttons?: ActionButton[];
-  isVoice?: boolean;
 }
 
 export interface TelemetryMetrics {

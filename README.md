@@ -4,7 +4,7 @@
 
 [![Language: English](https://img.shields.io/badge/Language-English-blue.svg)](README.md)
 [![Language: Español](https://img.shields.io/badge/Language-Español-green.svg)](README.es.md)
-[![Tests: 25/25 Passed](https://img.shields.io/badge/Tests-25%2F25%20Passed-brightgreen.svg)](backend/tests/)
+[![Tests: 27/27 Passed](https://img.shields.io/badge/Tests-27%2F27%20Passed-brightgreen.svg)](backend/tests/)
 [![Next.js 15](https://img.shields.io/badge/Frontend-Next.js%2015-black.svg)](frontend/)
 [![FastAPI](https://img.shields.io/badge/Backend-FastAPI%200.115-009688.svg)](backend/)
 [![ChromaDB](https://img.shields.io/badge/Vector%20Store-ChromaDB-orange.svg)](backend/data/chroma_db/)
@@ -40,12 +40,11 @@
 ```text
 synapse-admissions-ai/ (NovaVice_os97)
 ├── backend/                               # 🐍 FastAPI Backend & AI Pipelines
-│   ├── data/                              # Official Knowledge Base (82 docs) & Ticket Store
-│   │   ├── documents/                     # Structured Markdown files
+│   ├── data/                              # Official Knowledge Base (83 docs) & Ticket Store
+│   │   ├── documents/                     # Structured Markdown files (incl. 12_04_becas_descuentos_)
 │   │   └── escalations.json               # Persisted human escalation tickets
-│   ├── hermes_skills/                     # Agent skill tools & OpenAPI definitions
 │   ├── src/                               # Application source code (API, bot, core, rag)
-│   ├── tests/                             # 25 Automated Pytest tests
+│   ├── tests/                             # 27 Automated Pytest tests (incl. semantic cache)
 │   └── requirements.txt                   # Python dependencies
 │
 ├── frontend/                              # 🌐 Next.js 15 Retro Web Application
@@ -59,8 +58,8 @@ synapse-admissions-ai/ (NovaVice_os97)
 │   ├── 03-architecture/                   # Architecture diagrams & technical proposals
 │   ├── 04-engineering/                    # Deep-dive guides for backend, frontend & RAG
 │   ├── 05-ai/                             # AI integrations (OpenCode & AGY Antigravity)
-│   ├── 08-operations/                     # Performance tuning & monitoring
-│   └── 09-decisions/                      # Architecture Decision Records (ADR-001 to ADR-007)
+│   ├── 08-operations/                     # Performance tuning & monitoring + SESSION_HANDOFF & TODO
+│   └── 09-decisions/                      # Architecture Decision Records (ADR-001 to ADR-008)
 │
 ├── scripts/                               # 🛠️ Multiplatform Automation & Setup
 │   ├── installer.py                       # Cross-platform installation logic
@@ -235,10 +234,10 @@ The project includes a comprehensive suite of unit, integration, and E2E tests i
 ```
 
 ```text
-============================= 25 passed in 14.07s ==============================
+============================= 27 passed in ~35s ==============================
 ```
 
-The 25 test cases validate:
+The 27 test cases validate:
 - API health and advisor engine auto-detection.
 - Overlapping chunking and ingestion across 82 official documents.
 - Hybrid search (dense ChromaDB + sparse BM25) and Reciprocal Rank Fusion.

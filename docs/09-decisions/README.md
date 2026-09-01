@@ -15,6 +15,7 @@ Este directorio almacena el registro formal de todas las decisiones arquitectón
 | [**ADR-005**](ADR-005-hybrid-retriever-reciprocal-rank-fusion.md) | Recuperación Híbrida Vectorial y Léxica con Fusión RRF y Auto-Ajuste BM25 | `Accepted` | 2026-08-30 | Recuperación de Información & RAG |
 | [**ADR-006**](ADR-006-multiplatform-executable-supervision.md) | Lanzador Supervisor Unificado y Suite de Instalación Multiplataforma | `Accepted` | 2026-08-30 | DevOps, Ejecutables & Multiplataforma |
 | [**ADR-007**](ADR-007-guardrails-and-structured-escalation-protocol.md) | Protocolo de Guardrails de Entrada y Derivación Estructurada a Consejeros | `Accepted` | 2026-08-30 | Seguridad, Guardrails & Escalamiento |
+| [**ADR-008**](ADR-008-becas-como-descuentos.md) | Becas como Descuentos (No Merit-Based) — Mapeo `becas` → `12_04` con threshold pilar 0.35 vs heavy 0.50 | `Accepted` | 2026-09-01 | Producto / RAG Knowledge |
 
 ---
 

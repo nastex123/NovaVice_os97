@@ -2,7 +2,7 @@
 
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Gauge, X, Activity, TrendingUp, HelpCircle, DollarSign, Database, Clock, ShieldCheck } from "lucide-react";
+import { Activity, TrendingUp, HelpCircle, DollarSign } from "lucide-react";
 import { TelemetryMetrics, ServerHealth } from "../lib/types";
 
 interface MetricsModalProps {

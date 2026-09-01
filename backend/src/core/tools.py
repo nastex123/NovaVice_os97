@@ -4,7 +4,7 @@ Permite realizar cálculos dinámicos de cotización, agendamiento de exámenes 
 y consulta de disponibilidad de sedes.
 """
 
-from typing import Dict, Any, Optional
+from typing import Dict, Any
 import time
 import uuid
 

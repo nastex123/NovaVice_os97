@@ -22,8 +22,10 @@
 | **Frontend Framework** | Next.js 15 (App Router), React 19, TypeScript, Tailwind CSS, Lucide Icons |
 | **Visual Design** | "Nova OS '97" Retro Macintosh OS + Poolsuite.net + GTA Vice City 80s/90s Aesthetics |
 | **Optical Filter** | CRT Anti-Glare & Warm Phosphor Screen Shader with interactive `[📺 CRT: ON/OFF]` switch |
-| **Living Background** | 8 swaying palms, 18 bidirectional clouds (9 L2R + 9 R2L), 6 seagull flocks 2-state flap, verde seco retro grass carpet 28 tufts (CSS3 GPU 60 FPS) |
-| **Test Pass Rate** | **25/25 Automated Unit & E2E Pytest Suite PASSED** • Next.js Static Build 0 errors (1.3s) |
+| **Living Background** | Hybrid: SVG 18 clouds + 8 palms + grass + PIXI WebGL 36 particles (18 fireflies +10 dews +8 spores) 60 FPS |
+| **Knowledge Base** | 83 docs / 245 chunks (20 clusters + `12_04_becas_descuentos_aclaratoria.md` canónico — becas→descuentos) |
+| **Thresholds** | Pilar `0.35` (horario/precio/curso/modalidad/sede/beca→descuento) vs Heavy `0.50` + 2-phase Sí/No (ADR-008) |
+| **Test Pass Rate** | **27/27 Automated Unit & E2E Pytest Suite PASSED** (semantic cache + heavy only) • Next.js 219kB 0 errors |
 
 ---
 
@@ -284,10 +286,10 @@ Coverage highlights:
 ### 🎙️ Suggested Presentation Flow:
 1. **Introduction (1 min):** "Good afternoon. Today we present *Nova OS '97*, a production-grade Admissions AI Assistant and hybrid RAG system built for Nova Idiomas Colombia..."
 2. **Business Problem & Value Proposition (1 min):** "The institution faced hundreds of daily inquiries regarding courses, COP pricing, and international exams. Our solution automates 100% of these inquiries with zero hallucinations..."
-3. **Hybrid RAG Architecture (2 min):** "We engineered a dense vector search with ChromaDB and sparse lexical search with BM25, fused via Reciprocal Rank Fusion ($k=60$) and guarded by a 0.50 confidence threshold..."
+3. **Hybrid RAG Architecture (2 min):** "We engineered dense ChromaDB + BM25 (Unicode NFD, 80 synonyms) fused via RRF ($k=60$) + centroid per pillar, with 0.35 threshold for pilares (horario/precio/curso/modalidad/sede/beca→descuento) vs 0.50 heavy only (2-phase Sí/No, ADR-008)..."
 4. **Dual Advisor & Supervisor (1.5 min):** "We designed a pre-launch switch in `run.py` that allows toggling between OpenCode Daemon (:4096) and Google Antigravity (AGY)..."
 5. **Retro OS Experience & CRT Filter (1 min):** "On the frontend, we built an engaging Macintosh '97 retro interface with an optical CRT anti-fatigue filter and a living GPU-accelerated pixel-art landscape..."
-6. **Conclusion & Metrics (30s):** "The system is backed by a 25/25 automated test pass rate, sub-30ms cache hits, and clean monorepo architecture."
+6. **Conclusion & Metrics (30s):** "Backed by 27/27 tests, sub-30ms dual cache (exact SHA-256 + semantic 0.88 pilar), 83 docs including becas→descuentos canónico 12_04, and heavy-only escalation."
 
 ---
 
@@ -301,3 +303,6 @@ Coverage highlights:
 
 * **Q: Why include an optical CRT shader in the UI?**  
   * **A:** It transforms an ordinary chatbot into a memorable retro experience while acting as a functional anti-glare screen filter that reduces eye strain during long reading sessions.
+
+* **Q: What if user asks “becas disponibles”?**  
+  * **A:** Per ADR-008, Nova has no merit becas. The query maps via 80 synonyms to `12_04_becas_descuentos_aclaratoria.md` and answers `No becas, sí descuentos 10% contado / 15% cajas / 15% familiar / bono $100k` with `0.35` pilar threshold, never escalated as heavy. Demo: `becas disponibles` → `MaxSim 0.85` hit, not `ESC-`.

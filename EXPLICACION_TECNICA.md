@@ -295,10 +295,10 @@ El proyecto cuenta con una cobertura de pruebas automatizadas rigurosa:
 ### 🎙️ Guión Sugerido para la Presentación (5-7 Minutos):
 1. **Introducción (1 min):** "Buenas tardes. Hoy presentamos *Nova OS '97*, una solución de automatización inteligente y RAG híbrido en Python para admisiones de la academia Nova Idiomas Colombia..."
 2. **El Problema y la Propuesta de Valor (1 min):** "El reto era atender cientos de dudas diarias sobre horarios, precios en pesos colombianos y certificaciones sin margen de alucinación..."
-3. **Arquitectura RAG Híbrida (2 min):** "Implementamos un pipeline con ChromaDB para vectores densos y BM25 con stemming en español para búsqueda léxica, fusionados con Reciprocal Rank Fusion ($k=60$). Si la relevancia es menor a 0.50, escala automáticamente a un ticket humano..."
+3. **Arquitectura RAG Híbrida (2 min):** "Implementamos ChromaDB + BM25 (NFD, 80 sinónimos) fusionados con RRF ($k=60$) + centroid por pilar. Umbral pilar 0.35 (horario/precio/curso/modalidad/sede/beca→descuento) vs heavy 0.50 con 2 fases Sí/No (ADR-008). Así 'becas disponibles' mapea a descuentos 10%/15% sin escalar..."
 4. **Doble Motor de Asesoría y Supervisor (1.5 min):** "Desarrollamos un switch pre-lanzamiento en `run.py` que permite alternar entre el daemon de OpenCode (:4096) y Google Antigravity (AGY)..."
 5. **Experiencia de Usuario Retro y Filtro CRT (1 min):** "En el frontend creamos una interfaz retro inspirada en Macintosh '97 y GTA Vice City, con un filtro óptico CRT anti-fatiga y un fondo pixel-art animado a 60 FPS por GPU..."
-6. **Conclusión y Métricas (30 seg):** "El sistema cuenta con 25/25 pruebas automatizadas aprobadas, latencia promedio inferior a 30ms en caché y compilación estática instantánea."
+6. **Conclusión y Métricas (30 seg):** "27/27 pruebas, cache dual exacto + semántico 0.88 pilar, 83 docs con becas→descuentos canónico 12_04 y escalamiento solo very heavy."
 
 ---
 
@@ -312,6 +312,9 @@ El proyecto cuenta con una cobertura de pruebas automatizadas rigurosa:
 
 * **P: ¿Por qué el frontend tiene un filtro CRT y estética retro 90s?**  
   * **R:** Transforma un chatbot corporativo aburrido en una experiencia memorable y estética, mientras que el filtro CRT actúa como un protector óptico real (*Anti-Glare & Warm Phosphor*) que suaviza la emisión de luz blanca y evita la fatiga ocular del usuario.
+
+* **P: ¿Qué pasa si pregunta “becas disponibles”?**  
+  * **R:** Per ADR-008, Nova no tiene becas merit-based. La consulta mapea vía 80 sinónimos a `12_04_becas_descuentos_aclaratoria.md` y responde `No becas, sí descuentos 10% contado / 15% cajas / 15% familiar / bono $100k` con umbral pilar 0.35, nunca escala como heavy.
 
 * **P: ¿Cómo se despliega el sistema en diferentes sistemas operativos?**  
   * **R:** Incluye scripts nativos multiplataforma: `installer.py` / `install.sh` / `install.bat` para configurar virtualenvs y Node modules, y `run.py` / `start.sh` / `start.bat` como supervisor de procesos con manejo de señales `SIGINT`.

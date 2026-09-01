@@ -46,8 +46,8 @@ El subsistema RAG (*Retrieval-Augmented Generation*) implementa un pipeline de r
 
 ## 2. Componentes Técnicos y Código Fuente
 
-### 2.1 `src/rag/ingestion.py` — Pipeline de Segmentación y Carga Documental
-Transforma los 87 archivos Markdown en fragmentos de texto enriquecidos con metadatos de cluster, documento y sección.
+### 2.1 `src/rag/ingestion.py:32` — Pipeline de Segmentación y Carga Documental
+Transforma los 83 archivos Markdown (+ `12_04_becas_descuentos_aclaratoria.md`) en 245 fragmentos con metadatos `source/section`. **Plan Fase B14:** `chunk 600/150` para tablas `03_precios`/`02_horarios` para no partir `\$650k`.
 
 ```python
 # src/rag/ingestion.py
@@ -62,8 +62,8 @@ class DocumentIngestionPipeline:
 
 ---
 
-### 2.2 `src/rag/bm25.py` — Motor Léxico BM25 en Python Puro con Lematización
-Implementa el algoritmo estándar Okapi BM25 sin requerir dependencias externas como Java o ElasticSearch.
+### 2.2 `src/rag/bm25.py:18,34` — Motor Léxico BM25 en Python Puro con Lematización + Unicode NFD + STOP 62
+Implementa Okapi BM25 con expansión planificada: **Fase A1** `unicodedata.normalize NFD` para `ubicación→ubicacion`, **A3** 80 sinónimos `beca→descuento`, **B15** STOP revisado, **B17** expansión `precio↔tarifa`.
 
 ```python
 # src/rag/bm25.py
@@ -102,8 +102,8 @@ donde:
 
 ---
 
-### 2.3 `src/rag/hybrid_retriever.py` — Fusión de Rangos Recíprocos (RRF)
-Combina los resultados del vector store y del índice léxico BM25.
+### 2.3 `src/rag/hybrid_retriever.py:62` — Fusión RRF + Boost por Intent + Centroid (Fase B11/B16)
+Combina densa (Chroma) y BM25 con **RRF k=60 + `coverage*1.4` para pilar detectado + centroid 5 pilares + fallback `b=0.6`** antes de escalar.
 
 ```python
 # src/rag/hybrid_retriever.py
@@ -139,9 +139,5 @@ donde $k = 60$. La constante $60$ evita que las primeras posiciones tengan un pe
 
 ---
 
-### 2.4 `src/rag/engine.py` — Orquestador Maestro del RAG
-Controla el flujo de ejecución completo:
-1. Valida guardrails de seguridad.
-2. Evalúa navegación guiada interactiva.
-3. Si está en `advisor_mode` o `use_opencode_mode=True`, delega a OpenCode con los 5 mejores fragmentos.
-4. Si es una consulta estándar, verifica caché, ejecuta la búsqueda híbrida y sintetiza la respuesta oficial con citas y botones de acción.
+### 2.4 `src/rag/engine.py:164,220` — Orquestador Maestro + Cache Dual + Heavy Only
+Controla: 1) `navigation.py:330` (80 synonyms, typo, multi-intent), 2) guardrails, 3) **cache dual** `SHA-256` + **semantic `0.88` pilar** (`becas→descuentos` 0.92) via `vector_store.embed_query()`, 4) **threshold pilar `0.35` vs heavy `0.50`** con **2 fases `¿Sí/No?`** y hard rule `D39` pilares nunca heavy, 5) `advisor_mode` 5 chunks. Ver `ADR-008` y `TODO` Fase D.

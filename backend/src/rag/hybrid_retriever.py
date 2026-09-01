@@ -1,6 +1,6 @@
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any
 from src.rag.vector_store import vector_store
-from src.rag.bm25 import bm25_index, PureBM25
+from src.rag.bm25 import bm25_index
 
 
 class HybridRetriever:
@@ -77,7 +77,12 @@ class HybridRetriever:
         for doc_id, rank in bm25_ranks.items():
             rrf_scores[doc_id] = rrf_scores.get(doc_id, 0.0) + (1.0 / (self.rrf_k + rank + 1))
 
-        sorted_candidates = sorted(rrf_scores.items(), key=lambda item: item[1], reverse=True)
+        # Sort by RRF, tie-break by fused similarity to prioritize high-coverage BM25 hits (e.g., becas->12_04)
+        sorted_candidates = sorted(
+            rrf_scores.items(),
+            key=lambda item: (item[1], doc_map.get(item[0], {}).get("similarity_score", 0.0)),
+            reverse=True
+        )
 
         final_results = []
         for doc_id, rrf_score in sorted_candidates[:top_k]:

@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageSquare, Gauge, Building2, Phone, Radio, MapPin, X } from "lucide-react";
+import { MessageSquare, Gauge, Building2, Phone, Radio, MapPin } from "lucide-react";
 
 interface FooterProps {
   onReset?: () => void;
@@ -16,11 +16,6 @@ export const Footer: React.FC<FooterProps> = ({
   onNewChat,
 }) => {
   const [showSedesModal, setShowSedesModal] = useState(false);
-  const [isPlayingRadio, setIsPlayingRadio] = useState(false);
-
-  const toggleRadio = () => {
-    setIsPlayingRadio(!isPlayingRadio);
-  };
 
   return (
     <>
@@ -78,18 +73,18 @@ export const Footer: React.FC<FooterProps> = ({
           </a>
 
           {/* Tile 5: Poolsuite FM / Synthwave */}
-          <button
-            onClick={toggleRadio}
+          <a
+            href="https://poolsuite.net/"
+            target="_blank"
+            rel="noreferrer"
             className="hidden sm:flex flex-col items-center gap-1 group active:translate-y-0.5 transition-transform"
-            title="Poolsuite FM 80s Synthwave"
+            title="Poolsuite FM 80s Inspiration"
           >
-            <div className={`w-8 h-8 sm:w-9 sm:h-9 ${isPlayingRadio ? "bg-vicePink text-white" : "bg-white"} group-hover:bg-vicePink border-2 border-black shadow-retro-sm flex items-center justify-center transition-colors`}>
-              <Radio className={`w-4 h-4 ${isPlayingRadio ? "text-white animate-pulse" : "text-black group-hover:text-white"}`} />
+            <div className="w-8 h-8 sm:w-9 sm:h-9 bg-white group-hover:bg-vicePink border-2 border-black shadow-retro-sm flex items-center justify-center transition-colors">
+              <Radio className="w-4 h-4 text-black group-hover:text-white" />
             </div>
-            <span className="text-[10px] font-bold text-black uppercase tracking-wider font-mono">
-              {isPlayingRadio ? "FM • ON" : "Radio FM"}
-            </span>
-          </button>
+            <span className="text-[10px] font-bold text-black uppercase tracking-wider font-mono">Radio FM</span>
+          </a>
         </div>
       </footer>
 

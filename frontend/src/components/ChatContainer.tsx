@@ -2,7 +2,7 @@
 
 import React, { useRef, useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Bot, User, Clock, FileText, Sparkles, Info, ChevronRight, Terminal } from "lucide-react";
+import { Bot, User, Clock, FileText, Sparkles, Info, ChevronRight } from "lucide-react";
 import confetti from "canvas-confetti";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";

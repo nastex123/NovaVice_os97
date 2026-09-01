@@ -138,18 +138,34 @@ class ChromaVectorStore:
         if not documents:
             return 0
 
+        # Always fit fallback engine for semantic cache consistency (hybrid + embeddings)
+        all_texts = [d["text"] for d in documents]
+        try:
+            self.fallback_engine.fit(all_texts)
+        except Exception:
+            pass
+
         if self.use_chroma:
             try:
                 ids = [doc["id"] for doc in documents]
                 texts = [doc["text"] for doc in documents]
                 metadatas = [doc.get("metadata", {}) for doc in documents]
                 self.collection.upsert(ids=ids, documents=texts, metadatas=metadatas)
+                # Also persist fallback vectors for semantic cache even when Chroma succeeds
+                for doc in documents:
+                    doc_id = doc["id"]
+                    text = doc["text"]
+                    meta = doc.get("metadata", {})
+                    self.fallback_docs[doc_id] = {
+                        "id": doc_id,
+                        "text": text,
+                        "metadata": meta,
+                        "vector": self.fallback_engine.embed(text)
+                    }
+                self._save_fallback()
                 return len(ids)
             except Exception:
                 self.use_chroma = False
-
-        all_texts = [d["text"] for d in documents]
-        self.fallback_engine.fit(all_texts)
 
         for doc in documents:
             doc_id = doc["id"]
@@ -163,6 +179,21 @@ class ChromaVectorStore:
             }
         self._save_fallback()
         return len(documents)
+
+    def embed_query(self, query_text: str) -> List[float]:
+        # Unified query embedding for semantic cache (uses same engine as fallback or Chroma's embedding function).
+        if self.use_chroma:
+            try:
+                # Chroma's DefaultEmbeddingFunction is callable; if available, use it for consistency
+                if hasattr(self, "embedding_fn"):
+                    # Chroma 0.4+ embedding function expects list[str]
+                    embs = self.embedding_fn([query_text])
+                    if embs and len(embs) > 0 and isinstance(embs[0], list):
+                        return [float(x) for x in embs[0]]
+            except Exception:
+                pass
+        # Fallback TF-IDF embedding (also works when Chroma is active as semantic layer)
+        return self.fallback_engine.embed(query_text)
 
     def query(self, query_text: str, top_k: int = 3) -> List[Dict[str, Any]]:
         if self.use_chroma:

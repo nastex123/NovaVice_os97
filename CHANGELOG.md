@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [2026-09-01 10:46] [Docs]
+- **Documentación Fase 0 — Becas=Descuentos para Retomar en Otra PC (`docs/08-operations/TODO_SPRINT_BECAS_DESCUENTOS.md`, `docs/08-operations/SESSION_HANDOFF_BECAS_DESCUENTOS.md`, `backend/data/documents/12_04_becas_descuentos_aclaratoria.md`, `docs/09-decisions/ADR-008-becas-como-descuentos.md`):**
+  - **TODO y Handoff en `docs/` (a petición `en docs`):** Creados `TODO_SPRINT_BECAS_DESCUENTOS.md` (50 pasos Fase A-E + 11 Fase 0, checkboxes `0/50`, con `file:line` y test `pytest -k becas`) y `SESSION_HANDOFF_BECAS_DESCUENTOS.md` (repo, estado 27/27, decisiones, 3 comandos `git pull` para retomar).
+  - **Doc RAG canónico `12_04`:** `12_04_becas_descuentos_aclaratoria.md` (180 palabras, 4 descuentos 10%/15%/bono $100k, fuentes `10_01,12_01,12_03,09_03`) para que `becas disponibles` mapee a `12_04` con `sim 0.85` y no `0.25` heavy.
+  - **Actualizados 10 archivos:** `PRD.md:32` `US-07` + tabla Beca vs Descuento, `system-architecture.md:54` threshold `0.35 pilar vs 0.50 heavy` + cache dual `0.88`, `rag-subsystem-deep-dive.md` BM25 NFD + centroid, `opencode-integration.md` heavy 2 fases, `TECHNICAL_EXPLANATION.md:26` `83 docs` + Q&A becas, `EXPLICACION_TECNICA.md:298` idem, `README.md:42` + `README.es.md:42` árbol `83 docs`, `ADR-008` decision `becas=descuentos`, `DIAGRAMA.md` nodos `BECAS→DESCUENTOS`.
+  - **Validación:** `27/27 pytest` intacto, `ls 12_04` existe, `grep -r becas docs/ | wc -l >=6`.
+- Motivo: Dejar documentación precisa paso a paso para continuar sesión en otra PC sin perder contexto de los 50 + becas=descuentos.
+
+### [2026-09-01 10:15] [Fixed/Critical]
+- **Fix: Supervisor Ctrl+C Ahora Libera la Terminal Correctamente (`run.py:227`, `run.py:349`, `run.py:126/149/188`):**
+  - **Causa Raíz:** `signal.signal(SIGINT, cleanup_processes)` reemplazaba el `KeyboardInterrupt` pero `cleanup_processes` no hacía `sys.exit` y el loop `while True: sleep(1)` nunca salía — tras `🛑 Deteniendo...` el proceso supervisor seguía vivo y el shell no recuperaba el prompt.
+  - **Fix 1 — Salida Explícita:** Añadido flag global `_shutdown_requested` `run.py:33`, `cleanup_processes` ahora hace `sys.exit(0)` / `os._exit(0)` tras matar hijos y el loop principal es `while not _shutdown_requested: sleep(0.5)` `run.py:382` con `finally: sys.exit(0)`. Segundo Ctrl+C fuerza `os._exit(1)` con `SIGKILL` a todo el process group.
+  - **Fix 2 — Terminación Robusta:** `killpg(SIGTERM)` → `wait(timeout=3)` → `killpg(SIGKILL)` para cada hijo (`OpenCode`, `FastAPI`, `Next.js`), evitando huérfanos `next-server`/`uvicorn` que antes dejaban puerto ocupado.
+  - **Fix 3 — stdin Desacoplado:** Añadido `stdin=subprocess.DEVNULL` a `Popen` de `start_opencode` `run.py:128`, `start_fastapi` `run.py:149`, `start_nextjs` `run.py:188` para que los hijos no hereden `stdin` del supervisor y no bloqueen el TTY tras el cierre.
+  - **Validación:** Mock supervisor con `sleep` hijos + `os.kill(SIGINT)` ahora exit `0` en 1.8s y `✔ Terminal liberada` (antes hang infinito). `python -m py_compile run.py` OK, `pytest 27/27` intacto.
+- Motivo: Resolver bloqueo de terminal tras Ctrl+C reportado por el usuario.
+
+### [2026-09-01 09:50] [Added/Removed/Implemented]
+- **Fase 2 — Auditoría Deep Clean + Implementaciones (A/B/C/D):**
+  - **A. Caché Semántica Implementada (`backend/src/rag/vector_store.py:167`, `backend/src/rag/engine.py:164`, `backend/src/core/cache.py:47`):** Activada capa semántica dormida: `vector_store.embed_query()` unificado (Chroma `embedding_fn` o fallback TF-IDF 1807 dims), `engine.py:164` ahora consulta `find_semantic_match(threshold 0.95)` antes de miss, `engine.py:301` almacena `embedding` bajo `effective_query` y raw `query`, `vector_store.add_documents()` ahora siempre hace `fit` para semantic layer aun con Chroma activo. Nuevos tests `backend/tests/test_cache_semantic.py` (2 tests: paraphrase hit + exact/semantic coexist) con validación cosine 1.0.
+  - **B. Legados Borrados (`n8n/`, `backend/hermes_skills/`):** Eliminados `n8n/admissions_rag_workflow.json` (7 nodos) y `hermes_skills/admissions_rag_tool.py`, `openapi_tool_generator.py` (0 imports en `src/`). Actualizados `README.md:42`, `README.es.md:42`, `docs/05-ai/hermes-agent-integration.md` preservado como histórico.
+  - **C. PixiJS Híbrido Real (`frontend/src/components/PixiParticleBackground.tsx:88`):** Implementado `PIXI.Application` WebGL híbrido sobre SVG persistente: 18 nubes + 8 palmas + hierba SVG intactas + canvas WebGL con 18 fireflies doradas (`#F59E0B` con glow `#FDE68A`, magnetismo cursor 160px, friction 0.995), 10 dews esmeralda (`#10B981`) y 8 spores ascendentes, + líneas constelación `120px` `0xD97706` alpha 0.12. `useEffect` SSR-safe, `resizeTo` + `pointer-events-none`, `ticker` GPU. Build `219 kB` route `/` (vs 98.5 kB previo) por inclusión real de `pixi.js@7.4.2`.
+  - **D. Radio Placebo Eliminado (`frontend/src/components/Footer.tsx:19`):** Removido `isPlayingRadio` state y `toggleRadio()`, reemplazado Tile 5 por `<a href="https://poolsuite.net">` estático. Pruned imports `X` en `Footer.tsx`, `Sparkles/Gauge/...` en `Header.tsx:4`, `Gauge/X/Database/Clock/ShieldCheck` en `MetricsModal.tsx:5`, `Terminal` en `ChatContainer.tsx:5`, `isVoice` y `system` en `types.ts:8`, `Optional/PureBM25/Path/re` en backend, `tailwind.config.ts:5` pages glob, `layout.tsx:16` dark class → `bg-retroPaper text-black`.
+  - **Validación Automatizada:** 27/27 Pytest PASSED en 33.85s y Next.js 15 build `3.2s` con 0 errores, 0 warnings de tipos.
+- Motivo: Resolver auditoría de código muerto (Fase 2 A/B/C/D confirmada por usuario: implementar semántica, borrar legados, implementar Pixi, eliminar radio).
+
 ### [2026-08-31 11:30] [Added/Enhanced]
 - **Cielo Ultra-Denso de 18 Nubes Bidireccionales + Alfombra de Hierba Pixel-Art Verde Seco Retro (`PixiParticleBackground.tsx`, `globals.css`):**
   - **18 Nubes Volumétricas 16-bit (9 L2R + 9 R2L):** Expandido de 8 a 18 nubes estratocúmulos/cirros con trayectorias estrictamente alternas (L2R: `cloudDriftL2R` y R2L: `cloudDriftR2L` con `scaleX(-1)` para gaviotas). Nuevas clases `animate-cloud-l2r-5..9` y `animate-cloud-r2l-5..9` en [`frontend/src/app/globals.css`](frontend/src/app/globals.css:215) con duraciones 40-70s y delays escalonados 1-30s para flujo continuo sin huecos visuales. Garantiza aparición simultánea desde borde derecho e izquierdo en todos los viewports (375px a 1920px).

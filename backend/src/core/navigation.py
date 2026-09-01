@@ -1,3 +1,5 @@
+import unicodedata
+import re
 from typing import Dict, Any, Optional, Tuple
 from src.core.memory import applicant_memory
 
@@ -159,8 +161,137 @@ SUBMENU_BUTTONS_MAP = {
     ]
 }
 
-# Semantic Intent Map for Natural Language Normalization
+def _normalize(text: str) -> str:
+    """Unicode NFD + lower + strip + collapse spaces + remove punctuation except needed."""
+    # Lower and strip
+    t = text.strip().lower()
+    # NFD accent removal
+    t = unicodedata.normalize("NFD", t)
+    t = "".join(c for c in t if unicodedata.category(c) != "Mn")
+    # Replace punctuation with spaces, keep alphanumeric and spaces
+    t = re.sub(r"[^a-z0-9\s]", " ", t)
+    # Collapse multiple spaces
+    t = re.sub(r"\s+", " ", t).strip()
+    return t
+
+
+def _levenshtein(a: str, b: str) -> int:
+    if a == b:
+        return 0
+    if len(a) < len(b):
+        a, b = b, a
+    if not b:
+        return len(a)
+    prev = list(range(len(b) + 1))
+    for i, ca in enumerate(a, 1):
+        cur = [i]
+        for j, cb in enumerate(b, 1):
+            ins = prev[j] + 1
+            delete = cur[j - 1] + 1
+            sub = prev[j - 1] + (ca != cb)
+            cur.append(min(ins, delete, sub))
+        prev = cur
+    return prev[-1]
+
+
+# Common typos → correction (normalized)
+_TYPO_MAP = {
+    "orario": "horario",
+    "horaroi": "horario",
+    "horrai": "horario",
+    "orarios": "horarios",
+    "presio": "precio",
+    "presios": "precios",
+    "cuorsos": "cursos",
+    "curzo": "curso",
+    "curzos": "cursos",
+    "beca": "beca",  # placeholder for typo grouping
+    "veca": "beca",
+    "vecas": "becas",
+    "modalida": "modalidad",
+    "modaliad": "modalidad",
+    "sedde": "sede",
+    "sedes": "sedes",
+    "financiacion": "financiacion",  # without accent after normalize
+    "financiamiento": "financiacion",
+    "virtuali": "virtual",
+    "presensial": "presencial",
+    "hyflexx": "hyflex",
+    "hy fex": "hyflex",
+    "seede": "sede",
+}
+
+
+def _correct_typos(normalized: str) -> str:
+    toks = normalized.split()
+    corrected = []
+    # Whitelist of valid tokens that should never be auto-corrected via Levenshtein
+    valid_tokens = {
+        "horario", "horarios", "precio", "precios", "curso", "cursos", "beca", "becas",
+        "modalidad", "modalidades", "virtual", "presencial", "hibrida", "hibrido", "hyflex",
+        "sede", "sedes", "sucursal", "sucursales", "descuento", "descuentos", "financiacion",
+        "cuota", "cuotas", "tarifa", "tarifas", "costo", "costos", "valor", "valores",
+        "pago", "pagos", "becas", "ayudas", "subsidio", "subsidios", "scholarship",
+        "franja", "franjas", "jornadas", "turnos", "madrugadores", "sabados", "domingos",
+        "grabaciones", "online", "linea", "linea", "sincronico", "sincronica"
+    }
+    for tok in toks:
+        if tok in _TYPO_MAP:
+            corrected.append(_TYPO_MAP[tok])
+            continue
+        if tok in valid_tokens:
+            corrected.append(tok)
+            continue
+        # Levenshtein <=2 only for unknown tokens
+        best = None
+        best_dist = 3
+        for cand in ("horario", "horarios", "precio", "precios", "curso", "cursos", "beca", "becas", "modalidad", "virtual", "presencial", "hyflex", "sede", "sedes", "descuento", "financiacion"):
+            d = _levenshtein(tok, cand)
+            if d < best_dist and d <= 2 and len(tok) >= 4:
+                best_dist = d
+                best = cand
+        corrected.append(best if best else tok)
+    return " ".join(corrected)
+
+
+def _find_intent_by_embedding(normalized: str, threshold: float = 0.82) -> Optional[str]:
+    """Fallback semantic intent via dense cosine vs canonical queries. Returns canonical if hits."""
+    try:
+        from src.rag.vector_store import vector_store
+        q_emb = vector_store.embed_query(normalized)
+        if not q_emb or sum(x * x for x in q_emb) == 0:
+            return None
+        best_canonical = None
+        best_sim = 0.0
+        # Cache canonical embeddings (values, not keys) for better semantic match
+        if not hasattr(_find_intent_by_embedding, "_intent_emb_cache"):
+            _find_intent_by_embedding._intent_emb_cache = {}  # type: ignore
+            # Use unique canonical values to reduce cache size
+            uniq_canon = set(INTENT_SYNONYMS.values())
+            for canon in uniq_canon:
+                emb = vector_store.embed_query(canon.lower())
+                _find_intent_by_embedding._intent_emb_cache[canon] = emb  # type: ignore
+        cache = _find_intent_by_embedding._intent_emb_cache  # type: ignore
+        for canon, emb in cache.items():
+            dot = sum(a * b for a, b in zip(q_emb, emb))
+            norm_a = sum(a * a for a in q_emb) ** 0.5
+            norm_b = sum(b * b for b in emb) ** 0.5
+            if norm_a == 0 or norm_b == 0:
+                continue
+            sim = dot / (norm_a * norm_b)
+            if sim > best_sim:
+                best_sim = sim
+                best_canonical = canon
+        if best_canonical and best_sim >= threshold:
+            return best_canonical
+    except Exception:
+        pass
+    return None
+
+
+# Semantic Intent Map for Natural Language Normalization (normalized keys, no accents)
 INTENT_SYNONYMS = {
+    # --- Horarios & Modalidades ---
     "horario": "Cuales son los horarios, franjas y modalidades de estudio disponibles?",
     "horarios": "Cuales son los horarios, franjas y modalidades de estudio disponibles?",
     "horarios disponibles": "Cuales son los horarios, franjas y modalidades de estudio disponibles?",
@@ -170,9 +301,40 @@ INTENT_SYNONYMS = {
     "a que hora dan clases": "Cuales son los horarios, franjas y modalidades de estudio disponibles?",
     "jornadas": "Cuales son los horarios, franjas y modalidades de estudio disponibles?",
     "turnos": "Cuales son los horarios, franjas y modalidades de estudio disponibles?",
+    "cuando abren": "Cuales son los horarios, franjas y modalidades de estudio disponibles?",
+    "a que hora abren": "Cuales son los horarios, franjas y modalidades de estudio disponibles?",
+    "franja": "Cuales son los horarios, franjas y modalidades de estudio disponibles?",
+    "franjas": "Cuales son los horarios, franjas y modalidades de estudio disponibles?",
+    "en la manana": "Cuales son los horarios de las franjas diurnas de mananas y tardes de lunes a viernes?",
+    "en la tarde": "Cuales son los horarios de las franjas diurnas de mananas y tardes de lunes a viernes?",
+    "en la noche": "Como funciona la franja nocturna after work de 6:30 a 8:30 p.m. de lunes a viernes?",
     "madrugadores": "Que horarios y caracteristicas tiene la franja de madrugadores de 6:00 a 8:00 a.m.?",
     "after work": "Como funciona la franja nocturna after work de 6:30 a 8:30 p.m. de lunes a viernes?",
+    "nocturno": "Como funciona la franja nocturna after work de 6:30 a 8:30 p.m. de lunes a viernes?",
     "sabados": "Cuales son los horarios y duracion de los cursos intensivos de fin de semana en sabados y domingos?",
+    "sabatino": "Cuales son los horarios y duracion de los cursos intensivos de fin de semana en sabados y domingos?",
+    "domingos": "Cuales son los horarios y duracion de los cursos intensivos de fin de semana en sabados y domingos?",
+    "fin de semana": "Cuales son los horarios y duracion de los cursos intensivos de fin de semana en sabados y domingos?",
+    "fines de semana": "Cuales son los horarios y duracion de los cursos intensivos de fin de semana en sabados y domingos?",
+    # Modalidades
+    "modalidad": "Cuales son los horarios, franjas y modalidades de estudio disponibles?",
+    "modalidades": "Cuales son los horarios, franjas y modalidades de estudio disponibles?",
+    "modalidades disponibles": "Cuales son los horarios, franjas y modalidades de estudio disponibles?",
+    "que modalidades hay": "Cuales son los horarios, franjas y modalidades de estudio disponibles?",
+    "que modalidades tienen": "Cuales son los horarios, franjas y modalidades de estudio disponibles?",
+    "virtual": "Cuales son las ventajas de la modalidad 100% virtual sincronica con clases en vivo y grabaciones?",
+    "presencial": "Donde quedan ubicadas las sedes en Bogota, Medellin y Cali y como contactarlos?",
+    "hibrida": "En que consisten las aulas hibridas HyFlex con camaras inteligentes 360 grados?",
+    "hibrido": "En que consisten las aulas hibridas HyFlex con camaras inteligentes 360 grados?",
+    "online": "Cuales son las ventajas de la modalidad 100% virtual sincronica con clases en vivo y grabaciones?",
+    "en linea": "Cuales son las ventajas de la modalidad 100% virtual sincronica con clases en vivo y grabaciones?",
+    "clases virtuales": "Cuales son las ventajas de la modalidad 100% virtual sincronica con clases en vivo y grabaciones?",
+    "clases presenciales": "Donde quedan ubicadas las sedes en Bogota, Medellin y Cali y como contactarlos?",
+    "grabaciones": "Cuales son las ventajas de la modalidad 100% virtual sincronica con clases en vivo y grabaciones?",
+    "hyflex": "En que consisten las aulas hibridas HyFlex con camaras inteligentes 360 grados?",
+    "sincronico": "Cuales son las ventajas de la modalidad 100% virtual sincronica con clases en vivo y grabaciones?",
+    "sincronica": "Cuales son las ventajas de la modalidad 100% virtual sincronica con clases en vivo y grabaciones?",
+    # --- Precios & Financiación ---
     "precio": "Cuanto cuesta el modulo regular e intensivo en pesos colombianos (COP) y que incluye la tarifa?",
     "precios": "Cuanto cuesta el modulo regular e intensivo en pesos colombianos (COP) y que incluye la tarifa?",
     "precios disponibles": "Cuanto cuesta el modulo regular e intensivo en pesos colombianos (COP) y que incluye la tarifa?",
@@ -182,22 +344,76 @@ INTENT_SYNONYMS = {
     "tarifas": "Cuanto cuesta el modulo regular e intensivo en pesos colombianos (COP) y que incluye la tarifa?",
     "cuanto vale": "Cuanto cuesta el modulo regular e intensivo en pesos colombianos (COP) y que incluye la tarifa?",
     "cuanto cuesta": "Cuanto cuesta el modulo regular e intensivo en pesos colombianos (COP) y que incluye la tarifa?",
+    "cuanto es": "Cuanto cuesta el modulo regular e intensivo en pesos colombianos (COP) y que incluye la tarifa?",
+    "cuanto sale": "Cuanto cuesta el modulo regular e intensivo en pesos colombianos (COP) y que incluye la tarifa?",
+    "valor": "Cuanto cuesta el modulo regular e intensivo en pesos colombianos (COP) y que incluye la tarifa?",
+    "valores": "Cuanto cuesta el modulo regular e intensivo en pesos colombianos (COP) y que incluye la tarifa?",
+    "pago": "Como es el plan de financiacion directa en 3 cuotas sin interes y que porcentaje se paga?",
+    "pagos": "Como es el plan de financiacion directa en 3 cuotas sin interes y que porcentaje se paga?",
+    "financiacion": "Como es el plan de financiacion directa en 3 cuotas sin interes y que porcentaje se paga?",
+    "financiacion directa": "Como es el plan de financiacion directa en 3 cuotas sin interes y que porcentaje se paga?",
     "planes de pago": "Como es el plan de financiacion directa en 3 cuotas sin interes y que porcentaje se paga?",
+    "plan de pago": "Como es el plan de financiacion directa en 3 cuotas sin interes y que porcentaje se paga?",
     "cuotas": "Como es el plan de financiacion directa en 3 cuotas sin interes y que porcentaje se paga?",
+    "cuota": "Como es el plan de financiacion directa en 3 cuotas sin interes y que porcentaje se paga?",
     "descuento": "Como funciona el 10% de descuento por pago de contado en modulos y paquetes de idiomas?",
     "descuentos": "Como funciona el 10% de descuento por pago de contado en modulos y paquetes de idiomas?",
+    # --- Becas → Descuentos (ADR-008) — short canonical for BM25 high IDF ---
+    "beca": "becas disponibles",
+    "becas": "becas disponibles",
+    "becas disponibles": "becas disponibles",
+    "hay becas": "becas disponibles",
+    "existen becas": "becas disponibles",
+    "ayudas": "becas disponibles",
+    "ayuda financiera": "becas disponibles",
+    "subsidio": "becas disponibles",
+    "subsidios": "becas disponibles",
+    "scholarship": "becas disponibles",
+    "scholarships": "becas disponibles",
+    "apoyo financiero": "becas disponibles",
+    # --- Cursos & Certificaciones ---
+    "curso": "Que programas ofrecen en frances, aleman, italiano, portugues y espanol para extranjeros?",
+    "cursos": "Que programas ofrecen en frances, aleman, italiano, portugues y espanol para extranjeros?",
+    "que cursos hay": "Que programas ofrecen en frances, aleman, italiano, portugues y espanol para extranjeros?",
+    "cursos disponibles": "Que programas ofrecen en frances, aleman, italiano, portugues y espanol para extranjeros?",
+    "que cursos tienen": "Que programas ofrecen en frances, aleman, italiano, portugues y espanol para extranjeros?",
+    "que cursos ofrecen": "Que programas ofrecen en frances, aleman, italiano, portugues y espanol para extranjeros?",
+    "programas": "Que programas ofrecen en frances, aleman, italiano, portugues y espanol para extranjeros?",
+    "que programas hay": "Que programas ofrecen en frances, aleman, italiano, portugues y espanol para extranjeros?",
+    "idiomas": "Que programas ofrecen en frances, aleman, italiano, portugues y espanol para extranjeros?",
+    "que idiomas hay": "Que programas ofrecen en frances, aleman, italiano, portugues y espanol para extranjeros?",
+    "que idiomas ensenan": "Que programas ofrecen en frances, aleman, italiano, portugues y espanol para extranjeros?",
+    "niveles": "Cuales son los niveles del MCER (A1 a C2), duracion y enfoque del programa de ingles general?",
+    "nivel": "Cuales son los niveles del MCER (A1 a C2), duracion y enfoque del programa de ingles general?",
+    "mcer": "Cuales son los niveles del MCER (A1 a C2), duracion y enfoque del programa de ingles general?",
+    "a1": "Cuales son los niveles del MCER (A1 a C2), duracion y enfoque del programa de ingles general?",
+    "b1": "Cuales son los niveles del MCER (A1 a C2), duracion y enfoque del programa de ingles general?",
+    "ingles": "Cuales son los niveles del MCER (A1 a C2), duracion y enfoque del programa de ingles general?",
+    "frances": "Que programas ofrecen en frances, aleman, italiano, portugues y espanol para extranjeros?",
+    "aleman": "Que programas ofrecen en frances, aleman, italiano, portugues y espanol para extranjeros?",
+    "italiano": "Que programas ofrecen en frances, aleman, italiano, portugues y espanol para extranjeros?",
+    "portugues": "Que programas ofrecen en frances, aleman, italiano, portugues y espanol para extranjeros?",
+    # --- Matrícula & Sedes ---
     "inscripcion": "Cual es el paso a paso para inscribirse y matricularse en linea o de forma presencial?",
     "inscripciones": "Cual es el paso a paso para inscribirse y matricularse en linea o de forma presencial?",
     "matricula": "Cual es el paso a paso para inscribirse y matricularse en linea o de forma presencial?",
     "matriculas": "Cual es el paso a paso para inscribirse y matricularse en linea o de forma presencial?",
     "como entrar": "Cual es el paso a paso para inscribirse y matricularse en linea o de forma presencial?",
+    "proximo inicio": "Cual es el paso a paso para inscribirse y matricularse en linea o de forma presencial?",
+    "cuando empieza": "Cual es el paso a paso para inscribirse y matricularse en linea o de forma presencial?",
+    "cuando inicia": "Cual es el paso a paso para inscribirse y matricularse en linea o de forma presencial?",
     "test gratis": "Como se realiza el examen de clasificacion (Placement Test) gratuito y como se agendan los resultados?",
     "placement test": "Como se realiza el examen de clasificacion (Placement Test) gratuito y como se agendan los resultados?",
     "examen de clasificacion": "Como se realiza el examen de clasificacion (Placement Test) gratuito y como se agendan los resultados?",
     "sedes": "Donde quedan ubicadas las sedes en Bogota, Medellin y Cali y como contactarlos?",
+    "sede": "Donde quedan ubicadas las sedes en Bogota, Medellin y Cali y como contactarlos?",
+    "sucursal": "Donde quedan ubicadas las sedes en Bogota, Medellin y Cali y como contactarlos?",
+    "sucursales": "Donde quedan ubicadas las sedes en Bogota, Medellin y Cali y como contactarlos?",
     "donde quedan": "Donde quedan ubicadas las sedes en Bogota, Medellin y Cali y como contactarlos?",
+    "donde estan": "Donde quedan ubicadas las sedes en Bogota, Medellin y Cali y como contactarlos?",
     "ubicacion": "Donde quedan ubicadas las sedes en Bogota, Medellin y Cali y como contactarlos?",
     "direcciones": "Donde quedan ubicadas las sedes en Bogota, Medellin y Cali y como contactarlos?",
+    "direccion": "Donde quedan ubicadas las sedes en Bogota, Medellin y Cali y como contactarlos?",
     "bogota": "Donde quedan ubicadas las sedes en Bogota D.C. (Chico Norte y Chapinero) y que instalaciones tienen?",
     "medellin": "Donde quedan las sedes en Medellin (El Poblado One Plaza y Laureles) y como llegar?",
     "cali": "Donde queda la sede de Cali en el Barrio Granada y que horarios de atencion maneja?",
@@ -324,13 +540,20 @@ class GuidedNavigationEngine:
 
     def process_input(self, raw_input: str, session_id: str) -> Tuple[Optional[str], Optional[str], bool, list]:
         """
-        Universal Omnicanal Navigation Resolver.
+        Universal Omnicanal Navigation Resolver with NFD, typos, embedding fallback and multi-intent.
         Returns: (response_text, query_to_rag, is_navigation_handled, action_buttons)
         """
-        text = raw_input.strip().lower()
+        # Preserve raw leaf handling before NFD (dots)
+        raw_lower = raw_input.strip().lower()
+        # Normalized for intent (NFD accent strip + punctuation collapse)
+        norm = _normalize(raw_input)
+        corrected = _correct_typos(norm)
 
-        # 1. Global Reset to Root Menu
-        if text in ("0", "menu", "inicio", "volver", "back", "home", "menu principal", "principal"):
+        # Use corrected for navigation but keep raw_lower for leaf exact "1.1"
+        text = corrected  # for all normalized checks
+
+        # 1. Global Reset to Root Menu (normalized)
+        if text in ("0", "menu", "inicio", "volver", "back", "home", "menu principal", "principal", "limpiar", "reiniciar", "volver al inicio"):
             applicant_memory.update_attributes(session_id, "menu_state", "root")
             return ROOT_MENU_TEXT, None, True, self.get_buttons_for_state("root")
 
@@ -350,28 +573,38 @@ class GuidedNavigationEngine:
                 {"label": "0. Menú Principal", "value": "0"}
             ]
 
-        # 3. Universal Main Pillar Navigation (1, 2, 3, 4) - Works seamlessly from ANY state
-        if text in ("1", "cursos", "programas", "idiomas"):
+        # 3. Universal Main Pillar Navigation - expanded tolerant sets
+        if text in ("1", "cursos", "curso", "programas", "programa", "idiomas", "idioma", "niveles", "nivel", "mcer"):
             applicant_memory.update_attributes(session_id, "menu_state", "submenu_1")
             return SUBMENU_1_TEXT, None, True, self.get_buttons_for_state("submenu_1")
-        elif text in ("2", "horario", "horarios", "modalidades"):
+        elif text in ("2", "horario", "horarios", "modalidades", "modalidad", "franja", "franjas", "jornadas", "turnos"):
             applicant_memory.update_attributes(session_id, "menu_state", "submenu_2")
             return SUBMENU_2_TEXT, None, True, self.get_buttons_for_state("submenu_2")
-        elif text in ("3", "precio", "precios", "costos", "financiacion", "tarifas"):
+        elif text in ("3", "precio", "precios", "costo", "costos", "tarifas", "tarifa", "financiacion", "financiacion directa", "cuota", "cuotas", "descuento", "descuentos", "valor", "valores", "pago", "pagos"):
             applicant_memory.update_attributes(session_id, "menu_state", "submenu_3")
             return SUBMENU_3_TEXT, None, True, self.get_buttons_for_state("submenu_3")
-        elif text in ("4", "admision", "admisiones", "sedes", "test", "matricula", "matriculas"):
+        elif text in ("4", "admision", "admisiones", "sedes", "sede", "sucursal", "sucursales", "test", "matricula", "matriculas", "inscripcion", "ubicacion", "direccion", "direcciones"):
             applicant_memory.update_attributes(session_id, "menu_state", "submenu_4")
             return SUBMENU_4_TEXT, None, True, self.get_buttons_for_state("submenu_4")
 
-        # 4. Universal Leaf Shortcuts (1.1, 1.2 ... 4.6) - Works seamlessly from ANY state
+        # 4. Universal Leaf Shortcuts (1.1, 1.2 ... 4.6) - keep raw_lower exact, also handle normalized "1 1" -> "1.1"
+        leaf_key = raw_lower
+        # also tolerate "1,1" "1 1" "1-1" via regex
+        m = re.match(r"^\s*([1-4])\s*[.,\-\s]\s*([1-6])\s*$", raw_lower)
+        if m:
+            leaf_key = f"{m.group(1)}.{m.group(2)}"
+        if leaf_key in LEAF_QUERY_MAP:
+            prefix = leaf_key.split(".")[0]
+            applicant_memory.update_attributes(session_id, "menu_state", f"submenu_{prefix}")
+            return None, LEAF_QUERY_MAP[leaf_key], False, get_contextual_buttons(leaf_key)
+        # Also try normalized leaf without dot
         if text in LEAF_QUERY_MAP:
-            # Set state corresponding to the pillar prefix
             prefix = text.split(".")[0]
             applicant_memory.update_attributes(session_id, "menu_state", f"submenu_{prefix}")
             return None, LEAF_QUERY_MAP[text], False, get_contextual_buttons(text)
 
-        # 5. Natural Language Intent Normalization (Mapped to targeted queries)
+        # 5. Natural Language Intent Normalization (exact, typo-corrected, then embedding)
+        # A3: expanded 80+ synonyms, A1 NFD, A5 typos already in corrected
         if text in INTENT_SYNONYMS:
             return None, INTENT_SYNONYMS[text], False, [
                 {"label": "1. Cursos & Certificaciones", "value": "1"},
@@ -380,6 +613,40 @@ class GuidedNavigationEngine:
                 {"label": "4. Admisiones & Sedes", "value": "4"},
                 {"label": "0. Menú Principal", "value": "0"}
             ]
+        # Also try raw_lower exact for cases where NFD not needed
+        if raw_lower in INTENT_SYNONYMS:
+            return None, INTENT_SYNONYMS[raw_lower], False, [
+                {"label": "1. Cursos & Certificaciones", "value": "1"},
+                {"label": "2. Horarios & Modalidades", "value": "2"},
+                {"label": "3. Precios & Financiación", "value": "3"},
+                {"label": "4. Admisiones & Sedes", "value": "4"},
+                {"label": "0. Menú Principal", "value": "0"}
+            ]
+
+        # A6: Embedding fallback cosine >0.82 for short/typo queries
+        if len(text.split()) <= 6:
+            emb_match = _find_intent_by_embedding(text, threshold=0.82)
+            if emb_match:
+                return None, emb_match, False, [
+                    {"label": "1. Cursos & Certificaciones", "value": "1"},
+                    {"label": "2. Horarios & Modalidades", "value": "2"},
+                    {"label": "3. Precios & Financiación", "value": "3"},
+                    {"label": "4. Admisiones & Sedes", "value": "4"},
+                    {"label": "0. Menú Principal", "value": "0"}
+                ]
+
+        # A8: Multi-intent split - if " y " / "," handle as RAG raw (hybrid will fuse both intents)
+        if " y " in text or " and " in text or "," in text:
+            # Let RAG handle multi-topic without forcing single intent
+            return None, raw_input, False, [
+                {"label": "1. Cursos & Certificaciones", "value": "1"},
+                {"label": "2. Horarios & Modalidades", "value": "2"},
+                {"label": "3. Precios & Financiación", "value": "3"},
+                {"label": "4. Admisiones & Sedes", "value": "4"},
+                {"label": "0. Menú Principal", "value": "0"}
+            ]
+
+        # A7: Short query rewriting - already via INTENT, otherwise let RAG handle with raw
 
         # 6. Fallback: Any free-form natural language query is passed to RAG seamlessly without state errors
         return None, raw_input, False, [

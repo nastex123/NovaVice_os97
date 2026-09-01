@@ -181,15 +181,16 @@ class ChromaVectorStore:
         return len(documents)
 
     def embed_query(self, query_text: str) -> List[float]:
-        # Unified query embedding for semantic cache (uses same engine as fallback or Chroma's embedding function).
+        # Unified query embedding for semantic cache (dense Chroma first, fallback TF-IDF)
         if self.use_chroma:
             try:
-                # Chroma's DefaultEmbeddingFunction is callable; if available, use it for consistency
                 if hasattr(self, "embedding_fn"):
-                    # Chroma 0.4+ embedding function expects list[str]
                     embs = self.embedding_fn([query_text])
-                    if embs and len(embs) > 0 and isinstance(embs[0], list):
-                        return [float(x) for x in embs[0]]
+                    if embs and len(embs) > 0:
+                        first = embs[0]
+                        # Handle both list and numpy array from DefaultEmbeddingFunction
+                        if hasattr(first, "__len__") and len(first) > 10:
+                            return [float(x) for x in first]
             except Exception:
                 pass
         # Fallback TF-IDF embedding (also works when Chroma is active as semantic layer)

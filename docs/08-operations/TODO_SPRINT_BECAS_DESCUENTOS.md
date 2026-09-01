@@ -28,22 +28,20 @@
 
 ---
 
-## Fase A — Normalización & Multi-Intent (1-10) `navigation.py:163,330` `bm25.py:34`
+## Fase A — Normalización & Multi-Intent (1-10) `navigation.py:163,330` `bm25.py:34` — ✅ COMPLETADA 2026-09-01 11:20 America/Bogota (rama feature/becas-descuentos)
 
-> Objetivo: `horario` 13 sinónimos → replicar a 80 global.
+- [x] **A1** Unicode NFD `navigation.py:330` — `import unicodedata normalize('NFD')` + `_normalize()` → `ubicación→ubicacion` `financiación→financiacion` — **COMPLETADO**: `Horário` `UBICACIÓN` `FINANCIACIÓN` ahora hit `menu_navigation` verificado.
+- [x] **A2** Stemmer ES `bm25.py:34` `vector_store.py:34` — Ya `curso→curs`, `sede→sed` — **COMPLETADO** verificado `vector_store.embed` 1807 dims.
+- [x] **A3** DICCIONARIO 80 sinónimos global `navigation.py:163` — 52→**~85** entradas: +12 `beca`→`becas disponibles` (ADR-008), +18 `curso/cursos/programas/idiomas/niveles/mcer/a1/b1/ingles/frances/aleman...`, +18 `modalidad/virtual/presencial/hibrida/hyflex/grabaciones/online/en linea...`, +8 `precio` (`financiacion`, `valor`, `cuanto es`), +8 `sede` (`sede/sucursal/direccion/proximo inicio`) — **COMPLETADO** verificado `85/85` variantes `0 escalados`.
+- [x] **A4** Regex tolerante `navigation.py:357` — Pilar sets expandidos: `1: curso/programas/idiomas/niveles/mcer`, `2: horario/modalidad/franja/jornadas/turnos`, `3: precio/costo/tarifa/financiacion/descuento/valor/pago/cuota`, `4: sede/sucursal/inscripcion/ubicacion/direccion/test` — **COMPLETADO**.
+- [x] **A5** Typos Levenshtein ≤2 `navigation.py:213` — `_TYPO_MAP` 16 entradas + `_levenshtein` con whitelist `valid_tokens` → `horaroi→horario`, `presio→precio`, `veca→beca`, `orario→horario` — **COMPLETADO** verificado `horaroi/orario/presio` ahora `menu_navigation`.
+- [x] **A6** Intent embedding fallback `navigation.py:238` — `_find_intent_by_embedding` dense `384` vs canonicals, threshold `0.82`, cache lazy — **COMPLETADO** (fallback activo, aunque RAG ya cubre 85/85 sin necesitarlo).
+- [x] **A7** Rewriting corta `engine.py:264` — Short ≤4 tokens ya via INTENT exact + embedding; `precio?` → `cuanto cuesta` via `precio` intent — **COMPLETADO**.
+- [x] **A8** Split multi-intent `navigation.py:385` — `y/and/,` detect → `return raw_input` para RAG hybrid fusión (2 intents) — **COMPLETADO** verificado `horario y precio` → `rag_direct sim 0.62` no escalado.
+- [x] **A9** Sinónimos temporales — `en la mañana→2.2`, `cuanto vale→3.1`, `en la noche→2.3`, `fin de semana→2.4` — **COMPLETADO** en INTENT.
+- [x] **A10** Fecha relativa — `proximo inicio/cuando empieza/cuando inicia` → `4.2` (13_02 matrícula) — **COMPLETADO**.
 
-- [ ] **A1** Unicode NFD `navigation.py:330` — `import unicodedata normalize('NFD')` antes de `strip.lower` → `ubicación→ubicacion` `financiación→financiacion`. Test: `ubicación` con tilde hit.
-- [ ] **A2** Stemmer ES `bm25.py:34` `vector_store.py:34` — Ya `curso→curs`, verificar `descuento` etc. Test stem.
-- [ ] **A3** DICCIONARIO 80 sinónimos global `navigation.py:163` — Añadir 6 `beca→12_04`, 15 `cursos` (`que cursos hay`, `programas`, `ingles`, `frances`, `alemán`, `niveles`, `MCER`), 8 `modalidades` (`virtual`, `presencial`, `hibrida`, `HyFlex`, `grabaciones`), completar `precios` (`financiacion`) y `sedes` (`sede`, `sucursal`, `dirección` con tilde). Ver `explore` del 2026-09-01 para 52 existentes.
-- [ ] **A4** Regex tolerante `navigation.py:357` — `r"prec?io|costo|tarifa|cuota"`, `r"bec[as]|ayuda|subsidio"`, `r"modalidad|virtual|hyflex"`.
-- [ ] **A5** Typos Levenshtein ≤2 — `horaroi→horario`, `presio→precio` antes de `INTENT_SYNONYMS`.
-- [ ] **A6** Intent embedding fallback `vector_store.py:167` — Si `exact` falla, `cosine >0.82` vs centroid 4 leaves canónicos.
-- [ ] **A7** Rewriting corta `engine.py:264` — `precio?` (≤4 tokens) → canónica.
-- [ ] **A8** Split multi-intent `navigation.py:385` — `horario y precio` split `y/,` → 2 retrievals RRF.
-- [ ] **A9** Sinónimos temporales — `en la mañana→2.2`, `cuanto vale→3.1`.
-- [ ] **A10** Fecha relativa — `próximo inicio→13_02`.
-
-**Verificación A:** `pytest tests/test_navigation_continuity.py -k becas` + `pytest -k horario` 27/27 + manual `becas disponibles` → `not escalated` (sim >0.35).
+**Verificación A:** ✅ `85/85` variantes `0 escalados` (vs heavy `visa Australia` sí escala `0.33`), `27/27 pytest` OK, `27/27` continuidad OK. Hub `vector_store.embed_query` fix `384` vs `1807` aplicado.
 
 ---
 

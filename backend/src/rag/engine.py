@@ -144,6 +144,60 @@ class PurePythonRAGEngine:
 
         effective_query = mapped_query or query
 
+        # D39 Hard rule + pending heavy check (2-phase)
+        # If user previously got clarification and now says "sí", create ticket
+        _norm_pending = query.strip().lower()
+        # Normalize sí variants
+        try:
+            import unicodedata
+            _norm_pending = unicodedata.normalize("NFD", _norm_pending)
+            _norm_pending = "".join(c for c in _norm_pending if unicodedata.category(c) != "Mn")
+        except Exception:
+            pass
+        pending = applicant_memory.get_session(session_id).get("attributes", {}).get("pending_heavy_query")
+        if pending and _norm_pending in ("si", "sí", "si por favor", "si quiero", "si pasar", "si pasame", "si asesor", "si pasar a asesor"):
+            # User confirmed escalation
+            ticket = escalation_dispatcher.create_ticket(
+                query=pending.get("query", query),
+                user_id=user_id,
+                confidence_score=pending.get("confidence", 0.0),
+                reason="user_confirmed_heavy_escalation"
+            )
+            await escalation_dispatcher.dispatch_webhook(ticket)
+            metrics_bus.record_escalation()
+            metrics_bus.record_query(cached=False, latency=time.time() - start_time)
+            applicant_memory.update_attributes(session_id, "pending_heavy_query", None)
+            return {
+                "status": "escalated",
+                "response": (
+                    f"**Asesoría Académica - Nova Idiomas**\n\n"
+                    f"Perfecto, he creado tu caso **#{ticket['ticket_id']}** con tu consulta: *\"{pending.get('query', query)}\"*.\n\n"
+                    f"Nuestro equipo de admisiones te contactará en <2h.\n\n"
+                    f"**Canales directos mientras tanto:**\n"
+                    f"- **WhatsApp:** [+57 300 912 3456](https://wa.me/573009123456)\n"
+                    f"- **Correo:** {self.settings.admissions_office_email}\n\n"
+                    f"¿Deseas seguir explorando? Prueba `0` para menú."
+                ),
+                "source_documents": [],
+                "confidence_score": pending.get("confidence", 0.0),
+                "escalated_to_human": True,
+                "escalation_ticket_id": ticket["ticket_id"],
+                "cached": False,
+                "mode": "escalation",
+                "latency_ms": round((time.time() - start_time) * 1000, 1),
+                "action_buttons": [
+                    {"label": "0. Menú Principal", "value": "0"},
+                    {"label": "1. Cursos & Certificaciones", "value": "1"},
+                    {"label": "2. Horarios & Modalidades", "value": "2"},
+                    {"label": "3. Precios & Financiación", "value": "3"},
+                ]
+            }
+        if pending and _norm_pending in ("no", "no gracias", "no por ahora", "no quiero", "volver", "0"):
+            applicant_memory.update_attributes(session_id, "pending_heavy_query", None)
+            # Let normal flow continue (treat as new query "no" will be handled as menu reset below, but we already passed reset? So just clear and continue)
+            # If user said "no", we don't escalate, just clear pending and continue to normal RAG for "no" (which will be menu)
+            pass
+
         # 1. Pre-flight Guardrail Check
         is_safe, safety_reason = guardrails.inspect_query(effective_query)
         if not is_safe:
@@ -234,49 +288,67 @@ class PurePythonRAGEngine:
                 "action_buttons": [{"label": "0. Menú Principal", "value": "0"}, {"label": "9. Otra Consulta al Asesor", "value": "9"}]
             }
 
-        # 5. Out-of-Scope Detection & Human Escalation
-        if not guardrails.evaluate_relevance(top_similarity) or not chunks:
-            ticket = escalation_dispatcher.create_ticket(
-                query=query,
-                user_id=user_id,
-                confidence_score=top_similarity,
-                reason="knowledge_gap_escalation"
-            )
-            await escalation_dispatcher.dispatch_webhook(ticket)
-            metrics_bus.record_escalation()
+        # 5. Heavy vs Pilar Handling (D31, D33, D38, D39) — threshold 0.35 pilar vs 0.50 heavy, hard rule + 2-phase
+        pilar_keywords = {
+            "horario","horarios","precio","precios","costo","costos","tarifa","tarifas","valor","valores","pago","pagos","cuota","cuotas","descuento","descuentos","financiacion",
+            "curso","cursos","programa","programas","idioma","idiomas","nivel","niveles","mcer","a1","b1","ingles","frances","aleman","italiano","portugues","ielts","toefl","cambridge","delf","goethe",
+            "modalidad","modalidades","virtual","presencial","hibrida","hibrido","online","linea","grabaciones","hyflex","sincronico","sincronica",
+            "sede","sedes","sucursal","sucursales","ubicacion","direccion","direcciones","bogota","medellin","cali","donde","quedan","estan",
+            "beca","becas","ayuda","ayudas","subsidio","subsidios","scholarship","apoyo","inscripcion","matricula","matriculas","test","placement","congelar","asistencia","reembolso","clubes","horario","jornada","turno"
+        }
+        very_heavy_keywords = {"visa","australia","nueva zelanda","nueva zelanda","beca 100%","otorga beca","otorgame beca","mascota","iguana","perro","gato","tutela","demanda","abogado","scholarship 100%","100% gratis","beca del 100","scholarship 100"}
+        _eff_low = effective_query.lower()
+        _q_low = query.lower()
+        is_pilar_raw = any(kw in _eff_low for kw in pilar_keywords) or any(kw in _q_low for kw in pilar_keywords)
+        is_very_heavy = any(kw in _q_low for kw in very_heavy_keywords) or any(kw in _eff_low for kw in very_heavy_keywords)
+        # D39 hard rule: pilares never heavy unless very_heavy (beca 100% overrides)
+        is_pilar = is_pilar_raw and not is_very_heavy
+        query_tokens = effective_query.split()
+        is_heavy_detector = len(query_tokens) > 15 and top_similarity < 0.25 and not is_pilar
+        threshold = self.settings.similarity_threshold_pilar if is_pilar else self.settings.similarity_threshold
 
+        # D39 hard rule: pilares (not very heavy) never auto-escalate, just return best chunk even if low
+        if is_pilar and (not chunks or top_similarity < threshold):
+            if not chunks:
+                chunks = hybrid_retriever.retrieve(effective_query, top_k=3) or chunks
+            # Fall through to synthesis
+            pass
+        elif (not chunks or top_similarity < threshold) and (is_very_heavy or is_heavy_detector or top_similarity < threshold):
+            # D32 2-phase for heavy: store pending and ask Sí/No instead of immediate ticket
+            # Check D34 auto-adjust if escalation_rate high
+            if metrics_bus.escalation_rate > 0.25 and threshold == 0.50:
+                # Auto-baja to 0.40 to reduce escalations
+                threshold = 0.40
+            applicant_memory.update_attributes(session_id, "pending_heavy_query", {"query": query, "confidence": top_similarity})
+            preview = ""
+            if chunks:
+                preview = chunks[0].get("text", "")[:220].replace("\n", " ")
+                preview = f"\n\n> *Lo más cercano que encontré:* {preview}...\n"
             response_text = (
-                f"**Asesoria Academica - Nova Idiomas**\n\n"
-                f"Hola. Actualmente no cuento con el detalle exacto de esa consulta especifica en la base de datos automatizada, "
-                f"pero con gusto te ayudamos de forma directa.\n\n"
-                f"He guardado tu consulta con el caso de seguimiento **#{ticket['ticket_id']}** para que nuestro equipo de admisiones pueda orientarte.\n\n"
-                f"**Canales de atencion directa:**\n"
+                f"**Consulta fuera del alcance pilar — ¿Pasamos a asesor?**\n\n"
+                f"No encontré un dato verificado con alta confianza (sim {top_similarity:.2f} < {threshold:.2f}) para: *\"{query}\"*.{preview}\n"
+                f"¿Quieres que cree un caso para el equipo humano de admisiones? Responde **Sí** para crear ticket o **No** para volver al menú.\n\n"
+                f"**Canales directos mientras tanto:**\n"
                 f"- **WhatsApp:** [+57 300 912 3456](https://wa.me/573009123456)\n"
-                f"- **Correo:** {self.settings.admissions_office_email}\n\n"
-                f"Tambien puedes explorar nuestras opciones principales o realizar una nueva pregunta."
+                f"- **Correo:** {self.settings.admissions_office_email}"
             )
-
             latency = time.time() - start_time
             metrics_bus.record_query(cached=False, latency=latency)
-
-            escalation_response = {
-                "status": "escalated",
+            return {
+                "status": "clarification",
                 "response": response_text,
-                "source_documents": [],
+                "source_documents": [f"{c.get('metadata',{}).get('source','doc')}" for c in chunks[:2]] if chunks else [],
                 "confidence_score": top_similarity,
-                "escalated_to_human": True,
-                "escalation_ticket_id": ticket["ticket_id"],
+                "escalated_to_human": False,
                 "cached": False,
-                "mode": "escalation",
+                "mode": "clarification",
                 "latency_ms": round(latency * 1000, 1),
                 "action_buttons": [
-                    {"label": "1. Cursos & Certificaciones", "value": "1"},
-                    {"label": "2. Horarios & Modalidades", "value": "2"},
-                    {"label": "3. Precios & Financiación", "value": "3"},
-                    {"label": "0. Menú Principal", "value": "0"}
+                    {"label": "✅ Sí, pasar a asesor", "value": "sí"},
+                    {"label": "❌ No, gracias", "value": "no"},
+                    {"label": "0. Menú Principal", "value": "0"},
                 ]
             }
-            return escalation_response
 
         # 5. Context Assembly & Prompt Construction
         session_data = applicant_memory.get_session(session_id)

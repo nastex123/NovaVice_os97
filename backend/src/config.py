@@ -20,7 +20,9 @@ class Settings(BaseSettings):
     # Vector Storage and Retrieval
     chroma_collection_name: str = "idiomas_knowledge_base"
     similarity_threshold: float = 0.50
+    similarity_threshold_pilar: float = 0.35
     top_k_results: int = 3
+    # Heavy-only escalation: only escalate if very heavy and user confirms Sí
 
     # Advisor Engine Selection (OpenCode vs AGY / Antigravity)
     advisor_backend: str = "opencode"  # "opencode" or "agy"

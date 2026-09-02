@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [2026-09-02 15:37] [Docs/SENA]
+- **Suite Integral de Evidencias de Competencias Laborales SENA (`SENA/README.md`, `SENA/part1/`, `SENA/part2/`):**
+  - **Estructuración en Dos Partes Normativas:** Creada la carpeta raíz `SENA/` organizada de forma modular según las dos normas de competencia solicitadas:
+    - **Parte 1 — Norma 220501095 (*Diseñar la solución de software...*):**
+      - `00_GUIA_ENTREGA_PARTE_1.md`: Ficha técnica, trazabilidad con rúbrica y enlace a Google Forms (`https://forms.gle/xtd48BgaPFEHzRAJ7`).
+      - `01_DOCUMENTO_DISENO_SOFTWARE.md`: Documento de diseño con introducción, problema, objetivos, actores, matriz de 14 RF y 10 RNF, arquitectura multicapa y justificación técnica.
+      - `02_DIAGRAMAS_UML.md`: Diagramas en Mermaid de Casos de Uso, Clases del dominio/servicios, Secuencias (RAG estándar y escalamiento humano) y Actividades.
+      - `03_PROTOTIPO_SOLUCION_SOFTWARE.md`: Wireframes y mockups de terminal principal CRT, gestión de oferta, gestión de tickets para asesores y formularios de placement test/escalamiento.
+      - `04_MODELO_BASE_DATOS.md`: Modelo conceptual en 3FN, diagrama ERD en Mermaid, diccionario de 9 entidades y script DDL SQL estructurado para PostgreSQL.
+    - **Parte 2 — Norma 220501096 (*Desarrollar solución de software...*):**
+      - `00_GUIA_ENTREGA_PARTE_2.md`: Ficha técnica, trazabilidad y enlace a Google Forms (`https://forms.gle/485g3veWL9CnBGKC7`).
+      - `01_DOCUMENTO_TECNICO_CODIGO_FUENTE.md`: Estructura del código, módulos, y formalización de los 6 algoritmos matemáticos de optimización (Okapi BM25 con lematización, Similitud Coseno, Reciprocal Rank Fusion k=60, Programación Dinámica Levenshtein, Caché SHA-256 en O(1) y Físicas WebGL PixiJS), junto con bloques de código fuente reales comentados.
+      - `02_INSTRUCTIVO_USO_SOLUCION_SOFTWARE.md`: Manual de usuario con requisitos técnicos, instalación en un clic (`install.bat`/`install.sh`), ejecución con el supervisor `run.py`/`start.bat`, manual de funciones y vistas del sistema.
+      - `03_ENTREGA_SOLUCION_SOFTWARE.md`: Ficha de entrega de la solución de software funcional: repositorio GitHub, endpoints API REST, persistencia y validación de 27/27 pruebas Pytest aprobadas.
+  - **Ficha Maestra `SENA/README.md`:** Ficha institucional consolidada con datos del candidato/aprendiz y matriz de trazabilidad con ambos formularios de entrega.
+- Motivo: Cumplir con la estructuración documental rigurosa de las dos evidencias de producto del SENA para certificación de competencias laborales.
+
 ### [2026-09-01 10:46] [Docs]
 - **Documentación Fase 0 — Becas=Descuentos para Retomar en Otra PC (`docs/08-operations/TODO_SPRINT_BECAS_DESCUENTOS.md`, `docs/08-operations/SESSION_HANDOFF_BECAS_DESCUENTOS.md`, `backend/data/documents/12_04_becas_descuentos_aclaratoria.md`, `docs/09-decisions/ADR-008-becas-como-descuentos.md`):**
   - **TODO y Handoff en `docs/` (a petición `en docs`):** Creados `TODO_SPRINT_BECAS_DESCUENTOS.md` (50 pasos Fase A-E + 11 Fase 0, checkboxes `0/50`, con `file:line` y test `pytest -k becas`) y `SESSION_HANDOFF_BECAS_DESCUENTOS.md` (repo, estado 27/27, decisiones, 3 comandos `git pull` para retomar).

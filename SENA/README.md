@@ -45,8 +45,8 @@ SENA/
 
 ## 📋 Datos del Candidato / Aprendiz
 
-- **Nombre del Candidato:** `[Nombre del Aprendiz]`
-- **Documento de Identidad:** `[C.C. / T.I. Número]`
+- **Nombre del Candidato:** `Brandon Jose Carranza Rangel`
+- **Documento de Identidad:** `C.C. 1007892884`
 - **Número de Ficha / Grupo:** `[Ficha SENA]`
 - **Centro de Formación:** `[Centro de Formación SENA]`
 - **Regional:** `[Regional SENA]`

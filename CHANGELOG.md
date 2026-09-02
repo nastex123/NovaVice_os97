@@ -21,7 +21,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
       - `01_DOCUMENTO_TECNICO_CODIGO_FUENTE.md`: Estructura del código, módulos, y formalización de los 6 algoritmos matemáticos de optimización (Okapi BM25 con lematización, Similitud Coseno, Reciprocal Rank Fusion k=60, Programación Dinámica Levenshtein, Caché SHA-256 en O(1) y Físicas WebGL PixiJS), junto con bloques de código fuente reales comentados.
       - `02_INSTRUCTIVO_USO_SOLUCION_SOFTWARE.md`: Manual de usuario con requisitos técnicos, instalación en un clic (`install.bat`/`install.sh`), ejecución con el supervisor `run.py`/`start.bat`, manual de funciones y vistas del sistema.
       - `03_ENTREGA_SOLUCION_SOFTWARE.md`: Ficha de entrega de la solución de software funcional: repositorio GitHub, endpoints API REST, persistencia y validación de 27/27 pruebas Pytest aprobadas.
-  - **Ficha Maestra `SENA/README.md`:** Ficha institucional consolidada con datos del candidato/aprendiz y matriz de trazabilidad con ambos formularios de entrega.
+    - **Ficha Maestra `SENA/README.md`:** Ficha institucional consolidada con datos del candidato/aprendiz y matriz de trazabilidad con ambos formularios de entrega.
+  - **Compilación Automatizada a PDF (`scripts/generate_sena_pdfs.js`):** Generados 9 documentos PDF institucionales correspondientes a las evidencias de las partes 1 y 2 con renderizado de fórmulas KaTeX, diagramas Mermaid vectoriales y estilos de impresión, excluyendo `part1/03_PROTOTIPO_SOLUCION_SOFTWARE.md` a solicitud expresa del usuario para toma de capturas manuales.
 - Motivo: Cumplir con la estructuración documental rigurosa de las dos evidencias de producto del SENA para certificación de competencias laborales.
 
 ### [2026-09-01 10:46] [Docs]

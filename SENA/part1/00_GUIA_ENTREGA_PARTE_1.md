@@ -8,6 +8,8 @@
 - **Enlace Oficial de Radicación SENA:** [https://forms.gle/xtd48BgaPFEHzRAJ7](https://forms.gle/xtd48BgaPFEHzRAJ7)
 - **Fecha de Elaboración:** 2026-09-02 (Zona Horaria: `America/Bogota`)
 - **Sistema Diseñado:** Asistente Inteligente de Admisiones con RAG Híbrido y Terminal Retro ("Nova OS '97")
+- **Candidato / Aprendiz:** Brandon Jose Carranza Rangel
+- **Documento de Identidad:** C.C. 1007892884
 - **Organización / Entorno de Aplicación:** Nova Idiomas Colombia
 
 ---

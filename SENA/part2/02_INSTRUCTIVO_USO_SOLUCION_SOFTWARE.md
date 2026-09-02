@@ -4,8 +4,8 @@
 
 - **Programa de Formación:** Análisis y Desarrollo de Software (ADSO)
 - **Norma de Competencia:** 220501096 — *Desarrollar solución de software de acuerdo con especificaciones de diseño y marcos de referencia.*
-- **Candidato / Aprendiz:** `[Nombre del Aprendiz]`
-- **Documento de Identidad:** `[C.C. / T.I. Número]`
+- **Candidato / Aprendiz:** `Brandon Jose Carranza Rangel`
+- **Documento de Identidad:** `C.C. 1007892884`
 - **Organización Beneficiaria:** Nova Idiomas Colombia
 - **Fecha de Elaboración:** 2026-09-02 (Zona Horaria: `America/Bogota`)
 - **Versión del Manual:** v2.6.0

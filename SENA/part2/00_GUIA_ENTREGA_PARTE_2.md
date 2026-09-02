@@ -8,6 +8,8 @@
 - **Enlace Oficial de Radicación SENA:** [https://forms.gle/485g3veWL9CnBGKC7](https://forms.gle/485g3veWL9CnBGKC7)
 - **Fecha de Elaboración:** 2026-09-02 (Zona Horaria: `America/Bogota`)
 - **Sistema Desarrollado:** Asistente Inteligente de Admisiones con RAG Híbrido ("Nova OS '97")
+- **Candidato / Aprendiz:** Brandon Jose Carranza Rangel
+- **Documento de Identidad:** C.C. 1007892884
 - **Repositorio Oficial:** `https://github.com/nastex123/NovaVice_os97.git`
 
 ---

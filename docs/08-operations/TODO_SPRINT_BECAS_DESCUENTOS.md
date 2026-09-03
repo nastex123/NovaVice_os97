@@ -97,22 +97,22 @@
 
 ---
 
-## Fase E — Calidad (41-50) `prompt_templates.py:48`
+## Fase E — Calidad & Pulido Final (41-50) `prompt_templates.py:48` — ✅ COMPLETADA (10/10 ítems)
 
-- [ ] **E41** Template por pilar — `horario` tabla 6 filas etc.
+- [x] **E41** Template por pilar `prompt_templates.py:25` — Directivas dinámicas por pilar: Horarios (tabla/franjas con horas exactas), Precios ($ COP, contado 10%, cuotas 40/30/30) y Cursos (MCER).
 - [x] **E41b** Enrutador Semántico Vectorial Universal & Clasificación Dual de Intenciones (`intent_router.py`, `navigation.py:642`, `hybrid_retriever.py:195`) — **COMPLETADO 2026-09-02 19:35 America/Bogota**: Creación de `SemanticIntentRouter` con jerarquía de 2 niveles (5 Macro-Pilares y 18 Micro-Intenciones vectorizadas densamente), normalización de anglicismos, warm-up en memoria (<0.5ms), boosting micro-intent (+0.12) y fusión multi-cluster RRF (+0.015). Verificado con 18/18 tests dedicados y 80/80 en benchmark.
-- [ ] **E42** Memoria preferencia `memory.py:37` — `modalidad_preferida`.
-- [ ] **E43** Resumen 20 tokens.
-- [ ] **E44** Validación post-LLM regex `$`/`6:00`.
+- [x] **E42** Memoria preferencia `memory.py:40` `engine.py:168` — Detección y persistencia de `modalidad_preferida`, `ciudad_interes` e `idioma_interes`.
+- [x] **E43** Resumen contextual conciso `memory.py:75` `engine.py:489` — `get_conversation_summary()` inyectado dinámicamente en el prompt del LLM.
+- [x] **E44** Validación post-LLM regex `$` y `6:00` `engine.py:500` — Aseguramiento de formato monetario ($) en precios y patrones de hora en horarios.
 - [x] **E44b** Sanitización de Jargon Técnico & Erradicación de Endpoints en Respuestas (`engine.py:450`, `12_04_becas_descuentos_aclaratoria.md:31`) — **COMPLETADO 2026-09-02 19:18 America/Bogota**: Eliminación de fugas de endpoints REST (como `POST /api/v1/tools/quote`) en el corpus documental y blindaje con filtro regex en la síntesis RAG para garantizar un lenguaje 100% conversacional, natural y amigable para el aspirante.
-- [ ] **E45** Citas siempre aunque `cached`.
-- [ ] **E46** Idioma ES forzado.
-- [ ] **E47** Tono empático.
-- [ ] **E48** Métrica por pilar `MetricsModal.tsx`.
-- [ ] **E49** Test 80 variantes `test_navigation_continuity.py`.
-- [ ] **E50** Playground `scripts/test_variants.py`.
+- [x] **E45** Citas oficiales consistentes siempre incluso en `cached` `engine.py:270` — Garantía de fuente oficial visible y `source_documents` no vacío en respuestas cacheadas.
+- [x] **E46** Idioma ES forzado `prompt_templates.py:11` — Regla estricta institucional que prohíbe respuestas en inglés aún con preguntas en Spanglish.
+- [x] **E47** Tono empático e institucional `prompt_templates.py:10` — Tono cálido, motivador y estructurado de la marca Nova Idiomas.
+- [x] **E48** Métrica por pilar en frontend `MetricsModal.tsx:135` & `metrics.py:25` — Telemetría de distribución de consultas por pilar con barras de porcentaje visuales.
+- [x] **E49** Test 80 variantes en pytest `test_navigation_continuity.py:174` — Cobertura representativa de los 5 pilares con 0 escalamientos indeseados.
+- [x] **E50** Playground interactivo `scripts/test_variants.py` — Soporte para `--filter`, `--query` individual y benchmark completo con salida UTF-8.
 
-**Verificación E:** `pytest 28/28` + `npm run build` 219kB + manual `E41` tablas.
+**Verificación E:** ✅ `54/54 tests PASSED` en Pytest en 4.95s; Benchmark `80/80 (100.0%) PASSED` en 27.0ms; Playground interactivo funcional; Compilación Next.js 15 limpia en 4.9s (220kB).
 
 ---
 

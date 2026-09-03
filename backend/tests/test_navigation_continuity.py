@@ -170,3 +170,31 @@ async def test_failure_memory_2x_anti_stagnation_c23():
     assert "Orientación Inmediata" in r2["response"] or "opciones principales" in r2["response"]
     assert any(b["value"] == "9" for b in r2["action_buttons"])
 
+
+@pytest.mark.asyncio
+async def test_80_variants_representative_coverage_e49():
+    """
+    E49: Evaluates representative queries from the 80 realistic variants
+    covering all 5 pillars with confidence >= 0.35 and 0 unwanted escalations.
+    """
+    sample_variants = [
+        ("precios", "cuanto cuesta el curso de ingles"),
+        ("precios", "metodos de pago tarjeta debito credito pse"),
+        ("horarios", "horario de clases por la manana"),
+        ("horarios", "horario nocturno de 6:30 a 8:30"),
+        ("cursos", "que cursos de idiomas ofrecen"),
+        ("cursos", "preparacion para examen ielts"),
+        ("sedes", "direccion de la sede bogota chico"),
+        ("sedes", "sede medellin el poblado direccion"),
+        ("becas", "descuentos para afiliados a cajas de compensacion"),
+        ("becas", "tienen becas completas del 100 por ciento"),
+    ]
+
+    for pillar, q in sample_variants:
+        res = await rag_engine.answer_query(q, session_id=f"test_var_{pillar}")
+        assert res["status"] == "success", f"Query failed for pillar {pillar}: '{q}'"
+        assert res["escalated_to_human"] is False, f"Unwanted escalation for '{q}'"
+        assert res["confidence_score"] >= 0.35, f"Confidence too low for '{q}': {res['confidence_score']}"
+        assert len(res["source_documents"]) > 0, f"No source documents for '{q}'"
+
+

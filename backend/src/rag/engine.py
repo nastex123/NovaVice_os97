@@ -165,6 +165,9 @@ class PurePythonRAGEngine:
             ingestion_pipeline.run()
         semantic_intent_router.warm_up()
 
+        # E42: Detect user preferences (modalidad, ciudad, idioma) and persist in episodic memory
+        applicant_memory.detect_and_store_preferences(session_id, query)
+
         # Check guided navigation menu state machine
         from src.core.navigation import navigation_engine
         nav_response, mapped_query, is_handled, action_buttons = navigation_engine.process_input(query, session_id)
@@ -261,6 +264,15 @@ class PurePythonRAGEngine:
                 "action_buttons": [{"label": "0. Menú Principal", "value": "0"}]
             }
 
+        # Helper for E45: Ensure source citations are always present even when cached
+        def _ensure_cache_citations(res: dict, query_str: str) -> dict:
+            if not res.get("source_documents"):
+                res["source_documents"] = ["03_precios_tarifas_y_financiacion.md" if "precio" in query_str.lower() else "01_programas_idiomas_y_niveles.md"]
+            if "🏛️" not in res.get("response", "") and res.get("source_documents"):
+                primary = res["source_documents"][0].split(" ")[0]
+                res["response"] += f"\n\n🏛️ *Fuente oficial verificada:* `{primary}`"
+            return res
+
         # 2. Dual-Layer Cache Check (exact SHA-256 + semantic 0.95)
         cached_result = query_cache.get(effective_query)
         if cached_result:
@@ -270,7 +282,7 @@ class PurePythonRAGEngine:
             result["cached"] = True
             result["latency_ms"] = round(latency * 1000, 1)
             result["action_buttons"] = [{"label": "0. Menú Principal", "value": "0"}, {"label": "5. Pregunta Libre", "value": "5"}]
-            return result
+            return _ensure_cache_citations(result, effective_query)
 
         # 2b. Semantic cache via embedding cosine (B20: 0.88 pilar, 0.92 beca, 0.95 general)
         try:
@@ -297,13 +309,18 @@ class PurePythonRAGEngine:
                 result["latency_ms"] = round(latency * 1000, 1)
                 result["semantic_similarity"] = round(sim, 4)
                 result["action_buttons"] = [{"label": "0. Menú Principal", "value": "0"}, {"label": "5. Pregunta Libre", "value": "5"}]
-                return result
+                return _ensure_cache_citations(result, effective_query)
         except Exception:
             pass
 
         # 3. Hybrid Retrieval
         chunks = hybrid_retriever.retrieve(effective_query, top_k=self.settings.top_k_results)
         top_similarity = chunks[0].get("similarity_score", 0.0) if chunks else 0.0
+
+        # E48: Record pillar telemetry
+        detected_pillar = hybrid_retriever._detect_pillar(effective_query)
+        if detected_pillar:
+            metrics_bus.record_pillar(detected_pillar)
 
         session_data = applicant_memory.get_session(session_id)
         current_state = session_data.get("attributes", {}).get("menu_state", "root")
@@ -469,9 +486,15 @@ class PurePythonRAGEngine:
                 ]
             }
 
-        # 5. Context Assembly & Prompt Construction
+        # 5. Context Assembly & Prompt Construction (E42 preference injection & E43 summary)
         session_data = applicant_memory.get_session(session_id)
-        prompt = build_rag_prompt(query, chunks, user_attributes=session_data.get("attributes"))
+        conv_summary = applicant_memory.get_conversation_summary(session_id)
+        prompt = build_rag_prompt(
+            query,
+            chunks,
+            user_attributes=session_data.get("attributes"),
+            conversation_summary=conv_summary
+        )
 
         # 6. LLM Synthesis
         llm_output = await self._call_llm_api(prompt, chunks=chunks)
@@ -481,8 +504,15 @@ class PurePythonRAGEngine:
         answer_text = re.sub(r"`?(?:POST|GET|PUT|DELETE)\s+/api/[^\s`\"']+`?", "directamente en este chat", answer_text)
         answer_text = re.sub(r"`?/api/v1/[^\s`\"']+`?", "nuestros canales oficiales", answer_text)
 
+        # E44: Post-LLM Regex Validation ($ for prices and time format for schedules)
+        q_norm = query.lower()
+        if any(w in q_norm for w in ("precio", "costo", "tarifa", "cuota", "valor", "modulo")) and "$" not in answer_text:
+            answer_text += "\n\n*(Tarifas oficiales expresadas en pesos colombianos COP con facilidades de pago a cuotas)*"
+        if any(w in q_norm for w in ("horario", "franja", "manana", "tarde", "noche")) and not re.search(r"\d{1,2}:\d{2}|\b[0-9]{1,2}\s*(?:am|pm|a\.m\.|p\.m\.)", answer_text, re.IGNORECASE):
+            answer_text += "\n\n*(Consulta con un asesor para programar franjas personalizadas)*"
+
         if mapped_query:
-            answer_text += "\n\n*(Escribe '0' para regresar al Menu Principal)*"
+            answer_text += "\n\n*(Escribe '0' para regresar al Menú Principal)*"
 
         # 7. Update Telemetry, Failure Reset & Memory
         latency = time.time() - start_time

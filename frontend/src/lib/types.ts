@@ -29,6 +29,7 @@ export interface TelemetryMetrics {
   total_tokens: number;
   estimated_cost_usd: number;
   average_latency_ms: number;
+  pillar_distribution?: Record<string, number>;
 }
 
 export interface ServerHealth {

@@ -1,7 +1,11 @@
 import sys
 import asyncio
 import time
+import argparse
 from pathlib import Path
+
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / 'backend'))
 
@@ -96,19 +100,42 @@ TEST_VARIANTS = [
     ('sedes', 'congelacion de matricula por viaje o salud')
 ]
 
-async def run_benchmark():
-    print('=' * 75)
-    print('INICIANDO PLAYGROUND DE EVALUACION: 80 VARIANTES (FASE B VERIFICACION)')
-    print('=' * 75)
-    
+async def run_benchmark(filter_pillar: str = None, single_query: str = None):
     query_cache.invalidate()
     ingestion_pipeline.run()
+
+    if single_query:
+        print('=' * 75)
+        print(f"PLAYGROUND CONSULTA INDIVIDUAL: '{single_query}'")
+        print('=' * 75)
+        t0 = time.time()
+        res = await rag_engine.answer_query(single_query, session_id='playground_single')
+        dt = (time.time() - t0) * 1000
+        print(f"Estado: {res.get('status')}")
+        print(f"Confianza: {res.get('confidence_score', 0.0):.3f}")
+        print(f"Latencia: {dt:.1f} ms")
+        print(f"Modo: {res.get('mode')}")
+        print(f"Escalado: {res.get('escalated_to_human')}")
+        print(f"Fuentes: {res.get('source_documents', [])}")
+        print("\n--- RESPUESTA GENERADA ---")
+        print(res.get('response', ''))
+        print('=' * 75)
+        return True
+
+    variants = TEST_VARIANTS
+    if filter_pillar:
+        variants = [v for v in TEST_VARIANTS if filter_pillar.lower() in v[0].lower()]
+        print(f"Filtrando {len(variants)} variantes para el pilar: '{filter_pillar}'")
+
+    print('=' * 75)
+    print(f'INICIANDO PLAYGROUND DE EVALUACIÓN: {len(variants)} VARIANTES (FASE E VERIFICACIÓN)')
+    print('=' * 75)
     
     passed = 0
     failed = 0
     latencies = []
     
-    for idx, (pillar, query) in enumerate(TEST_VARIANTS, 1):
+    for idx, (pillar, query) in enumerate(variants, 1):
         t0 = time.time()
         res = await rag_engine.answer_query(query, session_id=f'bench_{idx}')
         dt = (time.time() - t0) * 1000
@@ -128,15 +155,21 @@ async def run_benchmark():
             failed += 1
             mark = 'FAIL'
             
-        print(f'[{idx:02d}/80] {mark:^4} [{pillar:^16}] conf={conf:.3f} | {dt:5.1f}ms | {query[:36]:<36} -> {top_src[:25]}')
+        print(f'[{idx:02d}/{len(variants):02d}] {mark:^4} [{pillar:^16}] conf={conf:.3f} | {dt:5.1f}ms | {query[:36]:<36} -> {top_src[:25]}')
         
     avg_lat = sum(latencies) / len(latencies) if latencies else 0.0
     print('=' * 75)
-    print(f'RESULTADOS: {passed}/80 APROBADOS ({passed/len(TEST_VARIANTS)*100:.1f}%) | {failed} FALLIDOS')
+    print(f'RESULTADOS: {passed}/{len(variants)} APROBADOS ({passed/len(variants)*100:.1f}%) | {failed} FALLIDOS')
     print(f'LATENCIA PROMEDIO: {avg_lat:.1f}ms | ESCALAMIENTOS NO DESEADOS: {failed}')
     print('=' * 75)
     return failed == 0
 
+
 if __name__ == '__main__':
-    success = asyncio.run(run_benchmark())
+    parser = argparse.ArgumentParser(description="Playground de Variantes y Evaluación RAG (E50)")
+    parser.add_argument("--filter", "-f", type=str, help="Filtrar por pilar (cursos, horarios, precios, sedes, becas)")
+    parser.add_argument("--query", "-q", type=str, help="Ejecutar una consulta libre individual en el playground")
+    args = parser.parse_args()
+
+    success = asyncio.run(run_benchmark(filter_pillar=args.filter, single_query=args.query))
     sys.exit(0 if success else 1)

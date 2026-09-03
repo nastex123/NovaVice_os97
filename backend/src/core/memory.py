@@ -38,6 +38,56 @@ class EpisodicApplicantMemory:
         session = self.get_session(session_id)
         session["attributes"][key] = value
 
+    def detect_and_store_preferences(self, session_id: str, query: str) -> None:
+        """
+        E42: Detects explicit applicant preferences (modalidad, ciudad, idioma) and persists them.
+        """
+        q = query.lower()
+        if any(w in q for w in ("virtual", "online", "remoto", "zoom", "desde casa")):
+            self.update_attributes(session_id, "modalidad_preferida", "Virtual Sincrónica")
+        elif any(w in q for w in ("presencial", "sede fisica", "en persona", "asistir")):
+            self.update_attributes(session_id, "modalidad_preferida", "Presencial")
+        elif any(w in q for w in ("hibrid", "hyflex", "mixt")):
+            self.update_attributes(session_id, "modalidad_preferida", "HyFlex 360°")
+
+        if "bogot" in q or "chico" in q or "chapinero" in q:
+            self.update_attributes(session_id, "ciudad_interes", "Bogotá")
+        elif "medell" in q or "poblado" in q or "laureles" in q:
+            self.update_attributes(session_id, "ciudad_interes", "Medellín")
+        elif "cali" in q or "granada" in q:
+            self.update_attributes(session_id, "ciudad_interes", "Cali")
+
+        for lang in ("ingles", "inglés", "frances", "francés", "aleman", "alemán", "italiano", "portugues", "portugués"):
+            if lang in q:
+                clean_lang = lang.replace("é", "e").replace("á", "a").capitalize()
+                self.update_attributes(session_id, "idioma_interes", clean_lang)
+
+    def get_conversation_summary(self, session_id: str) -> str:
+        """
+        E43: Produces a compact summary (<25 words) of user preferences and recent turns.
+        """
+        session = self.get_session(session_id)
+        attrs = session.get("attributes", {})
+        pref_parts = []
+        if "idioma_interes" in attrs:
+            pref_parts.append(f"Idioma: {attrs['idioma_interes']}")
+        if "modalidad_preferida" in attrs:
+            pref_parts.append(f"Modalidad: {attrs['modalidad_preferida']}")
+        if "ciudad_interes" in attrs:
+            pref_parts.append(f"Sede: {attrs['ciudad_interes']}")
+
+        recent = self.get_recent_history(session_id, limit=2)
+        if not recent and not pref_parts:
+            return ""
+        
+        last_queries = [h.get("query", "") for h in recent if h.get("query")]
+        summary = ""
+        if pref_parts:
+            summary += f"Preferencias: {', '.join(pref_parts)}. "
+        if last_queries:
+            summary += f"Últimas dudas: {' | '.join(last_queries)}."
+        return summary[:160]
+
     def get_recent_history(self, session_id: str, limit: int = 3) -> List[Dict[str, Any]]:
         session = self.get_session(session_id)
         return session["history"][-limit:]

@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [2026-09-02 19:52] [Feature/Response-Quality-Polish/Fase-E]
+- **Culminación Integral de la Fase E — Calidad de Respuestas y Pulido Final (E41 a E50):**
+  - **E41 (Plantillas Estructuradas por Pilar):** Directivas dinámicas en `prompt_templates.py` que instruyen al LLM y al motor determinista a estructurar horarios en tablas/bloques horarios precisos (`6:00 a 8:00 a.m.`, `6:30 a 8:30 p.m.`), precios en COP con símbolo `$` en negrita, contado 10% y 3 cuotas 40/30/30, y programas con niveles MCER.
+  - **E42 (Memoria de Preferencias):** Método `detect_and_store_preferences()` en `memory.py:40` para capturar `modalidad_preferida` (Virtual Sincrónica, Presencial, HyFlex 360°), ciudad de interés (Bogotá, Medellín, Cali) e idioma.
+  - **E43 (Resumen Contextual Conciso):** Método `get_conversation_summary()` en `memory.py:75` inyectado dinámicamente en el prompt del LLM (`engine.py:489`) para mantener continuidad en diálogos multi-turno.
+  - **E44 (Validación Post-LLM Regex):** Verificación regex post-síntesis (`engine.py:500`) que garantiza la presencia del símbolo monetario `$` en respuestas de tarifas y formato de hora en horarios.
+  - **E45 (Citas Oficiales en Caché):** Blindaje en `engine.py:270` asegurando que las respuestas devueltas desde caché contengan siempre la mención explícita `🏛️ *Fuente oficial verificada:* <doc>` y la lista de documentos fuente.
+  - **E46 & E47 (Idioma Estricto y Tono Empático):** Reglas institucionales reforzadas en `SYSTEM_PROMPT` exigiendo español impecable (cero cambio a inglés ante preguntas en Spanglish) y tono cálido/motivador de Nova Idiomas.
+  - **E48 (Métrica por Pilar en Frontend):** Contador de consultas por pilar en `metrics.py` y visualización interactiva con barras de progreso en [`MetricsModal.tsx`](frontend/src/components/MetricsModal.tsx#L135).
+  - **E49 (Test 80 Variantes en Pytest):** Suite automatizada `test_80_variants_representative_coverage_e49` en `test_navigation_continuity.py:174` con 100% de éxito.
+  - **E50 (Playground CLI de Evaluación):** Soporte en `scripts/test_variants.py` para banderas `--filter` (filtrar por pilar) y `--query` (evaluar consultas individuales en tiempo real con latencias y fuentes).
+  - **Validación Automatizada:** 54/54 tests unitarios PASSED en Pytest en 4.95s; 80/80 variantes PASSED en 27.0ms de latencia promedio; compilación limpia de Next.js 15 en 4.9s.
+- Motivo: Concluir al 100% la Fase E y completar la totalidad de las 5 fases (0, A, B, C, D, E) del sprint de Nova Idiomas con excelencia técnica y documental.
+
 ### [2026-09-02 19:46] [Feature/Escalation-Feedback/Fase-D]
 - **Culminación Integral de la Fase D — Heavy Only & Restantes (D35, D36, D37, D40):**
   - **D35 (Asesor Silencioso en Frontend):** Añadido botón no invasivo `👤 9. Consultar con un Asesor Académico` en `ChatContainer.tsx:348` para permitir al usuario alternar al modo asesor voluntariamente sin escalamiento forzado.

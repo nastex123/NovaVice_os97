@@ -3,6 +3,7 @@ import re
 from typing import List, Dict, Any, Optional, Tuple
 from src.rag.vector_store import vector_store
 from src.rag.bm25 import bm25_index
+from src.core.intent_router import semantic_intent_router
 
 
 # B19: Spanglish and English-Spanish terminology mapping
@@ -29,9 +30,9 @@ SPANGLISH_REPLACEMENTS = [
 PILLAR_CLUSTERS = {
     "becas_descuentos": ["12_04", "12_01", "12_02", "12_03", "10_01", "09_03", "12_"],
     "precios": ["03_", "09_", "10_", "12_04", "12_"],
-    "horarios": ["02_"],
-    "cursos": ["01_", "04_", "05_", "06_", "07_"],
-    "sedes": ["08_", "13_", "14_", "15_", "16_", "17_", "18_", "19_", "20_"]
+    "horarios": ["02_", "07_01", "07_02", "07_03", "07_04", "07_05", "08_"],
+    "cursos": ["01_", "04_0", "05_", "06_"],
+    "sedes": ["04_proceso", "07_sedes", "13_", "14_", "15_", "16_", "17_", "18_", "19_", "20_"]
 }
 
 # Pillar detection keyword sets
@@ -135,7 +136,8 @@ class HybridRetriever:
         query_tokens: List[str],
         detected_pillar: Optional[str],
         negations: Dict[str, bool],
-        query_embedding: List[float]
+        query_embedding: List[float],
+        intent_match: Optional[Any] = None
     ) -> None:
         num_query_tokens = max(1, len(query_tokens))
         centroids = self._get_pillar_centroids() if detected_pillar else {}
@@ -178,6 +180,10 @@ class HybridRetriever:
                 if any(source_name.startswith(pfx) for pfx in target_prefixes):
                     fused_sim = min(1.0, round(fused_sim + 0.15, 4))
 
+            # Targeted micro-intent cluster boost (+0.12)
+            if intent_match and intent_match.target_cluster and source_name == intent_match.target_cluster:
+                fused_sim = min(1.0, round(fused_sim + 0.12, 4))
+
             # B18: Negation adjustment (no virtual penalizes 02_05; no presencial penalizes physical)
             if negations["no_virtual"] and ("02_05" in source_name or "virtual" in source_name):
                 fused_sim = round(fused_sim * 0.3, 4)
@@ -195,6 +201,19 @@ class HybridRetriever:
         # Detect pillar and negative filters
         detected_pillar = self._detect_pillar(clean_query)
         negations = self._detect_negations(clean_query)
+
+        # Vectorized Intent Router Classification
+        macro_to_pillar = {
+            "cursos_idiomas_niveles": "cursos",
+            "horarios_modalidades_franjas": "horarios",
+            "precios_tarifas_financiacion": "precios",
+            "admisiones_sedes_matricula": "sedes",
+            "becas_descuentos_convenios": "becas_descuentos",
+        }
+        intent_match = semantic_intent_router.classify(clean_query)
+        semantic_pillar = macro_to_pillar.get(intent_match.top_macro_pillar)
+        if not detected_pillar and semantic_pillar and intent_match.macro_score >= 0.20:
+            detected_pillar = semantic_pillar
 
         # B17: Expand query for enhanced semantic & lexical recall
         expanded_query = self._expand_query(clean_query)
@@ -231,14 +250,15 @@ class HybridRetriever:
 
         query_tokens = bm25_index._tokenize(expanded_query)
 
-        # Initial scoring pass (B11, B16, B18)
+        # Initial scoring pass (B11, B16, B18, Micro-Intents)
         self._score_candidates(
             doc_map,
             bm25_score_map,
             query_tokens,
             detected_pillar,
             negations,
-            query_embedding
+            query_embedding,
+            intent_match=intent_match
         )
 
         # B12: Relaxed BM25 fallback (b=0.6, candidate_k=30) if top candidate similarity < 0.50
@@ -264,10 +284,11 @@ class HybridRetriever:
                 query_tokens,
                 detected_pillar,
                 negations,
-                query_embedding
+                query_embedding,
+                intent_match=intent_match
             )
 
-        # 4. Reciprocal Rank Fusion (RRF) with B13 cluster re-ranking bonus
+        # 4. Reciprocal Rank Fusion (RRF) with B13 cluster re-ranking bonus & Micro-Intent boosts
         rrf_scores: Dict[str, float] = {}
         for doc_id, rank in dense_ranks.items():
             rrf_scores[doc_id] = rrf_scores.get(doc_id, 0.0) + (1.0 / (self.rrf_k + rank + 1))
@@ -282,6 +303,26 @@ class HybridRetriever:
                 source_name = doc_map[doc_id].get("metadata", {}).get("source", "")
                 if any(source_name.startswith(pfx) for pfx in target_prefixes):
                     rrf_scores[doc_id] = rrf_scores.get(doc_id, 0.0) + 0.015
+
+        # Targeted micro-intent document RRF bonus (+0.025)
+        if intent_match and intent_match.target_cluster:
+            for doc_id in doc_map:
+                source_name = doc_map[doc_id].get("metadata", {}).get("source", "")
+                if source_name == intent_match.target_cluster:
+                    rrf_scores[doc_id] = rrf_scores.get(doc_id, 0.0) + 0.025
+
+        # Multi-intent composite RRF bonus for secondary pillar
+        if intent_match and intent_match.is_multi_intent and intent_match.secondary_micro_intent:
+            from src.core.intent_router import MICRO_INTENTS_PROTOTYPES
+            sec_meta = MICRO_INTENTS_PROTOTYPES.get(intent_match.secondary_micro_intent, {})
+            sec_pillar_raw = sec_meta.get("pillar", "")
+            sec_pillar = macro_to_pillar.get(sec_pillar_raw)
+            if sec_pillar:
+                sec_prefixes = PILLAR_CLUSTERS.get(sec_pillar, [])
+                for doc_id in doc_map:
+                    source_name = doc_map[doc_id].get("metadata", {}).get("source", "")
+                    if any(source_name.startswith(pfx) for pfx in sec_prefixes):
+                        rrf_scores[doc_id] = rrf_scores.get(doc_id, 0.0) + 0.015
 
         # Sort by RRF, tie-break by fused similarity
         sorted_candidates = sorted(

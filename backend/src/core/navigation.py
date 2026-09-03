@@ -2,6 +2,7 @@ import unicodedata
 import re
 from typing import Dict, Any, Optional, Tuple
 from src.core.memory import applicant_memory
+from src.core.intent_router import semantic_intent_router
 
 
 ROOT_MENU_TEXT = """### 🎓 ¡Bienvenido a Nova Idiomas Colombia!
@@ -639,6 +640,11 @@ class GuidedNavigationEngine:
                 {"label": "0. Menú Principal", "value": "0"}
             ]
 
+        # 6. Deep Vectorized Intent Routing (Macro + Micro Prototypes)
+        intent_match = semantic_intent_router.classify(raw_input)
+        if intent_match.canonical_query and intent_match.micro_score >= 0.20:
+            return None, intent_match.canonical_query, False, intent_match.action_buttons
+
         # A6: Embedding fallback cosine >0.82 for short/typo queries
         if len(text.split()) <= 6:
             emb_match = _find_intent_by_embedding(text, threshold=0.82)
@@ -662,16 +668,8 @@ class GuidedNavigationEngine:
                 {"label": "0. Menú Principal", "value": "0"}
             ]
 
-        # A7: Short query rewriting - already via INTENT, otherwise let RAG handle with raw
-
-        # 6. Fallback: Any free-form natural language query is passed to RAG seamlessly without state errors
-        return None, raw_input, False, [
-            {"label": "1. Cursos & Certificaciones", "value": "1"},
-            {"label": "2. Horarios & Modalidades", "value": "2"},
-            {"label": "3. Precios & Financiación", "value": "3"},
-            {"label": "4. Admisiones & Sedes", "value": "4"},
-            {"label": "0. Menú Principal", "value": "0"}
-        ]
+        # 7. Fallback: Any free-form natural language query is passed to RAG seamlessly without state errors
+        return None, raw_input, False, intent_match.action_buttons
 
 
 navigation_engine = GuidedNavigationEngine()

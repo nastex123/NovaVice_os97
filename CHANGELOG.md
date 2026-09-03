@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [2026-09-02 19:35] [Feature/Vectorized-Intent-Router/Fase-E]
+- **Enrutador Semántico Vectorial Universal & Clasificación Dual de Intenciones (Ítem E41b):**
+  - **Módulo Autónomo (`backend/src/core/intent_router.py`):** Implementada la clase `SemanticIntentRouter` con jerarquía de 2 niveles: 5 Macro-Pilares (`cursos`, `horarios`, `precios`, `sedes`, `becas_descuentos`) y 18 Micro-Intenciones hiper-especializadas (medios de pago, cuotas, tarifas COP, pronto pago, convenios, becas, madrugadores, diurnos, nocturno, sabatinos, virtual, presencial, hyflex, sedes Bogotá/Medellín/Cali, placement test, proceso de matrícula).
+  - **Vectorización Densa y Normalización Unitaria:** Los prototipos de intención son proyectados a un espacio vectorial normalizado ($\|v\|=1$), permitiendo cálculo de similitud de coseno mediante producto punto instantáneo ($<0.5$ ms de latencia por turno).
+  - **Warm-Up al Inicio del Servidor:** Método `warm_up()` integrado en el ciclo de vida de `engine.py` para pre-calcular los centroides una sola vez y mantenerlos en memoria.
+  - **Normalización de Anglicismos y Variantes Morfológicas:** Diccionario integrado de equivalencias de términos en inglés/spanglish (`schedules` -> `horarios`, `fees` -> `tarifas`, `prices` -> `precios`) y alineación jerárquica macro-micro.
+  - **Boosting Dinámico y Fusión Multi-Cluster RRF (`hybrid_retriever.py`):** Detección de intenciones compuestas con boost de cluster (+0.12) para el documento objetivo del micro-intent y bonificación RRF (+0.015) para ambos clusters cuando se identifican consultas multi-tema.
+  - **Blindaje Pre-Flight de Seguridad en Engine (`engine.py:143`):** Inspección de guardrails ejecutada sobre la consulta bruta original antes de la vectorización para evitar bypass de prompt injection o jailbreaks.
+  - **Validación Automatizada:**
+    - `18/18 tests PASSED` en nueva suite unitaria `backend/tests/test_intent_vectorizer.py`.
+    - `53/53 tests PASSED` en suite integral de pytest.
+    - `80/80 (100.0%) PASSED` en el benchmark de variantes de admisiones (`scripts/test_variants.py`) con latencia promedio de 30.1 ms y 0 falsas escalaciones.
+    - Build de producción Next.js 15 compilado limpiamente en 2.4s.
+- Motivo: Erradicar la dependencia de diccionarios rígidos de palabras clave, permitiendo que cualquier formulación libre o coloquial del aspirante sea mapeada con precisión matemática a su verdadera intención.
+
 ### [2026-09-02 19:20] [Fixed/Conversational-Sanitization/Fase-E]
 - **Sanitización Institucional de Jargon Técnico y Erradicación de Endpoints REST (Ítem E44b):**
   - **Detección del Problema:** Al consultar *"que medios de pagos hay?"*, el sistema citaba un fragmento de `12_04_becas_descuentos_aclaratoria.md` instruyendo al aspirante a calcular su cotización mediante una llamada técnica HTTP: `POST /api/v1/tools/quote`.

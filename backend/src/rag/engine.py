@@ -140,12 +140,30 @@ class PurePythonRAGEngine:
     ) -> Dict[str, Any]:
         start_time = time.time()
 
-        # Ensure knowledge base and BM25 index are initialized
+        # 1. Pre-flight Guardrail Check on raw query (blocks jailbreaks, prompt injection, and harmful payload)
+        is_safe, safety_reason = guardrails.inspect_query(query)
+        if not is_safe:
+            metrics_bus.record_query(cached=False, latency=time.time() - start_time)
+            return {
+                "status": "refused",
+                "response": f"🛡️ **Aviso de Seguridad Institucional**\n\n{safety_reason}",
+                "source_documents": [],
+                "confidence_score": 0.0,
+                "escalated_to_human": False,
+                "cached": False,
+                "mode": "guardrail_defense",
+                "latency_ms": round((time.time() - start_time) * 1000, 1),
+                "action_buttons": [{"label": "0. Menú Principal", "value": "0"}]
+            }
+
+        # Ensure knowledge base, BM25 index and semantic intent router are initialized
         from src.rag.bm25 import bm25_index
         from src.rag.vector_store import vector_store
+        from src.core.intent_router import semantic_intent_router
         if bm25_index.corpus_size == 0 or vector_store.count() == 0:
             from src.rag.ingestion import ingestion_pipeline
             ingestion_pipeline.run()
+        semantic_intent_router.warm_up()
 
         # Check guided navigation menu state machine
         from src.core.navigation import navigation_engine

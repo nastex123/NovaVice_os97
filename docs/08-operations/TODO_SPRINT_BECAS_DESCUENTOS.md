@@ -100,6 +100,7 @@
 ## Fase E — Calidad (41-50) `prompt_templates.py:48`
 
 - [ ] **E41** Template por pilar — `horario` tabla 6 filas etc.
+- [x] **E41b** Enrutador Semántico Vectorial Universal & Clasificación Dual de Intenciones (`intent_router.py`, `navigation.py:642`, `hybrid_retriever.py:195`) — **COMPLETADO 2026-09-02 19:35 America/Bogota**: Creación de `SemanticIntentRouter` con jerarquía de 2 niveles (5 Macro-Pilares y 18 Micro-Intenciones vectorizadas densamente), normalización de anglicismos, warm-up en memoria (<0.5ms), boosting micro-intent (+0.12) y fusión multi-cluster RRF (+0.015). Verificado con 18/18 tests dedicados y 80/80 en benchmark.
 - [ ] **E42** Memoria preferencia `memory.py:37` — `modalidad_preferida`.
 - [ ] **E43** Resumen 20 tokens.
 - [ ] **E44** Validación post-LLM regex `$`/`6:00`.

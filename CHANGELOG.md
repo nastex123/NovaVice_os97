@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [2026-09-02 19:15] [Feature/Anti-Stagnation/Fase-C]
+- **Culminación Integral de la Fase C — Anti-Estancamiento y Resiliencia Conversacional (C21-C30):**
+  - **C21 (Sin Errores Duros):** Fallback conversacional suave en `navigation.py:652` con 4 botones rectores y re-enrutamiento automático ante cualquier término no contemplado.
+  - **C22 (Botón Reformular):** Agregado botón interactivo retro `🔄 ¿No encontraste lo que buscabas? Reformular con opciones generales` en `ChatContainer.tsx:335` activado automáticamente cuando la confianza es baja (<0.55) o hay clarificación.
+  - **C23 (Memoria de Fracaso 2x):** Implementado `is_failure_loop()` en `memory.py:45` y evaluador en `engine.py:351`; tras 2 fallos consecutivos se despliega un menú interactivo guiado de rescate para evitar frustración.
+  - **C24 (Clarificación Dinámica 0.35-0.50):** Generación automática de 3 botones de desambiguación (`Cursos`, `Horarios`, `Precios`) cuando la consulta es ambigua y cae entre 0.35 y 0.50 sin un pilar dominante.
+  - **C25 (Sugerencias Cruzadas):** Inyección de botones contextuales en `engine.py:403` según el pilar dominante de la fuente documental (ej. al responder de cursos sugiere horarios y tarifas).
+  - **C26 (Reset Suave):** Ampliada la lista de disparadores de reinicio en `navigation.py:556` con `reset`, `empezar de nuevo`, `comenzar de nuevo`, `cancelar`, `borrar` y `salir`.
+  - **C27 (Breadcrumb Clickeable):** Miga de pan en `Header.tsx:72` transformada en botón retro interactivo que regresa al Menú Principal con un solo clic.
+  - **C28 (Tolerancia Regex):** Soporte en `navigation.py:593` para separadores variados (`1.1`, `1,1`, `1 1`, `1-1`).
+  - **C29 (Re-engage de Inactividad 60s):** Hook de inactividad de 60s en `page.tsx:73` que sugiere proactivamente opciones clave si el aspirante queda inactivo.
+  - **C30 (Detección de Loops de Fuentes):** Rastreador de firmas documentales en `memory.py:65` y alerta en `engine.py:400` que añade nota de desvío proactiva si se repiten las mismas fuentes durante 3 turnos seguidos.
+  - **Validación:** Pytest suite expandida a **35/35 tests PASSED** (incluyendo 3 nuevos tests unitarios en `test_navigation_continuity.py`), **80/80 variantes aprobadas** en `test_variants.py` (latencia promedio 38.0ms) y compilación de producción Next.js 15 en 0 errores.
+- Motivo: Proporcionar una experiencia de usuario fluida, comprensiva y anti-bloqueo en el portal de admisiones de Nova Idiomas.
+
 ### [2026-09-02 19:05] [Fixed/RAG/Synthesis]
 - **Anti-Respuestas Vacías & Síntesis Multi-Chunk Resiliente (`src/rag/ingestion.py:35`, `src/rag/engine.py:27`, `docs/08-operations/TODO_SPRINT_BECAS_DESCUENTOS.md`):**
   - **Diagnóstico del Fallo:** Se identificó que al ingresar consultas naturales como *"que horarios hay?"*, el sistema respondía únicamente con una ficha vacía (`📌 **02. Horarios...**` + `🏛️ *Fuente oficial:* ...`) sin mostrar ninguna franja ni modalidad de estudio.

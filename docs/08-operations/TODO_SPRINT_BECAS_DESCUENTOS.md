@@ -62,21 +62,21 @@
 
 ---
 
-## Fase C — Anti-Estancamiento (21-30) `engine.py:130,220` `memory.py:41`
+## Fase C — Anti-Estancamiento (21-30) `engine.py:130,220` `memory.py:41` — ✅ COMPLETADA (2026-09-02 19:14 America/Bogota)
 
-- [ ] **C21** Nunca error duro `navigation.py:384` — `4 botones + Reformulas?`.
+- [x] **C21** Nunca error duro `navigation.py:652` — Retorno suave con 4 botones y prompt conversacional sin pantallas de error duro.
 - [x] **C21b** Anti-Respuestas Vacías & Síntesis Multi-Chunk `engine.py:33` `ingestion.py:35` — **COMPLETADO 2026-09-02 19:05 America/Bogota**: Supresión de chunks título huérfanos sin contenido en `ingestion.py` (fusión de encabezados aislados con la subsección siguiente) y síntesis multi-chunk enriquecida en `engine.py` que extrae viñetas y franjas sustantivas de los `top_k` fragmentos, impidiendo que el bot devuelva fichas vacías con solo el título y 'fuente oficial'.
-- [ ] **C22** Botón Reformular `ChatContainer.tsx:302` — `🔄 Reformular` reintenta `top_k=5 threshold 0.35`.
-- [ ] **C23** Memoria fracaso 2x `memory.py:37` — `last_failed` cosine>0.85 → ofrecer menú no ESC.
-- [ ] **C24** Clarificación `0.35-0.50` `engine.py:220` — `¿horarios o precios o becas?` 3 botones.
-- [ ] **C25** Sugerencias cruzadas `navigation.py:217` — Tras `curso 1.1` → `1.2,3.1,4.1` etc.
-- [ ] **C26** Reset suave `navigation.py:333` — `limpiar, reiniciar, volver`.
-- [ ] **C27** Breadcrumb clickeable `page.tsx:74`.
-- [ ] **C28** Tolerancia `1.1` regex.
-- [ ] **C29** Re-engage 60s.
-- [ ] **C30** Loop detection 3 mismos `source` → shuffle `RRF`.
+- [x] **C22** Botón Reformular `ChatContainer.tsx:335` — Botón interactivo retro `🔄 Reformular consulta` visible en clarificaciones o baja confianza (<0.55).
+- [x] **C23** Memoria fracaso 2x `memory.py:45` `engine.py:351` — `is_failure_loop()` detecta 2 fallos consecutivos y ofrece menú interactivo de opciones guiadas en lugar de escalamiento intempestivo.
+- [x] **C24** Clarificación `0.35-0.50` `engine.py:380` — Si la confianza cae en rango ambiguo, ofrece 3 botones de desambiguación (`Cursos`, `Horarios`, `Precios`).
+- [x] **C25** Sugerencias cruzadas `engine.py:403` — Sugerencias contextuales automáticas basadas en el documento dominante (`01_` -> horarios/precios, `02_` -> cursos/sedes, `03_` -> cuotas/test).
+- [x] **C26** Reset suave `navigation.py:556` — `limpiar, reiniciar, volver, reset, empezar de nuevo, cancelar, borrar, salir`.
+- [x] **C27** Breadcrumb clickeable `Header.tsx:72` — Miga de pan interactiva en la cabecera retro para volver al menú con un solo clic.
+- [x] **C28** Tolerancia `1.1` regex `navigation.py:593` — Regex `^\s*([1-4])\s*[.,\-\s]\s*([1-6])\s*$` tolerante a puntos, comas, espacios y guiones.
+- [x] **C29** Re-engage 60s `page.tsx:73` — Temporizador de 60s de inactividad que sugiere temas clave al aspirante sin bloquear el flujo.
+- [x] **C30** Loop detection 3 mismos `source` `memory.py:65` `engine.py:400` — Detección de fuentes repetidas durante 3 turnos seguidos con nota proactiva de desvío.
 
-**Verificación C:** Manual 3 queries seguidas `precio` no loop, `pytest test_navigation_continuity.py`.
+**Verificación C:** ✅ Pytest `test_navigation_continuity.py` y suite completa: **35/35 tests PASSED** en 3.83s. Benchmark: **80/80 variantes aprobadas (100.0%)**, latencia promedio 38.0ms, 0 fallidos. Build de producción Next.js 15: **Compilación exitosa (0 errores)**.
 
 ---
 

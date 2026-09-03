@@ -132,3 +132,41 @@ async def test_rag_engine_full_continuity_e2e():
     r31 = await rag_engine.answer_query("3.1", session_id=session_id)
     assert r31["status"] == "success"
     assert "650.000" in r31["response"] or "COP" in r31["response"] or "tarifa" in r31["response"].lower()
+
+
+def test_soft_reset_synonyms_c26():
+    """C26: Tests soft reset synonyms returning cleanly to root menu."""
+    synonyms = ["reset", "empezar de nuevo", "cancelar", "comenzar de nuevo", "borrar", "salir"]
+    for s in synonyms:
+        session_id = f"test_reset_{s.replace(' ', '_')}"
+        navigation_engine.process_input("1", session_id)  # enter submenu 1
+        resp, query, handled, buttons = navigation_engine.process_input(s, session_id)
+        assert handled is True, f"Soft reset failed for '{s}'"
+        assert "Bienvenido a Nova Idiomas" in resp
+        assert any(b["value"] == "1" for b in buttons)
+
+
+@pytest.mark.asyncio
+async def test_cross_pillar_suggestions_c25():
+    """C25: Ensures responses dynamically suggest cross-pillar action buttons."""
+    session_id = "test_cross_c25"
+    # Query about courses (pillar 1)
+    res = await rag_engine.answer_query("que cursos ofrecen?", session_id=session_id)
+    assert res["status"] == "success"
+    btn_values = [b["value"] for b in res["action_buttons"]]
+    # Should suggest Horarios (2) and Precios (3)
+    assert "2" in btn_values or "3" in btn_values
+
+
+@pytest.mark.asyncio
+async def test_failure_memory_2x_anti_stagnation_c23():
+    """C23: Tests that 2 consecutive failures trigger guided assistance rather than frustration."""
+    session_id = "test_failure_2x_c23"
+    # Turn 1: Low confidence / out of scope query
+    r1 = await rag_engine.answer_query("tienen servicio de guarderia canina?", session_id=session_id)
+    # Turn 2: Another out of scope query
+    r2 = await rag_engine.answer_query("venden repuestos para carros?", session_id=session_id)
+    assert r2["status"] == "clarification"
+    assert "Orientación Inmediata" in r2["response"] or "opciones principales" in r2["response"]
+    assert any(b["value"] == "9" for b in r2["action_buttons"])
+

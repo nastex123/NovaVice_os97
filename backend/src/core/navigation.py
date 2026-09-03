@@ -552,8 +552,12 @@ class GuidedNavigationEngine:
         # Use corrected for navigation but keep raw_lower for leaf exact "1.1"
         text = corrected  # for all normalized checks
 
-        # 1. Global Reset to Root Menu (normalized)
-        if text in ("0", "menu", "inicio", "volver", "back", "home", "menu principal", "principal", "limpiar", "reiniciar", "volver al inicio"):
+        # 1. Global Reset to Root Menu (normalized - C26 soft reset)
+        if text in (
+            "0", "menu", "inicio", "volver", "back", "home", "menu principal",
+            "principal", "limpiar", "reiniciar", "volver al inicio", "reset",
+            "empezar de nuevo", "comenzar de nuevo", "cancelar", "borrar", "salir"
+        ):
             applicant_memory.update_attributes(session_id, "menu_state", "root")
             return ROOT_MENU_TEXT, None, True, self.get_buttons_for_state("root")
 

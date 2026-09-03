@@ -67,11 +67,16 @@ export const Header: React.FC<HeaderProps> = ({
         </nav>
       </div>
 
-      {/* Center: Active Topic Breadcrumb */}
+      {/* Center: Active Topic Breadcrumb (C27 clickeable) */}
       <div className="hidden lg:flex items-center space-x-2 text-[11px] font-mono text-slate-700">
-        <span className="px-2 py-0.5 bg-retroCard border border-black shadow-retro-sm text-black">
-          {currentMenuLabel || "Nova Idiomas - Admisiones"}
-        </span>
+        <button
+          onClick={onReset}
+          title="Clic para regresar al Menú Principal (0)"
+          className="px-2 py-0.5 bg-retroCard hover:bg-black hover:text-white border border-black shadow-retro-sm text-black transition-colors cursor-pointer flex items-center gap-1.5"
+        >
+          <span className="text-vicePink font-bold">📁</span>
+          <span>{currentMenuLabel || "Nova Idiomas - Admisiones"}</span>
+        </button>
       </div>
 
       {/* Right: Retro Live Clock & Status */}

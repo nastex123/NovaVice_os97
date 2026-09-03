@@ -13,7 +13,7 @@ export interface ChatMessage {
   source_documents?: string[];
   escalated_to_human?: boolean;
   cached?: boolean;
-  mode?: "rag_direct" | "opencode_advisor" | "agy_advisor" | "menu_navigation" | "escalation" | "guardrail_defense";
+  mode?: "rag_direct" | "opencode_advisor" | "agy_advisor" | "menu_navigation" | "escalation" | "guardrail_defense" | "clarification";
   action_buttons?: ActionButton[];
 }
 

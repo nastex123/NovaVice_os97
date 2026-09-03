@@ -342,16 +342,71 @@ class PurePythonRAGEngine:
         threshold = self.settings.similarity_threshold_pilar if is_pilar else self.settings.similarity_threshold
 
         # D39 hard rule: pilares (not very heavy) never auto-escalate, just return best chunk even if low
+        # D39 hard rule: pilares (not very heavy) never auto-escalate, just return best chunk even if low
         if is_pilar and (not chunks or top_similarity < threshold):
             if not chunks:
                 chunks = hybrid_retriever.retrieve(effective_query, top_k=3) or chunks
-            # Fall through to synthesis
             pass
         elif (not chunks or top_similarity < threshold) and (is_very_heavy or is_heavy_detector or top_similarity < threshold):
+            # C23: Record consecutive failure
+            fails = applicant_memory.record_failure(session_id)
+            if fails >= 2 and not is_very_heavy:
+                # C23: Offer guided interactive menu to prevent frustration loops
+                response_text = (
+                    "💡 **Orientación Inmediata — Nova Idiomas**\n\n"
+                    "Noté que tus últimas consultas no encontraron una respuesta directa en nuestra base documental. "
+                    "Para brindarte la información sin bloqueos, puedes seleccionar una de las opciones principales o conectarte con un asesor:"
+                )
+                latency = time.time() - start_time
+                metrics_bus.record_query(cached=False, latency=latency)
+                return {
+                    "status": "clarification",
+                    "response": response_text,
+                    "source_documents": [],
+                    "confidence_score": top_similarity,
+                    "escalated_to_human": False,
+                    "cached": False,
+                    "mode": "menu_navigation",
+                    "latency_ms": round(latency * 1000, 1),
+                    "action_buttons": [
+                        {"label": "1. Cursos & Certificaciones", "value": "1"},
+                        {"label": "2. Horarios & Modalidades", "value": "2"},
+                        {"label": "3. Precios & Financiación", "value": "3"},
+                        {"label": "4. Admisiones & Sedes", "value": "4"},
+                        {"label": "9. Hablar con un Asesor", "value": "9"},
+                        {"label": "0. Menú Principal", "value": "0"},
+                    ]
+                }
+
+            # C24: Clarification 0.35 - 0.50 if not very heavy
+            if 0.35 <= top_similarity < 0.50 and not is_very_heavy and not is_heavy_detector and chunks:
+                preview = chunks[0].get("text", "")[:180].replace("\n", " ")
+                response_text = (
+                    f"🤔 Tu consulta parece tocar varios temas de nuestra academia.\n\n"
+                    f"> *Información relacionada:* {preview}...\n\n"
+                    f"¿Hacia cuál de las siguientes áreas deseas orientar tu respuesta?"
+                )
+                latency = time.time() - start_time
+                metrics_bus.record_query(cached=False, latency=latency)
+                return {
+                    "status": "clarification",
+                    "response": response_text,
+                    "source_documents": [c.get("metadata", {}).get("source", "doc") for c in chunks[:2]],
+                    "confidence_score": top_similarity,
+                    "escalated_to_human": False,
+                    "cached": False,
+                    "mode": "clarification",
+                    "latency_ms": round(latency * 1000, 1),
+                    "action_buttons": [
+                        {"label": "1. Cursos & Niveles", "value": "1"},
+                        {"label": "2. Horarios & Modalidades", "value": "2"},
+                        {"label": "3. Precios & Descuentos", "value": "3"},
+                        {"label": "0. Menú Principal", "value": "0"},
+                    ]
+                }
+
             # D32 2-phase for heavy: store pending and ask Sí/No instead of immediate ticket
-            # Check D34 auto-adjust if escalation_rate high
             if metrics_bus.escalation_rate > 0.25 and threshold == 0.50:
-                # Auto-baja to 0.40 to reduce escalations
                 threshold = 0.40
             applicant_memory.update_attributes(session_id, "pending_heavy_query", {"query": query, "confidence": top_similarity})
             preview = ""
@@ -394,14 +449,63 @@ class PurePythonRAGEngine:
         if mapped_query:
             answer_text += "\n\n*(Escribe '0' para regresar al Menu Principal)*"
 
-        # 7. Update Telemetry & Memory
+        # 7. Update Telemetry, Failure Reset & Memory
         latency = time.time() - start_time
         metrics_bus.record_query(cached=False, latency=latency)
         metrics_bus.record_tokens(llm_output["prompt_tokens"], llm_output["completion_tokens"])
 
+        # Reset consecutive failures upon informative success
+        applicant_memory.reset_failures(session_id)
+
+        source_names = [c.get("metadata", {}).get("source", "") for c in chunks]
+        applicant_memory.record_sources(session_id, source_names)
+
+        # C30: Loop detection - if 3 identical source sets in a row, add guidance note
+        if applicant_memory.is_source_loop(session_id):
+            answer_text += "\n\n💡 *(Detecté que continúas explorando este mismo tema. Puedes consultar horarios, precios o hablar con un asesor usando las opciones abajo)*"
+
         applicant_memory.add_interaction(session_id, query, answer_text)
 
         source_docs = [f"{c.get('metadata', {}).get('source', 'doc')} (Sección: {c.get('metadata', {}).get('section', 'General')})" for c in chunks]
+
+        # C25: Cross-pillar dynamic suggestions based on dominant source
+        primary_source = chunks[0].get("metadata", {}).get("source", "") if chunks else ""
+        if not action_buttons:
+            if primary_source.startswith("01_"):
+                action_buttons = [
+                    {"label": "2. Ver Horarios", "value": "2"},
+                    {"label": "3. Ver Precios", "value": "3"},
+                    {"label": "4.1 Placement Test", "value": "4.1"},
+                    {"label": "0. Menú Principal", "value": "0"}
+                ]
+            elif primary_source.startswith("02_"):
+                action_buttons = [
+                    {"label": "1. Ver Cursos", "value": "1"},
+                    {"label": "3. Ver Precios", "value": "3"},
+                    {"label": "4. Sedes Físicas", "value": "4"},
+                    {"label": "0. Menú Principal", "value": "0"}
+                ]
+            elif primary_source.startswith("03_") or primary_source.startswith("10_") or "descuento" in primary_source:
+                action_buttons = [
+                    {"label": "2. Ver Horarios", "value": "2"},
+                    {"label": "3.2 Plan 3 Cuotas", "value": "3.2"},
+                    {"label": "4.1 Placement Test", "value": "4.1"},
+                    {"label": "0. Menú Principal", "value": "0"}
+                ]
+            elif primary_source.startswith("16_") or primary_source.startswith("07_"):
+                action_buttons = [
+                    {"label": "2. Ver Horarios", "value": "2"},
+                    {"label": "4.1 Agendar Test", "value": "4.1"},
+                    {"label": "0. Menú Principal", "value": "0"}
+                ]
+            else:
+                action_buttons = [
+                    {"label": "1. Cursos & Certificaciones", "value": "1"},
+                    {"label": "2. Horarios & Modalidades", "value": "2"},
+                    {"label": "3. Precios & Financiación", "value": "3"},
+                    {"label": "4. Admisiones & Sedes", "value": "4"},
+                    {"label": "0. Menú Principal", "value": "0"}
+                ]
 
         final_response = {
             "status": "success",
@@ -412,13 +516,7 @@ class PurePythonRAGEngine:
             "cached": False,
             "mode": "opencode_advisor" if use_opencode_mode else "rag_direct",
             "latency_ms": round(latency * 1000, 1),
-            "action_buttons": action_buttons if action_buttons else [
-                {"label": "1. Cursos & Certificaciones", "value": "1"},
-                {"label": "2. Horarios & Modalidades", "value": "2"},
-                {"label": "3. Precios & Financiación", "value": "3"},
-                {"label": "4. Admisiones & Sedes", "value": "4"},
-                {"label": "0. Menú Principal", "value": "0"}
-            ]
+            "action_buttons": action_buttons
         }
 
         # 8. Cache response (store both exact and semantic embedding)

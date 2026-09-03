@@ -337,19 +337,25 @@ class PurePythonRAGEngine:
 
         # 4. Handle Advisor Mode via Selected Intermediary (OpenCode or AGY)
         if current_state == "advisor_mode" or use_opencode_mode:
-            from src.core.opencode_client import opencode_advisor
+            is_agy = self.settings.advisor_backend.lower() == "agy"
+            if is_agy:
+                from src.core.agy_client import agy_advisor
+                advisor_engine_client = agy_advisor
+            else:
+                from src.core.opencode_client import opencode_advisor
+                advisor_engine_client = opencode_advisor
+
             # Retrieve 5 rich context chunks for comprehensive multi-document reasoning
             advisor_chunks = hybrid_retriever.retrieve(effective_query, top_k=5)
-            advisor_res = await opencode_advisor.query_advisor(
+            advisor_res = await advisor_engine_client.query_advisor(
                 query,
                 session_id,
                 context_chunks=advisor_chunks,
-                engine=self.settings.advisor_backend
+                engine="agy" if is_agy else "opencode"
             )
             latency = time.time() - start_time
             metrics_bus.record_query(cached=False, latency=latency)
 
-            is_agy = self.settings.advisor_backend.lower() == "agy"
             engine_label = "AGY / Antigravity" if is_agy else "OpenCode"
             mode_tag = "agy_advisor" if is_agy else "opencode_advisor"
 

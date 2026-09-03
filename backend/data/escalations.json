@@ -1432,5 +1432,34 @@
         "preview": "as a trav\u00e9s del Studienkolleg.  ### 2. Progresi\u00f3n Curricular - A1 y A2 (Fundamentos): Gram\u00e1tica estructurada, declinaciones (nominativo, acusativo, dativo) y conversaci\u00f3n cotidiana. - B1 y B2 (Indepen"
       }
     ]
+  },
+  {
+    "ticket_id": "ESC-20260902-D65692",
+    "created_at": "2026-09-02T20:39:48-0500",
+    "user_id": "guest_applicant",
+    "query": "\u00bfUstedes tramitan visas de trabajo para vivir en Australia o Nueva Zelanda?",
+    "confidence_score": 0.375,
+    "escalation_reason": "user_confirmed_heavy_escalation",
+    "assigned_to": "admisiones@novaidiomas.edu.co",
+    "estimated_resolution_window": "<2h",
+    "status": "pending_human_review",
+    "conversation_history_last3": [],
+    "top3_candidate_chunks": [
+      {
+        "source": "03_05_ielts_vs_toefl_comparativa.md",
+        "section": "Nova Idiomas Colombia - Academia Oficial de Idiomas",
+        "preview": "# Nova Idiomas Colombia - Academia Oficial de Idiomas  ## Gu\u00eda Comparativa Oficial: \u00bfIELTS o TOEFL iBT?  ### 1. \u00bfCu\u00e1l Examen Elegir? - IELTS: Preferido para Reino Unido, Australia, Nueva Zelanda y pro"
+      },
+      {
+        "source": "03_01_preparacion_ielts_academic_general.md",
+        "section": "Nova Idiomas Colombia - Academia Oficial de Idiomas",
+        "preview": "lificaci\u00f3n de ensayos por evaluadores certificados. - Estrategias para alcanzar bandas 7.0, 7.5 y 8.0 requeridas por universidades de Reino Unido, Australia y Canad\u00e1."
+      },
+      {
+        "source": "01_05_aleman_academico_y_laboral.md",
+        "section": "Nova Idiomas Colombia - Academia Oficial de Idiomas",
+        "preview": "as a trav\u00e9s del Studienkolleg.  ### 2. Progresi\u00f3n Curricular - A1 y A2 (Fundamentos): Gram\u00e1tica estructurada, declinaciones (nominativo, acusativo, dativo) y conversaci\u00f3n cotidiana. - B1 y B2 (Indepen"
+      }
+    ]
   }
 ]

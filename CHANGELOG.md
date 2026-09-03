@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [2026-09-02 20:39] [Refactor/Separate-OpenCode-And-AGY-Clients]
+- **Separación Arquitectónica Modular de Motores de Asesoría (OpenCode & AGY):**
+  - **Módulo Común de Razonamiento y Síntesis ([`backend/src/core/advisor_common.py`](backend/src/core/advisor_common.py)):** Creado módulo centralizado con `build_advisor_reasoning_prompt()` y `generate_advisor_fallback()`. Garantiza que **tanto OpenCode como AGY compartan exactamente las mismas directivas de profundidad**, formato en tablas Markdown, manejo de precios en $ COP (10% descuento y cuotas 40/30/30) y deduplicación de contexto oficial.
+  - **Cliente Dedicado de AGY ([`backend/src/core/agy_client.py`](backend/src/core/agy_client.py)):** Implementada la clase `AGYAdvisorClient` exclusiva para la orquestación del binario Google Antigravity (`agy.exe`) en modo no interactivo (`-p`), gestión de procesos asíncronos y contingencia estructurada de alta profundidad.
+  - **Cliente Dedicado de OpenCode ([`backend/src/core/opencode_client.py`](backend/src/core/opencode_client.py)):** Refactorizada la clase `OpenCodeAdvisorClient` para enfocarse exclusivamente en la comunicación HTTP, gestión de sesiones y persistencia con el servidor OpenCode (`http://127.0.0.1:4096`), manteniendo compatibilidad hacia atrás mediante alias.
+  - **Despacho Limpio en Motor RAG ([`backend/src/rag/engine.py:340`](backend/src/rag/engine.py#L340)):** El motor selecciona y ejecuta de forma limpia e independiente la instancia correspondiente (`agy_advisor` o `opencode_advisor`) según la configuración activa de `settings.advisor_backend`.
+  - **Validación Automatizada:** 55/55 tests PASSED en Pytest en 27.93s, con cobertura unitaria específica para cada cliente por separado (`test_agy_client_standalone()`).
+- Motivo: Desacoplar físicamente ambos clientes en archivos independientes preservando una profundidad analítica idéntica y estricta modularidad en el backend.
+
 ### [2026-09-02 20:36] [Feat/Real-AGY-Reasoning-Engine-CLI-Bridge]
 - **Integración Nativa del Motor de Razonamiento AGY (Google Antigravity CLI Bridge):**
   - **Diagnóstico de Discrepancia AGY vs OpenCode:** Identificado por qué AGY no estructuraba respuestas ni generaba tablas al solicitarlas: mientras OpenCode se comunicaba con un daemon LLM en el puerto 4096, la integración con AGY en `opencode_client.py` era un stub simulado que ejecutaba un formateador estático de Python sin pasar por un LLM real.

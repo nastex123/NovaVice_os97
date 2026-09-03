@@ -604,7 +604,29 @@ class GuidedNavigationEngine:
             )
             return prompt, None, True, [
                 {"label": "1. Cursos & Certificaciones", "value": "1"},
+                {"label": "2. Horarios & Modalidades", "value": "2"},
                 {"label": "3. Precios & Financiación", "value": "3"},
+                {"label": "0. Menú Principal", "value": "0"}
+            ]
+
+        # 2b. Freeform Question / Open Advisor Consultation Prompt (Prevents random retrieval on '5')
+        freeform_keywords = ("5", "pregunta libre", "consulta libre", "otra consulta", "otra consulta al asesor", "hacer pregunta", "preguntar", "otra pregunta")
+        if text in freeform_keywords or any(text == kw for kw in freeform_keywords):
+            applicant_memory.update_attributes(session_id, "menu_state", "advisor_mode")
+            prompt = (
+                "💬 **Consulta Abierta con el Asesor Académico**\n\n"
+                "¡Por supuesto! Puedes escribir directamente cualquier pregunta en el campo de texto inferior con tus propias palabras. Por ejemplo:\n\n"
+                "• *'¿Cuánto cuesta el curso intensivo y qué medios de pago reciben?'*\n"
+                "• *'¿Tienen horarios nocturnos para personas que trabajan?'*\n"
+                "• *'¿Cuáles son las sedes en Bogotá, Medellín y Cali?'*\n"
+                "• *'¿Qué convenios y descuentos aplican con cajas de compensación?'*\n\n"
+                "Escribe tu duda y te brindaremos la información oficial de inmediato."
+            )
+            return prompt, None, True, [
+                {"label": "1. Cursos & Certificaciones", "value": "1"},
+                {"label": "2. Horarios & Modalidades", "value": "2"},
+                {"label": "3. Precios & Financiación", "value": "3"},
+                {"label": "4. Admisiones & Sedes", "value": "4"},
                 {"label": "0. Menú Principal", "value": "0"}
             ]
 

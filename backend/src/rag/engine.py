@@ -281,7 +281,12 @@ class PurePythonRAGEngine:
             result = dict(cached_result)
             result["cached"] = True
             result["latency_ms"] = round(latency * 1000, 1)
-            result["action_buttons"] = [{"label": "0. Menú Principal", "value": "0"}, {"label": "5. Pregunta Libre", "value": "5"}]
+            result["action_buttons"] = [
+                {"label": "1. Cursos & Certificaciones", "value": "1"},
+                {"label": "2. Horarios & Modalidades", "value": "2"},
+                {"label": "3. Precios & Financiación", "value": "3"},
+                {"label": "0. Menú Principal", "value": "0"}
+            ]
             return _ensure_cache_citations(result, effective_query)
 
         # 2b. Semantic cache via embedding cosine (B20: 0.88 pilar, 0.92 beca, 0.95 general)
@@ -308,7 +313,12 @@ class PurePythonRAGEngine:
                 result["cached"] = True
                 result["latency_ms"] = round(latency * 1000, 1)
                 result["semantic_similarity"] = round(sim, 4)
-                result["action_buttons"] = [{"label": "0. Menú Principal", "value": "0"}, {"label": "5. Pregunta Libre", "value": "5"}]
+                result["action_buttons"] = [
+                    {"label": "1. Cursos & Certificaciones", "value": "1"},
+                    {"label": "2. Horarios & Modalidades", "value": "2"},
+                    {"label": "3. Precios & Financiación", "value": "3"},
+                    {"label": "0. Menú Principal", "value": "0"}
+                ]
                 return _ensure_cache_citations(result, effective_query)
         except Exception:
             pass
@@ -331,7 +341,7 @@ class PurePythonRAGEngine:
             # Retrieve 5 rich context chunks for comprehensive multi-document reasoning
             advisor_chunks = hybrid_retriever.retrieve(effective_query, top_k=5)
             advisor_res = await opencode_advisor.query_advisor(
-                effective_query,
+                query,
                 session_id,
                 context_chunks=advisor_chunks,
                 engine=self.settings.advisor_backend
@@ -350,6 +360,8 @@ class PurePythonRAGEngine:
 
             source_docs = [f"{c.get('metadata', {}).get('source', 'doc')} (Sección: {c.get('metadata', {}).get('section', 'General')})" for c in advisor_chunks] if advisor_chunks else [f"Asesor Humano de Admisiones ({engine_label})"]
 
+            applicant_memory.add_interaction(session_id, query, resp_text)
+
             return {
                 "status": "success",
                 "response": resp_text,
@@ -359,7 +371,12 @@ class PurePythonRAGEngine:
                 "cached": False,
                 "mode": mode_tag,
                 "latency_ms": round(latency * 1000, 1),
-                "action_buttons": [{"label": "0. Menú Principal", "value": "0"}, {"label": "9. Otra Consulta al Asesor", "value": "9"}]
+                "action_buttons": [
+                    {"label": "1. Cursos & Certificaciones", "value": "1"},
+                    {"label": "2. Horarios & Modalidades", "value": "2"},
+                    {"label": "3. Precios & Financiación", "value": "3"},
+                    {"label": "0. Menú Principal", "value": "0"}
+                ]
             }
 
         # 5. Heavy vs Pilar Handling (D31, D33, D38, D39) — threshold 0.35 pilar vs 0.50 heavy, hard rule + 2-phase

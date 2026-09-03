@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [2026-09-02 20:21] [Fixed/Advisor-Mode-Multi-Turn-Synthesis-And-Freeform-Navigation]
+- **Auditoría Integral y Reingeniería del Modo Asesor y Manejo de Preguntas Libres:**
+  - **Reingeniería del Fallback de Síntesis del Asesor (`opencode_client.py:64`):** Erradicada la fragmentación de texto que cortaba y duplicaba oraciones idénticas de los chunks (como ocurría con fragmentos de sedes y Cali). Se implementó un motor de síntesis estructurado que cubre los 5 pilares con información institucional oficial exhaustiva (tarifas exactas en COP, pronto pago 10%, cuotas 40/30/30, horarios diurnos/nocturnos/madrugadores, modalidades, sedes y becas), con deduplicación por hashing y redacción cálida sin repetir oraciones.
+  - **Erradicación de Consultas Aleatorias en "5. Pregunta Libre" (`navigation.py:612` & `engine.py:284, 311`):** Añadido interceptor de navegación para `"5"`, `"pregunta libre"`, `"consulta libre"` y `"otra consulta"`. Al hacer clic o ingresar "5", el sistema ya no realiza búsquedas vectoriales sobre el dígito "5" (que coincidían arbitrariamente con números de calles o sedes), sino que despliega una invitación cálida para que el usuario escriba su duda con botones rápidos de navegación a pilares principales.
+  - **Sincronización Contextual de la Consulta del Usuario (`engine.py:334`):** Modificado el flujo en `advisor_mode` para pasar la consulta original del usuario (`query`) al asesor en lugar de la consulta canónica mapeada, evitando que el bot mencione temas ajenos (como Cali al preguntar por tarifas).
+  - **Persistencia Episódica en Modo Asesor (`engine.py:350`):** Conectado `applicant_memory.add_interaction(session_id, query, resp_text)` en `advisor_mode` para que las conversaciones con el asesor queden registradas en el historial del aspirante.
+  - **Validación Automatizada:** 54/54 tests PASSED en Pytest en 4.39s, benchmark de 80 variantes al 100% (26.5 ms de latencia) y compilación limpia de Next.js 15 en 3.2s.
+- Motivo: Corregir las inconsistencias reportadas en el modo asesor donde se devolvían respuestas descontextualizadas o aleatorias al hacer clic en opciones de pregunta libre o consultar tarifas.
+
 ### [2026-09-02 20:04] [Fixed/Advisor-Button-Recondite-And-Shadow]
 - **Restauración del Botón 9 como Último Recurso Recóndito y Sombra Retro Homogénea:**
   - **Eliminación de la Inyección Global del Asesor en Frontend (`ChatContainer.tsx`):** Removido el bloque forzado que inyectaba el botón 9 al final de todos los mensajes regulares. El botón 9 ahora preserva su función original como **último recurso y opción recóndita**, mostrándose únicamente cuando el backend lo suministra en `action_buttons` (clarificación por ambigüedad, anti-estancamiento por doble fallo, escalamiento de tickets o ramas finales de casos especiales como `4.6`).

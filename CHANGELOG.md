@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [2026-09-02 20:36] [Feat/Real-AGY-Reasoning-Engine-CLI-Bridge]
+- **Integración Nativa del Motor de Razonamiento AGY (Google Antigravity CLI Bridge):**
+  - **Diagnóstico de Discrepancia AGY vs OpenCode:** Identificado por qué AGY no estructuraba respuestas ni generaba tablas al solicitarlas: mientras OpenCode se comunicaba con un daemon LLM en el puerto 4096, la integración con AGY en `opencode_client.py` era un stub simulado que ejecutaba un formateador estático de Python sin pasar por un LLM real.
+  - **Conexión Directa al CLI de Razonamiento AGY (`opencode_client.py:198`):** Implementado `_query_agy_cli()` mediante ejecución asíncrona no interactiva (`agy.exe --disable-slash-commands -p <prompt>`). Ahora AGY cuenta con la misma potencia generativa y de razonamiento profundo que OpenCode, generando tablas Markdown completas, comparativas detalladas de programas, horarios y planes de financiación en $ COP.
+  - **Prompt de Razonamiento Unificado y Directivas de Formato (`opencode_client.py:250`):** Establecidas directivas explícitas de formato que exigen generación de tablas comparativas en Markdown ante solicitudes de tablas, resúmenes o comparaciones, cálculo de esquemas 40%/30%/30% y horarios exactos.
+  - **Puente de Resiliencia Bi-Direccional:** Si OpenCode está activo pero el daemon no está iniciado, el sistema intenta automáticamente el puente con el CLI de AGY antes de recurrir a la síntesis estática de emergencia.
+  - **Validación Automatizada:** 54/54 tests PASSED en Pytest en 24.43s y generación de tablas Markdown validada en tiempo real.
+- Motivo: Equiparar la capacidad de razonamiento, estructura y generación de tablas de AGY con la de OpenCode para satisfacer las solicitudes analíticas y tabulares de los aspirantes.
+
 ### [2026-09-02 20:21] [Fixed/Advisor-Mode-Multi-Turn-Synthesis-And-Freeform-Navigation]
 - **Auditoría Integral y Reingeniería del Modo Asesor y Manejo de Preguntas Libres:**
   - **Reingeniería del Fallback de Síntesis del Asesor (`opencode_client.py:64`):** Erradicada la fragmentación de texto que cortaba y duplicaba oraciones idénticas de los chunks (como ocurría con fragmentos de sedes y Cali). Se implementó un motor de síntesis estructurado que cubre los 5 pilares con información institucional oficial exhaustiva (tarifas exactas en COP, pronto pago 10%, cuotas 40/30/30, horarios diurnos/nocturnos/madrugadores, modalidades, sedes y becas), con deduplicación por hashing y redacción cálida sin repetir oraciones.

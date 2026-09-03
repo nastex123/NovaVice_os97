@@ -173,6 +173,37 @@ class OpenCodeAdvisorIntermediary:
             "¿Podrías indicarme qué idioma deseas aprender o qué aspecto te gustaría consultar en detalle?"
         )
 
+    async def _query_agy_cli(self, prompt: str, timeout_seconds: float = 35.0) -> Optional[str]:
+        """
+        Executes Google Antigravity (AGY) reasoning CLI non-interactively via -p.
+        Produces full LLM-grade Markdown tables, rich comparisons, and deep reasoning.
+        """
+        import shutil
+        import os
+        import asyncio
+
+        agy_bin = shutil.which("agy") or shutil.which("agy.exe") or os.path.expandvars(r"%LOCALAPPDATA%\agy\bin\agy.exe")
+        if not agy_bin or not os.path.exists(agy_bin):
+            return None
+
+        cmd = [agy_bin, "--disable-slash-commands", "-p", prompt]
+
+        try:
+            proc = await asyncio.create_subprocess_exec(
+                *cmd,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE
+            )
+            stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=timeout_seconds)
+            if proc.returncode == 0:
+                result_text = stdout.decode("utf-8", errors="replace").strip()
+                if len(result_text) > 30:
+                    return result_text
+        except Exception:
+            pass
+
+        return None
+
     async def query_advisor(
         self,
         query: str,
@@ -198,12 +229,14 @@ class OpenCodeAdvisorIntermediary:
         reasoning_prompt = (
             "Eres el Asesor Académico Senior de Admisiones en Nova Idiomas (Academia Colombiana de Idiomas).\n"
             "Tu objetivo es brindar respuestas exhaustivas, certeras, cálidas, empáticas y fundamentadas exclusivamente en la documentación oficial del negocio.\n\n"
-            "DIRECTRICES DE RAZONAMIENTO Y SÍNTESIS:\n"
+            "DIRECTRICES DE RAZONAMIENTO, SÍNTESIS Y FORMATO:\n"
             "1. Analiza cuidadosamente todo el contexto oficial proporcionado y responde de manera completa a lo que el estudiante o interesado pregunta.\n"
-            "2. Si la pregunta abarca múltiples opciones (por ejemplo, precios en COP, modalidades, horarios o certificaciones), enumera y explica con claridad cada una de las alternativas disponibles en los documentos con sus valores y requisitos.\n"
-            "3. Utiliza formato Markdown profesional con títulos claros (###), viñetas destacadas (•), negritas y estructura limpia.\n"
-            "4. Mantén siempre un tono humano, cercano, motivador e institucionalmente riguroso.\n"
-            "5. Cierra tu mensaje haciendo preguntas de seguimiento orientadas a su perfil (idioma de interés, nivel previo, sede o modalidad virtual) para ayudarle a dar el siguiente paso.\n\n"
+            "2. Si el usuario solicita tablas, comparativas o resúmenes estructurados, genera tablas Markdown limpias y completas.\n"
+            "3. Si la pregunta abarca precios, detalla los valores en pesos colombianos ($ COP), el 10% de descuento por pronto pago y la financiación directa a 3 cuotas sin interés (40%/30%/30%).\n"
+            "4. Si la pregunta abarca horarios, incluye las franjas exactas (Madrugadores 6-8am, Diurnas, Nocturna After Work 6:30-8:30pm, Sabatinos y Dominicales) y modalidades (Virtual en vivo, Presencial, HyFlex 360°).\n"
+            "5. Utiliza formato Markdown profesional con títulos claros (###), tablas cuando aporten valor o se soliciten, viñetas (•) y negritas.\n"
+            "6. Mantén siempre un tono humano, cercano, motivador e institucionalmente riguroso en español.\n"
+            "7. Cierra tu mensaje haciendo una pregunta de seguimiento orientada a su perfil o invitándolo a agendar su Placement Test 100% gratuito.\n\n"
             f"CONTEXTO OFICIAL VERIFICADO:\n{context_str}\n\n"
             f"CONSULTA DEL USUARIO:\n{query}"
         )
@@ -246,7 +279,19 @@ class OpenCodeAdvisorIntermediary:
                 except Exception:
                     pass
 
-            # Fallback if OpenCode server is not reachable
+            # Secondary Reasoning Attempt: AGY CLI before static fallback
+            agy_text = await self._query_agy_cli(reasoning_prompt)
+            if agy_text:
+                elapsed = round((time.time() - start_t) * 1000, 1)
+                return {
+                    "success": True,
+                    "text": agy_text,
+                    "source": "agy_reasoning_cli",
+                    "engine": "opencode_agy_bridge",
+                    "latency_ms": elapsed
+                }
+
+            # Fallback if OpenCode server and AGY CLI are unreachable
             dynamic_text = self._generate_dynamic_advisor_fallback(query, context_chunks)
             elapsed = round((time.time() - start_t) * 1000, 1)
             return {
@@ -259,13 +304,27 @@ class OpenCodeAdvisorIntermediary:
 
         # Engine 2: AGY (Google Antigravity CLI / Engine)
         else:
-            # AGY Antigravity Advisor Synthesis Pipeline
+            # AGY Antigravity Real Reasoning Engine Pipeline
+            agy_text = await self._query_agy_cli(reasoning_prompt)
+            if agy_text:
+                elapsed = round((time.time() - start_t) * 1000, 1)
+                return {
+                    "success": True,
+                    "text": agy_text,
+                    "source": "agy_reasoning_cli",
+                    "engine": "agy",
+                    "model": settings.agy_model,
+                    "reasoning_effort": settings.agy_reasoning_effort,
+                    "latency_ms": elapsed
+                }
+
+            # Fallback if AGY CLI is unavailable
             dynamic_text = self._generate_dynamic_advisor_fallback(query, context_chunks)
             elapsed = round((time.time() - start_t) * 1000, 1)
             return {
                 "success": True,
                 "text": dynamic_text,
-                "source": "agy_advisor",
+                "source": "agy_advisor_fallback",
                 "engine": "agy",
                 "model": settings.agy_model,
                 "reasoning_effort": settings.agy_reasoning_effort,

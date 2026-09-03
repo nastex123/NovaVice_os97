@@ -34,7 +34,7 @@ class Settings(BaseSettings):
     # AGY (Google Antigravity) Integration
     agy_enabled: bool = True
     agy_model: str = "gemini-3.7-flash"
-    agy_reasoning_effort: str = "low"
+    agy_reasoning_effort: str = "high"
 
     # LLM and Provider Configuration
     llm_provider: str = "opencode"

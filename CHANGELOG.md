@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [2026-09-02 20:50] [Docs/Exhaustive-Bilingual-Master-Manuals-And-Ecosystem-Sync]
+- **Expansión Exhaustiva y Sincronización Bilingüe de la Documentación Maestra (v2.6.0):**
+  - **Manual Técnico Maestro en Español ([`EXPLICACION_TECNICA.md`](EXPLICACION_TECNICA.md)):** Rediseñado íntegramente como una guía exhaustiva de 12 secciones que enseña el proyecto desde 0: Ficha técnica v2.6.0, glosario para principiantes, anatomía del monorepo, 3 diagramas Mermaid UML interactivos (Componentes C4, Máquina de Estados FSM, Secuencia Dual OpenCode/AGY), fórmulas matemáticas (Okapi BM25, Cosine Distance y RRF con $k=60$), trazas didácticas paso a paso del ciclo de vida de peticiones hacia el asesor con snippets de código comentados y rutas exactas de archivo.
+  - **Manual Técnico Espejo en Inglés ([`TECHNICAL_EXPLANATION.md`](TECHNICAL_EXPLANATION.md)):** Estricta paridad 1:1 espejo en inglés con idéntica profundidad, diagramas Mermaid UML, trazas paso a paso y referencias de código.
+  - **Sincronización del Ecosistema Documental:**
+    - [`README.md`](README.md): Badges actualizados (55/55 tests PASSED, 80/80 benchmark al 100%), árbol de directorios con `advisor_common.py` y `agy_client.py`, y descripción del selector de asesor.
+    - [`docs/05-ai/opencode-integration.md`](docs/05-ai/opencode-integration.md): Especificación técnica de la arquitectura dual desacoplada con AGY CLI y contratos REST/CLI.
+- Motivo: Proporcionar una base documental de referencia absoluta para auditoría, aprendizaje desde cero y defensa técnica con máxima solidez y transparencia.
+
 ### [2026-09-02 20:39] [Refactor/Separate-OpenCode-And-AGY-Clients]
 - **Separación Arquitectónica Modular de Motores de Asesoría (OpenCode & AGY):**
   - **Módulo Común de Razonamiento y Síntesis ([`backend/src/core/advisor_common.py`](backend/src/core/advisor_common.py)):** Creado módulo centralizado con `build_advisor_reasoning_prompt()` y `generate_advisor_fallback()`. Garantiza que **tanto OpenCode como AGY compartan exactamente las mismas directivas de profundidad**, formato en tablas Markdown, manejo de precios en $ COP (10% descuento y cuotas 40/30/30) y deduplicación de contexto oficial.

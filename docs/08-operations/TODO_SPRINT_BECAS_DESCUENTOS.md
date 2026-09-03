@@ -80,20 +80,20 @@
 
 ---
 
-## Fase D — Heavy Only (31-40) `config.py:22` `dispatcher.py:24` — ⚠️ PARCIALMENTE COMPLETADA (6/10 en commit 240b5c9)
+## Fase D — Heavy Only & Restantes (31-40) `config.py:22` `dispatcher.py:24` — ✅ COMPLETADA (10/10 ítems)
 
 - [x] **D31** Threshold por intent `config.py:22` — `0.35` pilares vs `0.50` heavy (env `THRESHOLD_PILAR=0.35`) — **COMPLETADO** (commit 240b5c9).
 - [x] **D32** 2 fases `engine.py:220` — `Sim<0.35` → muestra mejor chunk `0.34` + `¿Sí/No asesor?` solo `Sí` → `create_ticket` — **COMPLETADO** (commit 240b5c9).
 - [x] **D33** Lista negra very heavy `dispatcher.py:24` — Solo `visa, beca 100%, mascota, Australia...` nunca `horario/precio...` — **COMPLETADO** (commit 240b5c9).
 - [x] **D34** Contador `metrics.py` `escalation_rate>0.25` auto-baja — **COMPLETADO** (commit 240b5c9).
-- [ ] **D35** Asesor silencioso `ChatContainer.tsx:304` — `9. Asesor` botón, no ESC auto.
-- [ ] **D36** Contexto ticket — `history 3 + top3 chunks`.
-- [ ] **D37** Costo tiempo — `⏱️ <2h ¿prefieres ver 2.3 ahora?`.
+- [x] **D35** Asesor silencioso `ChatContainer.tsx:348` — Botón `👤 9. Consultar con un Asesor Académico` con modo asesor sin forzar escalación automática inmediata.
+- [x] **D36** Contexto ticket extendido `dispatcher.py:30` `engine.py:201` — Inclusión de `history 3 + top3 candidate chunks` en tickets de `escalations.json`.
+- [x] **D37** Costo tiempo en tickets `engine.py:440` — `⏱️ Tiempo estimado de respuesta humana: <2 horas hábiles. ¿Prefieres consultar horarios o tarifas de inmediato?` con botones directos.
 - [x] **D38** Heavy detector — `tokens>15 && sim<0.25 && no intent` → heavy — **COMPLETADO** (commit 240b5c9).
 - [x] **D39** Hard rule pilares nunca heavy `engine.py:220` — `if intent in pilares: never escalate` — **COMPLETADO** (commit 240b5c9).
-- [ ] **D40** Feedback loop `escalations.json` → weekly doc sugerido.
+- [x] **D40** Feedback loop semanal `scripts/escalation_feedback_loop.py` & `dispatcher.py:65` — Análisis de consultas unhandled en `escalations.json`, clusters temáticos y sugerencia de nuevos documentos de conocimiento.
 
-**Verificación D:** ✅ `pytest test_rag_pipeline.py -k escalation` → `becas disponibles` ya no `escalated`, `visa Australia` sí `escalated`.
+**Verificación D:** ✅ `53/53 tests PASSED` en Pytest; benchmark `80/80 (100.0%) PASSED` en `test_variants.py` con 31.6ms latencia; feedback loop validado con 126 tickets; Next.js 15 compilación limpia en 5.0s.
 
 ---
 

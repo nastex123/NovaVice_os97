@@ -344,6 +344,21 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
                         <ChevronRight className="w-4 h-4 shrink-0 font-bold ml-1" />
                       </button>
                     )}
+
+                    {/* D35: Botón Asesor Silencioso (Alternar a modo asesor sin escalar automáticamente) */}
+                    {msg.mode !== "escalation" && !msg.action_buttons.some((b: ActionButton) => b.value === "9") && (
+                      <button
+                        onClick={() => onActionButtonClick("9")}
+                        className="w-full text-left p-2 sm:p-2.5 text-xs font-mono font-bold transition-all flex items-center justify-between gap-2 border border-black bg-slate-100 hover:bg-black hover:text-white text-slate-800 shadow-retro-sm sm:col-span-2 mt-0.5"
+                        title="Consultar caso especial directamente con un asesor académico"
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-vicePink border border-black shrink-0" />
+                          <span>👤 9. Consultar con un Asesor Académico (Modo Asesor)</span>
+                        </div>
+                        <ChevronRight className="w-3.5 h-3.5 shrink-0 ml-1" />
+                      </button>
+                    )}
                   </div>
                 )}
               </div>

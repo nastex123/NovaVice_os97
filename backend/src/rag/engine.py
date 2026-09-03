@@ -197,12 +197,18 @@ class PurePythonRAGEngine:
             pass
         pending = applicant_memory.get_session(session_id).get("attributes", {}).get("pending_heavy_query")
         if pending and _norm_pending in ("si", "sí", "si por favor", "si quiero", "si pasar", "si pasame", "si asesor", "si pasar a asesor"):
-            # User confirmed escalation
+            # User confirmed escalation (D36: Include conversation history & candidate chunks)
+            session_obj = applicant_memory.get_session(session_id)
+            conv_hist = session_obj.get("history", [])
+            top_candidate_chunks = pending.get("chunks", [])
+
             ticket = escalation_dispatcher.create_ticket(
                 query=pending.get("query", query),
                 user_id=user_id,
                 confidence_score=pending.get("confidence", 0.0),
-                reason="user_confirmed_heavy_escalation"
+                reason="user_confirmed_heavy_escalation",
+                conversation_history=conv_hist,
+                top_chunks=top_candidate_chunks
             )
             await escalation_dispatcher.dispatch_webhook(ticket)
             metrics_bus.record_escalation()
@@ -213,11 +219,11 @@ class PurePythonRAGEngine:
                 "response": (
                     f"**Asesoría Académica - Nova Idiomas**\n\n"
                     f"Perfecto, he creado tu caso **#{ticket['ticket_id']}** con tu consulta: *\"{pending.get('query', query)}\"*.\n\n"
-                    f"Nuestro equipo de admisiones te contactará en <2h.\n\n"
+                    f"⏱️ *Tiempo estimado de respuesta de admisiones: <2 horas hábiles.*\n\n"
                     f"**Canales directos mientras tanto:**\n"
                     f"- **WhatsApp:** [+57 300 912 3456](https://wa.me/573009123456)\n"
                     f"- **Correo:** {self.settings.admissions_office_email}\n\n"
-                    f"¿Deseas seguir explorando? Prueba `0` para menú."
+                    f"¿Deseas seguir explorando mientras tanto? Prueba `0` para volver al menú o consulta opciones abajo."
                 ),
                 "source_documents": [],
                 "confidence_score": pending.get("confidence", 0.0),
@@ -426,7 +432,11 @@ class PurePythonRAGEngine:
             # D32 2-phase for heavy: store pending and ask Sí/No instead of immediate ticket
             if metrics_bus.escalation_rate > 0.25 and threshold == 0.50:
                 threshold = 0.40
-            applicant_memory.update_attributes(session_id, "pending_heavy_query", {"query": query, "confidence": top_similarity})
+            applicant_memory.update_attributes(
+                session_id,
+                "pending_heavy_query",
+                {"query": query, "confidence": top_similarity, "chunks": chunks[:3] if chunks else []}
+            )
             preview = ""
             if chunks:
                 preview = chunks[0].get("text", "")[:220].replace("\n", " ")
@@ -434,7 +444,8 @@ class PurePythonRAGEngine:
             response_text = (
                 f"**Consulta fuera del alcance pilar — ¿Pasamos a asesor?**\n\n"
                 f"No encontré un dato verificado con alta confianza (sim {top_similarity:.2f} < {threshold:.2f}) para: *\"{query}\"*.{preview}\n"
-                f"¿Quieres que cree un caso para el equipo humano de admisiones? Responde **Sí** para crear ticket o **No** para volver al menú.\n\n"
+                f"⏱️ *Tiempo estimado de respuesta humana: <2 horas hábiles. ¿Prefieres consultar horarios o tarifas de inmediato?*\n\n"
+                f"Responde **Sí** para crear tu ticket o explora las alternativas inmediatas abajo.\n\n"
                 f"**Canales directos mientras tanto:**\n"
                 f"- **WhatsApp:** [+57 300 912 3456](https://wa.me/573009123456)\n"
                 f"- **Correo:** {self.settings.admissions_office_email}"
@@ -451,8 +462,9 @@ class PurePythonRAGEngine:
                 "mode": "clarification",
                 "latency_ms": round(latency * 1000, 1),
                 "action_buttons": [
-                    {"label": "✅ Sí, pasar a asesor", "value": "sí"},
-                    {"label": "❌ No, gracias", "value": "no"},
+                    {"label": "✅ Sí, crear ticket (⏱️ <2h)", "value": "sí"},
+                    {"label": "2. Ver Horarios & Modalidades", "value": "2"},
+                    {"label": "3. Ver Precios & Financiación", "value": "3"},
                     {"label": "0. Menú Principal", "value": "0"},
                 ]
             }

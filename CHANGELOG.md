@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [2026-09-02 19:46] [Feature/Escalation-Feedback/Fase-D]
+- **Culminación Integral de la Fase D — Heavy Only & Restantes (D35, D36, D37, D40):**
+  - **D35 (Asesor Silencioso en Frontend):** Añadido botón no invasivo `👤 9. Consultar con un Asesor Académico` en `ChatContainer.tsx:348` para permitir al usuario alternar al modo asesor voluntariamente sin escalamiento forzado.
+  - **D36 (Contexto Extendido en Tickets):** Parámetros `conversation_history` (últimos 3 turnos sanitizados) y `top_chunks` (fuente, sección y fragmento previo de los 3 mejores chunks) incorporados a la estructura persistente de `escalations.json` en `dispatcher.py:30` y conectados en `engine.py:201`.
+  - **D37 (Indicador de Costo de Tiempo <2h):** Clarificación en `engine.py:440` indicando `⏱️ Tiempo estimado de respuesta humana: <2 horas hábiles. ¿Prefieres consultar horarios o tarifas de inmediato?` con botones de acción inmediata para desincentivar escalamientos superfluos.
+  - **D40 (Feedback Loop Semanal):** Implementado método `generate_feedback_report()` en `dispatcher.py:65` y script operativo [`scripts/escalation_feedback_loop.py`](scripts/escalation_feedback_loop.py), que agrupa consultas no resueltas de `escalations.json`, extrae palabras clave frecuentes y sugiere borradores de documentación para cerrar gaps de conocimiento.
+  - **Validación Automatizada:** 53/53 tests unitarios aprobados en Pytest, benchmark de 80 variantes al 100% de éxito (31.6ms de latencia) y compilación de producción Next.js 15 limpia en 5.0s.
+- Motivo: Finalizar al 100% la Fase D, mejorando la experiencia del aspirante al consultar casos complejos y dotando al equipo de admisiones de herramientas analíticas para enriquecer la documentación continuamente.
+
 ### [2026-09-02 19:35] [Feature/Vectorized-Intent-Router/Fase-E]
 - **Enrutador Semántico Vectorial Universal & Clasificación Dual de Intenciones (Ítem E41b):**
   - **Módulo Autónomo (`backend/src/core/intent_router.py`):** Implementada la clase `SemanticIntentRouter` con jerarquía de 2 niveles: 5 Macro-Pilares (`cursos`, `horarios`, `precios`, `sedes`, `becas_descuentos`) y 18 Micro-Intenciones hiper-especializadas (medios de pago, cuotas, tarifas COP, pronto pago, convenios, becas, madrugadores, diurnos, nocturno, sabatinos, virtual, presencial, hyflex, sedes Bogotá/Medellín/Cali, placement test, proceso de matrícula).

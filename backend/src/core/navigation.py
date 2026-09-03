@@ -534,6 +534,13 @@ def get_contextual_buttons(key: str) -> list:
                 {"label": "3. Precios & Financiación", "value": "3"},
                 {"label": "0. Menú Principal", "value": "0"}
             ]
+        elif key == "4.6":
+            return [
+                {"label": "4.1 Placement Test Gratis", "value": "4.1"},
+                {"label": "4.3 Sedes Bogotá", "value": "4.3"},
+                {"label": "9. Hablar con un Asesor", "value": "9"},
+                {"label": "0. Menú Principal", "value": "0"}
+            ]
         else:
             return [
                 {"label": "4.1 Placement Test Gratis", "value": "4.1"},

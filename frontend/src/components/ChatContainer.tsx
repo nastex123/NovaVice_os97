@@ -318,7 +318,7 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
                             isReturn
                               ? "bg-retroBeige hover:bg-black hover:text-white text-black sm:col-span-2 font-mono"
                               : isAdvisor
-                              ? "bg-vicePink-pastel hover:bg-vicePink text-black hover:text-white border-black sm:col-span-2"
+                              ? "bg-retroBeige hover:bg-vicePink-pastel text-black hover:text-vicePink-dark sm:col-span-2 font-mono"
                               : "bg-retroBeige hover:bg-vicePink-pastel text-black hover:text-vicePink-dark"
                           }`}
                         >
@@ -340,23 +340,6 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
                         <div className="flex items-center gap-2">
                           <RotateCcw className="w-4 h-4 text-black shrink-0" />
                           <span>🔄 ¿No encontraste lo que buscabas? Reformular con opciones generales</span>
-                        </div>
-                        <ChevronRight className="w-4 h-4 shrink-0 font-bold ml-1" />
-                      </button>
-                    )}
-
-                    {/* D35: Botón Asesor Silencioso (Conserva estilo idéntico con borde-2, sombra retro y caja indicadora) */}
-                    {msg.mode !== "escalation" && !msg.action_buttons.some((b: ActionButton) => b.value === "9") && (
-                      <button
-                        onClick={() => onActionButtonClick("9")}
-                        className="w-full text-left p-2.5 sm:p-3 text-xs sm:text-sm font-bold transition-all flex items-center justify-between gap-2 border-2 border-black shadow-retro active:translate-x-[2px] active:translate-y-[2px] active:shadow-none overflow-hidden bg-retroBeige hover:bg-vicePink-pastel text-black hover:text-vicePink-dark sm:col-span-2 font-mono"
-                        title="Consultar caso especial directamente con un asesor académico"
-                      >
-                        <div className="flex items-center gap-2 min-w-0 flex-1 overflow-hidden">
-                          <span className="w-2 h-2 border border-black bg-vicePink shrink-0" />
-                          <span className="min-w-0 flex-1 break-words whitespace-normal leading-tight">
-                            9. Asesor Académico (Atención Personalizada)
-                          </span>
                         </div>
                         <ChevronRight className="w-4 h-4 shrink-0 font-bold ml-1" />
                       </button>

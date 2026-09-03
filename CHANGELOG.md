@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [2026-09-02 20:04] [Fixed/Advisor-Button-Recondite-And-Shadow]
+- **Restauración del Botón 9 como Último Recurso Recóndito y Sombra Retro Homogénea:**
+  - **Eliminación de la Inyección Global del Asesor en Frontend (`ChatContainer.tsx`):** Removido el bloque forzado que inyectaba el botón 9 al final de todos los mensajes regulares. El botón 9 ahora preserva su función original como **último recurso y opción recóndita**, mostrándose únicamente cuando el backend lo suministra en `action_buttons` (clarificación por ambigüedad, anti-estancamiento por doble fallo, escalamiento de tickets o ramas finales de casos especiales como `4.6`).
+  - **Sombra Retro Sólida y Bisel Idéntico (`ChatContainer.tsx:321`):** Configurado para que cualquier botón con `isAdvisor` (valor 9 o 5) herede la sombra sólida negra completa **`shadow-retro`** (`3px 3px 0px 0px #000000`), borde doble `border-2 border-black`, fondo beige `bg-retroBeige` y caja indicadora con marco negro (`w-2 h-2 border border-black bg-vicePink`), igualando exactamente a los botones de navegación superiores.
+  - **Acceso Recóndito en Navegación (`navigation.py:536`):** Agregada la opción `9. Hablar con un Asesor` en la hoja `4.6` (Políticas de Congelamiento, Asistencia y Casos Especiales), permitiendo al aspirante encontrar la asistencia humana en el punto más profundo de la estructura institucional.
+  - **Validación Automatizada:** 54/54 tests PASSED en Pytest y compilación de producción Next.js 15 limpia en 4.8s.
+- Motivo: Cumplir con la directriz de diseño de preservar al asesor humano como último recurso recóndito para casos no resueltos y asegurar el biselado y sombreado 90s consistente.
+
 ### [2026-09-02 19:57] [Fixed/UI-Style-Advisor-Button-And-Nocturnal-Intent]
 - **Homogeneización Visual del Botón 9 (Asesor) y Corrección de Enrutamiento de Horarios Nocturnos:**
   - **Estilo Retro Homogéneo en Frontend (`ChatContainer.tsx:348`):** Corregido el botón del asesor silencioso para que conserve el **diseño idéntico a todos los demás botones de navegación**: borde doble negro (`border-2 border-black`), sombra retro offset (`shadow-retro`), dimensiones y padding (`p-2.5 sm:p-3 font-bold`), fondo beige (`bg-retroBeige`), caja indicadora cuadrada con borde (`w-2 h-2 border border-black bg-vicePink`) y flecha chevron negra, eliminando la discrepancia visual y el emoji circular.

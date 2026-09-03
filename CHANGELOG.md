@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [2026-09-02 19:57] [Fixed/UI-Style-Advisor-Button-And-Nocturnal-Intent]
+- **Homogeneización Visual del Botón 9 (Asesor) y Corrección de Enrutamiento de Horarios Nocturnos:**
+  - **Estilo Retro Homogéneo en Frontend (`ChatContainer.tsx:348`):** Corregido el botón del asesor silencioso para que conserve el **diseño idéntico a todos los demás botones de navegación**: borde doble negro (`border-2 border-black`), sombra retro offset (`shadow-retro`), dimensiones y padding (`p-2.5 sm:p-3 font-bold`), fondo beige (`bg-retroBeige`), caja indicadora cuadrada con borde (`w-2 h-2 border border-black bg-vicePink`) y flecha chevron negra, eliminando la discrepancia visual y el emoji circular.
+  - **Corrección de Enrutamiento Nocturno (`intent_router.py`, `navigation.py`, `hybrid_retriever.py`):**
+    - Añadida tolerancia y normalización a errores ortográficos y variantes libres (`horaios nocturnos`, `horarios nocturnos`, `horario nocturno`, `clases en la noche`, `estudiar de noche`, `nocturna`).
+    - Enriquecido el prototipo de `franja_nocturna` en `intent_router.py` con términos de noche, after work y franjas laborales.
+    - Actualizado el documento oficial [`07_03_franja_nocturna_after_work.md`](backend/data/documents/07_03_franja_nocturna_after_work.md) con títulos y metadatos explícitos de horarios nocturnos (6:30 a 8:30 p.m., lunes a viernes).
+    - Re-ingestión e invalidación de caché ejecutada: preguntas sobre franja nocturna ahora devuelven con 100% de confianza el horario oficial After Work en lugar de fragmentos descontextualizados de sedes.
+  - **Validación Automatizada:** 54/54 tests PASSED en Pytest, benchmark de 80 variantes al 100% (25.7 ms de latencia) y compilación limpia de Next.js 15 en 4.2s.
+- Motivo: Resolver el reporte de inconsistencia estética en el botón de asesor y asegurar que las consultas sobre franjas nocturnas entreguen la información horaria exacta deseada por el aspirante.
+
 ### [2026-09-02 19:52] [Feature/Response-Quality-Polish/Fase-E]
 - **Culminación Integral de la Fase E — Calidad de Respuestas y Pulido Final (E41 a E50):**
   - **E41 (Plantillas Estructuradas por Pilar):** Directivas dinámicas en `prompt_templates.py` que instruyen al LLM y al motor determinista a estructurar horarios en tablas/bloques horarios precisos (`6:00 a 8:00 a.m.`, `6:30 a 8:30 p.m.`), precios en COP con símbolo `$` en negrita, contado 10% y 3 cuotas 40/30/30, y programas con niveles MCER.

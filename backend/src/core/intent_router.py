@@ -178,8 +178,8 @@ MICRO_INTENTS_PROTOTYPES: Dict[str, Dict[str, Any]] = {
     },
     "franjas_diurnas": {
         "text": (
-            "franjas diurnas mananas y tardes de lunes a viernes 9 a 11 am 2 a 4 pm 4 a 6 pm horarios regulares "
-            "clases en el dia tarde regular entre semana"
+            "franjas diurnas mananas y tardes de lunes a viernes 9 a 11 am 2 a 4 pm 4 a 6 pm "
+            "clases en el dia manana mananas tarde tardes regular entre semana diurno diurna"
         ),
         "canonical": "Cuales son los horarios de las franjas diurnas de mananas y tardes de lunes a viernes?",
         "target_cluster": "07_02_franjas_diurnas_mananas_tardes.md",
@@ -193,8 +193,9 @@ MICRO_INTENTS_PROTOTYPES: Dict[str, Dict[str, Any]] = {
     },
     "franja_nocturna": {
         "text": (
-            "franja nocturna after work 6:30 a 8:30 pm clases en la noche despues del trabajo universitarios "
-            "profesionales lunes a viernes nocturno"
+            "horario nocturno horarios nocturnos franja nocturna after work 6:30 a 8:30 pm clases en la noche "
+            "clases nocturnas estudiar de noche noche noches nocturno nocturna horaios nocturnos despues del trabajo "
+            "universitarios profesionales lunes a viernes 6:30 8:30 pm presencial virtual"
         ),
         "canonical": "Como funciona la franja nocturna after work de 6:30 a 8:30 p.m. de lunes a viernes?",
         "target_cluster": "07_03_franja_nocturna_after_work.md",
@@ -403,6 +404,12 @@ class SemanticIntentRouter:
         # Normalize English loanwords to Spanish
         loanword_replacements = [
             (r"\bschedules?\b", "horarios"),
+            (r"\btimetables?\b", "horarios"),
+            (r"\bhoraios?\b", "horarios"),
+            (r"\bhoraros?\b", "horarios"),
+            (r"\bnocturnos?\b", "nocturno"),
+            (r"\bnocturnas?\b", "nocturna"),
+            (r"\bnight\b", "noche nocturno"),
             (r"\bavailable\b", "disponibles"),
             (r"\bprices?\b", "precios"),
             (r"\bfees?\b", "tarifas"),

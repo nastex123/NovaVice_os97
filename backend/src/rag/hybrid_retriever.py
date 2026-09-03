@@ -10,6 +10,11 @@ from src.core.intent_router import semantic_intent_router
 SPANGLISH_REPLACEMENTS = [
     (r"\bschedules?\b", "horario"),
     (r"\btimetables?\b", "horario"),
+    (r"\bhoraios?\b", "horarios"),
+    (r"\bhoraros?\b", "horarios"),
+    (r"\bnocturnos?\b", "nocturno"),
+    (r"\bnocturnas?\b", "nocturna"),
+    (r"\bnight\b", "noche nocturno"),
     (r"\bfees?\b", "precios"),
     (r"\bprices?\b", "precio"),
     (r"\bcosts?\b", "costo"),
@@ -39,7 +44,7 @@ PILLAR_CLUSTERS = {
 PILLAR_KEYWORDS = {
     "becas_descuentos": {"beca", "becas", "descuento", "descuentos", "subsidio", "subsidios", "bono", "bonos", "convenio", "convenios", "caja", "cajas", "compensacion"},
     "precios": {"precio", "precios", "costo", "costos", "tarifa", "tarifas", "valor", "valores", "pago", "pagos", "cuota", "cuotas", "financiacion", "financiamiento", "inversion", "cuesta", "cuestan", "vale", "valen", "cuanto", "modulo"},
-    "horarios": {"horario", "horarios", "franja", "franjas", "jornada", "jornadas", "turno", "turnos", "modalidad", "modalidades", "virtual", "presencial", "hibrida", "sabados", "domingos", "manana", "tarde", "noche"},
+    "horarios": {"horario", "horarios", "horaios", "nocturno", "nocturna", "nocturnos", "nocturnas", "franja", "franjas", "jornada", "jornadas", "turno", "turnos", "modalidad", "modalidades", "virtual", "presencial", "hibrida", "sabados", "domingos", "manana", "tarde", "noche", "noches", "after", "work", "madrugador", "madrugadores"},
     "cursos": {"curso", "cursos", "programa", "programas", "idioma", "idiomas", "nivel", "niveles", "mcer", "a1", "a2", "b1", "b2", "c1", "ingles", "frances", "aleman", "italiano", "portugues", "ielts", "toefl", "cambridge", "delf", "goethe", "clase", "clases", "academico"},
     "sedes": {"sede", "sedes", "sucursal", "sucursales", "ubicacion", "ubicaciones", "direccion", "direcciones", "bogota", "medellin", "cali", "chico", "chapinero", "poblado", "laureles", "granada", "matricula", "inscripcion", "examen", "placement", "test", "inicio", "inicios", "calendario", "admision", "admisiones", "cuando", "empieza", "comienza", "proximo"}
 }

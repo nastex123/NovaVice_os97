@@ -345,18 +345,20 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
                       </button>
                     )}
 
-                    {/* D35: Botón Asesor Silencioso (Alternar a modo asesor sin escalar automáticamente) */}
+                    {/* D35: Botón Asesor Silencioso (Conserva estilo idéntico con borde-2, sombra retro y caja indicadora) */}
                     {msg.mode !== "escalation" && !msg.action_buttons.some((b: ActionButton) => b.value === "9") && (
                       <button
                         onClick={() => onActionButtonClick("9")}
-                        className="w-full text-left p-2 sm:p-2.5 text-xs font-mono font-bold transition-all flex items-center justify-between gap-2 border border-black bg-slate-100 hover:bg-black hover:text-white text-slate-800 shadow-retro-sm sm:col-span-2 mt-0.5"
+                        className="w-full text-left p-2.5 sm:p-3 text-xs sm:text-sm font-bold transition-all flex items-center justify-between gap-2 border-2 border-black shadow-retro active:translate-x-[2px] active:translate-y-[2px] active:shadow-none overflow-hidden bg-retroBeige hover:bg-vicePink-pastel text-black hover:text-vicePink-dark sm:col-span-2 font-mono"
                         title="Consultar caso especial directamente con un asesor académico"
                       >
-                        <div className="flex items-center gap-2">
-                          <span className="w-2 h-2 rounded-full bg-vicePink border border-black shrink-0" />
-                          <span>👤 9. Consultar con un Asesor Académico (Modo Asesor)</span>
+                        <div className="flex items-center gap-2 min-w-0 flex-1 overflow-hidden">
+                          <span className="w-2 h-2 border border-black bg-vicePink shrink-0" />
+                          <span className="min-w-0 flex-1 break-words whitespace-normal leading-tight">
+                            9. Asesor Académico (Atención Personalizada)
+                          </span>
                         </div>
-                        <ChevronRight className="w-3.5 h-3.5 shrink-0 ml-1" />
+                        <ChevronRight className="w-4 h-4 shrink-0 font-bold ml-1" />
                       </button>
                     )}
                   </div>

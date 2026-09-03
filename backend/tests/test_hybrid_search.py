@@ -24,3 +24,61 @@ def test_bm25_lexical_search():
 def test_reciprocal_rank_fusion():
     retriever = HybridRetriever(rrf_k=60)
     assert retriever.rrf_k == 60
+
+
+def test_spanglish_normalization():
+    retriever = HybridRetriever()
+    norm = retriever._normalize_spanglish("What are the schedules, fees and courses on this campus?")
+    assert "horario" in norm
+    assert "precios" in norm
+    assert "curso" in norm
+    assert "sede" in norm
+
+
+def test_query_expansion():
+    retriever = HybridRetriever()
+    expanded_beca = retriever._expand_query("becas disponibles")
+    assert "descuento" in expanded_beca
+    assert "12_04" in expanded_beca
+
+    expanded_precio = retriever._expand_query("precios del curso")
+    assert "planes de pago" in expanded_precio or "inversion" in expanded_precio
+
+
+def test_negation_detection():
+    retriever = HybridRetriever()
+    neg_v = retriever._detect_negations("quiero estudiar ingles pero no virtual")
+    assert neg_v["no_virtual"] is True
+    assert neg_v["no_presencial"] is False
+
+    neg_p = retriever._detect_negations("horarios de noche no presencial por favor")
+    assert neg_p["no_presencial"] is True
+    assert neg_p["no_virtual"] is False
+
+
+def test_pillar_detection():
+    retriever = HybridRetriever()
+    assert retriever._detect_pillar("becas disponibles") == "becas_descuentos"
+    assert retriever._detect_pillar("cuanto cuesta el modulo") == "precios"
+    assert retriever._detect_pillar("franja de la noche") == "horarios"
+    assert retriever._detect_pillar("cursos de ingles intensivo") == "cursos"
+    assert retriever._detect_pillar("sede en bogota chapinero") == "sedes"
+
+
+def test_bm25_dynamic_b_and_domain_protection():
+    bm25 = PureBM25()
+    # Confirm B15: domain keywords never in STOP_WORDS
+    assert "beca" not in bm25.STOP_WORDS
+    assert "descuento" not in bm25.STOP_WORDS
+    assert "precio" not in bm25.STOP_WORDS
+    assert "horario" not in bm25.STOP_WORDS
+
+    # Confirm B12: search with custom b=0.6 executes cleanly
+    docs = [
+        {"id": "doc_a", "text": "Planes de pago y cuotas mensuales para ingles intensivo."},
+        {"id": "doc_b", "text": "Horarios disponibles de lunes a viernes en sede Chico."}
+    ]
+    bm25.fit(docs)
+    res = bm25.search("pago cuotas", top_k=2, b=0.6)
+    assert len(res) > 0
+    assert res[0][0] == "doc_a"

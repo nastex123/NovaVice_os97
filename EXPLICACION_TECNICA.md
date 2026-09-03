@@ -84,7 +84,6 @@ synapse-admissions-ai/ (NovaVice_os97)
 ├── AGENTS.md                              # Definición de agentes y comandos
 ├── CHANGELOG.md                           # Historial cronológico estricto
 ├── EXPLICACION_TECNICA.md                 # Guía maestra de exposición y presentación
-├── Dockerfile                             # Contenedor Docker de producción
 ├── pytest.ini                             # Configuración centralizada de Pytest
 ├── run.py                                 # Supervisor raíz multi-proceso con selector
 ├── start.sh                               # Lanzador rápido Linux/macOS

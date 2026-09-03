@@ -30,6 +30,7 @@ yarn-error.log*
 
 # Vector Database & Temp Artifacts
 data/chroma_db/
+backend/data/chroma_db/
 *.zip
 scratch_*.py
 

@@ -32,7 +32,42 @@ class DocumentIngestionPipeline:
     def _split_into_chunks(self, text: str, source_name: str) -> List[Dict[str, Any]]:
         chunks = []
         # Split hierarchically by markdown headers and paragraphs
-        sections = re.split(r"\n(?=##?\s)", text)
+        raw_sections = re.split(r"\n(?=##?\s)", text)
+        sections = []
+        header_buffer = ""
+        for s in raw_sections:
+            s_clean = s.strip()
+            if not s_clean:
+                continue
+            # Check if section has substantive content beyond header lines and dividers
+            substantive = [
+                l for l in s_clean.split("\n")
+                if l.strip() and not l.strip().startswith("#") and not l.strip().startswith("---")
+            ]
+            if not substantive:
+                # Accumulate title/header into next section
+                header_buffer += s_clean + "\n\n"
+                continue
+            if header_buffer:
+                sections.append(header_buffer + s_clean)
+                header_buffer = ""
+            else:
+                sections.append(s_clean)
+        if header_buffer:
+            if sections:
+                sections[0] = header_buffer + sections[0]
+            else:
+                sections.append(header_buffer)
+
+        # B14: Table-aware chunk protection: 600/150 for 02_horarios, 03_precios, 10_planes or tables
+        is_table_dense = (
+            source_name.startswith("02_") or
+            source_name.startswith("03_") or
+            source_name.startswith("10_") or
+            "|" in text
+        )
+        effective_chunk_size = 600 if is_table_dense else self.chunk_size
+        effective_overlap = 150 if is_table_dense else self.chunk_overlap
 
         for sec_idx, section in enumerate(sections):
             lines = section.strip().split("\n")
@@ -42,12 +77,18 @@ class DocumentIngestionPipeline:
             if not sec_text:
                 continue
 
-            # Sliding window chunking with character overlap
+            # Sliding window chunking with character overlap and table boundary protection
             start = 0
             text_len = len(sec_text)
 
             while start < text_len:
-                end = min(start + self.chunk_size, text_len)
+                end = min(start + effective_chunk_size, text_len)
+                # Keep markdown table rows intact: if cut inside a table line, extend to newline
+                if end < text_len and "|" in sec_text[start:end]:
+                    next_nl = sec_text.find("\n", end)
+                    if next_nl != -1 and (next_nl - start) <= (effective_chunk_size + 150):
+                        end = next_nl
+
                 chunk_str = sec_text[start:end].strip()
 
                 if len(chunk_str) >= 30:
@@ -59,13 +100,14 @@ class DocumentIngestionPipeline:
                             "source": source_name,
                             "section": section_title,
                             "char_start": start,
-                            "char_end": end
+                            "char_end": end,
+                            "has_table": "|" in chunk_str
                         }
                     })
 
                 if end >= text_len:
                     break
-                start += self.chunk_size - self.chunk_overlap
+                start += effective_chunk_size - effective_overlap
 
         return chunks
 

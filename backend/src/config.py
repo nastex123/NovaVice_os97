@@ -48,10 +48,6 @@ class Settings(BaseSettings):
     support_office_email: str = "soporte@novaidiomas.edu.co"
     escalation_webhook_url: str = ""
 
-    # Telegram Bot Integration
-    telegram_bot_token: str = ""
-    telegram_enabled: bool = False
-
     # Cache Invalidation and Expiry
     cache_ttl_seconds: int = 3600
 

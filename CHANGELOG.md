@@ -7,6 +7,55 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [2026-09-02 19:05] [Fixed/RAG/Synthesis]
+- **Anti-Respuestas Vacías & Síntesis Multi-Chunk Resiliente (`src/rag/ingestion.py:35`, `src/rag/engine.py:27`, `docs/08-operations/TODO_SPRINT_BECAS_DESCUENTOS.md`):**
+  - **Diagnóstico del Fallo:** Se identificó que al ingresar consultas naturales como *"que horarios hay?"*, el sistema respondía únicamente con una ficha vacía (`📌 **02. Horarios...**` + `🏛️ *Fuente oficial:* ...`) sin mostrar ninguna franja ni modalidad de estudio.
+  - **Causa Raíz:** 
+    1. En `ingestion.py`, la división por encabezados Markdown (`re.split`) generaba un chunk huérfano que contenía exclusivamente la cabecera `# 02. Horarios...` (sin texto de cuerpo).
+    2. Este chunk obtenía la mayor similitud léxica y densa con la consulta.
+    3. En `engine.py:_call_llm_api`, el extractor determinista tomaba únicamente `chunks[0]`, filtraba todas las líneas que comenzaban por `#`, y al quedar la lista vacía, devolvía solo el título de la cabecera sin información sustantiva.
+  - **Soluciones Implementadas:**
+    1. **Fusión en Ingestión (`ingestion.py:34-58`):** Se implementó un acumulador que detecta secciones que solo contienen encabezados o divisores sin texto sustantivo, fusionándolas automáticamente con la subsección siguiente. Ningún chunk es emitido con solo títulos.
+    2. **Síntesis Multi-Chunk Resiliente (`engine.py:28-75`):** El extractor determinista ahora itera sobre los `top_4` chunks recuperados, extrayendo, desduplicando y formateando hasta 10 viñetas y elementos informativos sustantivos (horarios, modalidades, requisitos, tarifas).
+    3. **Incorporación a Fase C:** Agregado el ítem **C21b** en `docs/08-operations/TODO_SPRINT_BECAS_DESCUENTOS.md` y verificado con 32/32 pruebas unitarias y 80/80 variantes aprobadas.
+- Motivo: Garantizar que el asistente virtual entregue siempre información académica detallada y concreta a los aspirantes, erradicando tarjetas vacías con solo la fuente oficial.
+
+### [2026-09-02 18:55] [Removed/Refactored/Cleaned]
+- **Limpieza Total Agresiva de Componentes Obsoletos y Dependencias Fantasma:**
+  - **Eliminación de Manifiesto Docker (`Dockerfile`):** Retirado el archivo `Dockerfile` en la raíz (32 líneas) y sincronizados todos los diagramas de árbol y referencias en `README.md`, `README.es.md`, `TECHNICAL_EXPLANATION.md`, `EXPLICACION_TECNICA.md` y `docs/04-engineering/technical-design.md`.
+  - **Actualización de Evidencia SENA (`SENA/part2/03_ENTREGA_SOLUCION_SOFTWARE.md`):** Reemplazada la sección de despliegue en contenedores por la guía de "Despliegue y Orquestación Multi-Proceso Nativa con Supervisor Python (`run.py` / `start.bat` / `start.sh`)", alineada con la decisión de arquitectura ADR-006.
+  - **Eliminación de Scripts Scratch Huérfanos:** Eliminados `scratch_generate_80_documents.py` (42.5 KB, generador legado de universidad mock) y `scratch_benchmark_speed.py` (1.4 KB, con imports rotos), reemplazados oficialmente por `scripts/test_variants.py`.
+  - **Poda de Dependencias Fantasma (`backend/requirements.txt`):** Eliminadas 4 librerías sin consumo en el código (`openai`, `flashrank`, `jinja2`, `python-telegram-bot`), reduciendo la huella de instalación de dependencias en `pip install`.
+  - **Retiro de Prototipo Frontend Estático (`backend/src/static/`):** Eliminados `index.html`, `style.css` y `app.js` (~25 KB). Reconfigurado el endpoint raíz `GET /` de FastAPI en `backend/src/main.py` para devolver un JSON descriptivo con hipervínculos a `/docs`, `/metrics/prometheus` y URL del frontend (`http://localhost:3000`).
+  - **Desmantelamiento de Módulos Inactivos y Herramientas Desconectadas:**
+    - Eliminado el módulo de bot de Telegram (`backend/src/bot/telegram_bot.py`), sus hooks de ciclo de vida en `main.py`, variables de entorno en `config.py` y endpoint `/telegram/webhook` en `routes.py`.
+    - Eliminado el módulo de herramientas desconectadas (`backend/src/core/tools.py`), esquemas no consumidos (`QuoteRequest`, `PlacementTestRequest`) y endpoints huérfanos `/api/v1/tools/*`.
+  - **Purga Definitiva del Legado de Hermes:** Eliminado el documento obsoleto `docs/05-ai/hermes-agent-integration.md` (400 líneas) y purgado el parámetro zombie `use_hermes_mode` en `schemas.py`, `routes.py` y `engine.py`.
+  - **Gobernanza Git (`.gitignore`):** Incorporada la regla de exclusión para `backend/data/chroma_db/knowledge_vectors.json`.
+  - **Verificación y Pruebas:** Suite unitaria en Pytest ejecutada con éxito (**32/32 tests PASSED**) y benchmark de 80 variantes en lenguaje natural (**80/80 PASSED**, latencia promedio 45.4ms, 0 falsos escalamientos).
+- Motivo: Optimizar y sanear la base de código eliminando artefactos legados, deuda técnica y dependencias no utilizadas acordadas durante la sesión de `/grill-me`.
+
+### [2026-09-02 18:32] [Fixed/Tooling]
+- **Compatibilidad con Extensiones de Ejecución en Windows (`scripts/installer.py:1`, `run.py:1`):**
+  - Removido el shebang Unix `#!/usr/bin/env python3` en la cabecera de `scripts/installer.py` y `run.py`.
+  - Motivo: Evitar que extensiones de IDEs (como Code Runner en VS Code) intenten invocar la ruta Unix inexistente `/usr/bin/env` en consolas de Windows nativas (CMD / PowerShell), permitiendo la ejecución fluida tanto con el botón de reproducción del IDE como a través de `install.bat` o `python scripts/installer.py`.
+
+### [2026-09-02 18:20] [Fixed/Enhanced/RAG]
+- **Fase B — Recuperación Que Nunca Falla (B11-B20) & Corrección de Aserción de Confianza (`src/rag/hybrid_retriever.py`, `src/rag/ingestion.py`, `src/rag/bm25.py`, `src/rag/engine.py`, `tests/test_rag_pipeline.py`, `tests/test_hybrid_search.py`, `scripts/test_variants.py`):**
+  - **Corrección de Aserción en Pytest (`backend/tests/test_rag_pipeline.py:16`):** Ajustada la validación de confianza mínima de `>= 0.50` a `>= 0.35`, sincronizándola con la arquitectura de umbrales diferenciados de pilares (`similarity_threshold_pilar = 0.35`) introducida en Fase D (D31).
+  - **B11 — Boost Ponderado por Intención y Afinidad de Cluster (`hybrid_retriever.py:155`):** Multiplicador de cobertura $\times 1.4$ para tokens clave de pilares detectados y bonificación $+0.15$ en `similarity_score` para documentos pertenecientes al cluster temático de la intención detectada (`03_`, `09_`, `10_`, `12_`, `02_`, `01_`, `16_`).
+  - **B12 — Fallback BM25 Relajado (`hybrid_retriever.py:228`, `bm25.py:81`):** Búsqueda de contingencia con parámetro $b=0.6$ y `candidate_k=30` activada automáticamente si la similitud del mejor candidato inicial cae por debajo de $0.50$, rescatando consultas con vocabulario disperso.
+  - **B13 — Re-ranking Contextual por Cluster (`hybrid_retriever.py:255`):** Bonificación aditiva de $+0.015$ al score RRF para chunks alineados con el cluster del pilar detectado, priorizando fuentes canónicas en el ordenamiento final.
+  - **B14 — Chunking Jerárquico con Protección de Tablas Markdown (`ingestion.py:38`):** Ventana elástica de $600$ caracteres con $150$ de solapamiento para documentos con alta densidad tabular (`02_horarios`, `03_precios`, `10_planes`) y extensión dinámica hacia el siguiente salto de línea para evitar la fragmentación de filas de tablas.
+  - **B15 — Blindaje de Vocabulario de Admisiones en BM25 (`bm25.py:24`):** Sustracción explícita de `DOMAIN_PROTECTED_WORDS` (`beca`, `descuento`, `precio`, `tarifa`, `horario`, `curso`, `sede`, `subsidio`, `bono`) para asegurar que nunca sean filtrados como stop words.
+  - **B16 — Centroides Semánticos Precomputados para los 5 Pilares (`hybrid_retriever.py:53,165`):** Representaciones vectoriales para Cursos, Horarios, Precios, Sedes y Becas/Descuentos; combinación por similitud coseno ($0.7 \cdot \text{sim} + 0.3 \cdot \cos(\vec{q}, \vec{C}_{\text{pilar}})$) que ancla consultas breves al centroide semántico.
+  - **B17 — Expansión Léxica de Consultas (`hybrid_retriever.py:90`):** Expansión en caliente pre-retrieval inyectando términos sinónimos institucionales (ej. `becas` $\to$ `descuento subsidio beneficio 12_04 aclaratoria`).
+  - **B18 — Detección y Filtro de Restricciones Negativas (`hybrid_retriever.py:105,178`):** Detección de patrones como `no virtual` o `no presencial`, penalizando severamente las modalidades excluidas (reducción al $30\%$ del score) para favorecer la modalidad deseada.
+  - **B19 — Normalización Spanglish y Préstamos Léxicos (`hybrid_retriever.py:10,83`):** Diccionario de normalización para términos comunes de aspirantes bilingües (`schedules`, `fees`, `courses`, `campus`, `placement tests`, `scholarships`).
+  - **B20 — Caché Semántica con Umbrales Elásticos Adaptativos (`engine.py:230`):** Umbral diferenciado de similitud coseno: $0.88$ para consultas de pilares frecuentes, $0.92$ para aclaratorias de becas $\to$ descuentos y $0.95$ para consultas abiertas generales.
+  - **Suite de Pruebas y Benchmark Automatizado (`scripts/test_variants.py`, `test_hybrid_search.py`):** Creado playground de validación masiva con 80 frases de lenguaje natural evaluando los 5 pilares: **80/80 consultas aprobadas (100.0%)**, $0$ escalamientos accidentales a asesor humano y latencia promedio de $48.8\text{ms}$. Suite unitaria ampliada a **32/32 tests aprobados** en Pytest.
+- Motivo: Cumplir con la Fase B del sprint anti-estancamiento garantizando que la recuperación RAG nunca falle y proporcione respuestas precisas para cualquier variante natural sin derivaciones no deseadas.
+
 ### [2026-09-02 15:37] [Docs/SENA]
 - **Suite Integral de Evidencias de Competencias Laborales SENA (`SENA/README.md`, `SENA/part1/`, `SENA/part2/`):**
   - **Estructuración en Dos Partes Normativas:** Creada la carpeta raíz `SENA/` organizada de forma modular según las dos normas de competencia solicitadas:

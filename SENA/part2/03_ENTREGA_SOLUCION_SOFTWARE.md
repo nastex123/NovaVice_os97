@@ -54,7 +54,6 @@ NovaVice_os97/
 │   ├── part1/                             # Norma 220501095 (Diseño de Software)
 │   └── part2/                             # Norma 220501096 (Desarrollo de Software)
 │
-├── Dockerfile                             # Manifiesto para despliegue en contenedores
 ├── installer.py / install.bat / install.sh # Suite de instalación de un solo clic
 └── run.py / start.bat / start.sh           # Supervisor multi-proceso sincronizado
 ```
@@ -133,28 +132,49 @@ El servidor de FastAPI expone una interfaz REST interactiva accesible localmente
 
 ---
 
-## 6. Despliegue en Producción y Contenedores
+## 6. Despliegue y Orquestación Multi-Proceso Nativa
 
-Para desplegar la solución en servidores en la nube o entornos empresariales, el proyecto incluye un manifiesto **Dockerfile** multi-stage optimizado:
+Siguiendo la decisión de arquitectura **ADR-006**, el sistema implementa un modelo de despliegue bare-metal / VPS de alto rendimiento mediante el supervisor multi-proceso [`run.py`](file:///c:/Users/Usuario/Documents/GitHub/NovaVice_os97/run.py), eliminando la sobrecarga de virtualización y dependencias obligatorias de Docker:
 
-```dockerfile
-FROM python:3.11-slim AS backend
-WORKDIR /app
-COPY backend/requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-COPY backend/ /app/backend/
-EXPOSE 8000
-CMD ["uvicorn", "backend.src.main:app", "--host", "0.0.0.0", "--port", "8000"]
+```text
+                                [Usuario / Evaluador]
+                                          │
+                         (start.bat / start.sh / python run.py)
+                                          │
+                                          ▼
+                      ┌───────────────────────────────────────┐
+                      │   Supervisor de Procesos (run.py)     │
+                      └───────────────────┬───────────────────┘
+                                          │
+            ┌─────────────────────────────┼─────────────────────────────┐
+            │                             │                             │
+            ▼                             ▼                             ▼
+ ┌─────────────────────┐       ┌─────────────────────┐       ┌─────────────────────┐
+ │ OpenCode Daemon     │       │ FastAPI Backend     │       │ Next.js Frontend    │
+ │ Puerto 4096         │       │ Puerto 8000         │       │ Puerto 3000         │
+ │ opencode serve      │       │ uvicorn src.main:app│       │ npm run dev         │
+ └─────────────────────┘       └─────────────────────┘       └─────────────────────┘
 ```
 
-### Comandos de Construcción y Ejecución con Docker:
-```bash
-# Construir la imagen del contenedor
-docker build -t novatech/admissions-rag:v2.6.0 .
+### Comandos de Instalación y Ejecución Nativa:
 
-# Ejecutar el contenedor mapeando el puerto 8000
-docker run -d -p 8000:8000 --name nova-admissions novatech/admissions-rag:v2.6.0
-```
+1. **Instalación Automatizada (Un Clic):**
+   ```bash
+   # En Windows:
+   .\install.bat
+   # En Linux / macOS:
+   ./install.sh
+   ```
+
+2. **Ejecución y Supervisión de Servicios:**
+   ```bash
+   # En Windows:
+   .\start.bat
+   # En Linux / macOS:
+   ./start.sh
+   ```
+
+El supervisor libera automáticamente los puertos `8000`, `3000` y `4096` en caso de bloqueos previos, lanza los tres subprocesos de manera sincronizada y orquestada, y realiza un apagado limpio ante señales de interrupción (`SIGINT` / `Ctrl+C`).
 
 ---
 

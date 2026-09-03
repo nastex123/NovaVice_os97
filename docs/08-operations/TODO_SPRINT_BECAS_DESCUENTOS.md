@@ -45,26 +45,27 @@
 
 ---
 
-## Fase B — Recuperación Que Nunca Falla (11-20) `hybrid_retriever.py:62` `ingestion.py:32`
+## Fase B — Recuperación Que Nunca Falla (11-20) `hybrid_retriever.py:62` `ingestion.py:32` — ✅ COMPLETADA 2026-09-02 18:15 America/Bogota
 
-- [ ] **B11** Boost por intent `hybrid_retriever.py:62` — `coverage*1.4` para pilar detectado +0.15 si `source` cluster `03/09/10`, `01`, `08`, `16`, `12_04`.
-- [ ] **B12** Fallback BM25 relajado — `b=0.6 candidate 30` si `sim<0.50`.
-- [ ] **B13** Re-rank por cluster — Prioriza docs del pillar.
-- [ ] **B14** Protección chunk tabla `ingestion.py:32` — `chunk 600/150` para tablas `03_precios`, `02_horarios`.
-- [ ] **B15** STOP actualizado `bm25.py:18` — Confirmar `beca` no en STOP.
-- [ ] **B16** Centroid por pillar (5) — Pre-compute centroid embedding `precios, cursos, modalidades, sedes, becas→descuentos` → `0.3 * cosine`.
-- [ ] **B17** Expansión query — `beca→beca ayuda subsidio descuento`.
-- [ ] **B18** Negación — `no virtual` filtra `2.5`.
-- [ ] **B19** Spanglish — `schedule→horario` etc.
-- [ ] **B20** Cache `0.88` pilar `cache.py:47` — `horario/precio/curso/sede` 0.88, `beca` 0.92.
+- [x] **B11** Boost por intent `hybrid_retriever.py:62` — `coverage*1.4` para pilar detectado +0.15 si `source` cluster `03/09/10`, `01`, `08`, `16`, `12_04` — **COMPLETADO**: Implementado en `_score_candidates` con boost de cobertura y bonificación de cluster.
+- [x] **B12** Fallback BM25 relajado — `b=0.6 candidate 30` si `sim<0.50` — **COMPLETADO**: Activado en `retrieve()` re-evaluando candidatos si el top similarity es menor a 0.50.
+- [x] **B13** Re-rank por cluster — Prioriza docs del pillar — **COMPLETADO**: Bonificación suave de +0.015 RRF para chunks del cluster detectado.
+- [x] **B14** Protección chunk tabla `ingestion.py:32` — `chunk 600/150` para tablas `03_precios`, `02_horarios` — **COMPLETADO**: Segmentación elástica 600/150 y preservación de líneas de tabla Markdown sin cortes.
+- [x] **B15** STOP actualizado `bm25.py:18` — Confirmar `beca` no en STOP — **COMPLETADO**: Lista `DOMAIN_PROTECTED_WORDS` sustraída explícitamente en `PureBM25.__init__`.
+- [x] **B16** Centroid por pillar (5) — Pre-compute centroid embedding `precios, cursos, modalidades, sedes, becas→descuentos` → `0.3 * cosine` — **COMPLETADO**: Centroides calculados en `_get_pillar_centroids()` y mezclados $0.7 \cdot \text{sim} + 0.3 \cdot \text{centroid}$.
+- [x] **B17** Expansión query — `beca→beca ayuda subsidio descuento` — **COMPLETADO**: `_expand_query()` mapeando intenciones clave de admisiones.
+- [x] **B18** Negación — `no virtual` filtra `2.5` — **COMPLETADO**: `_detect_negations()` penalizando modalidades excluidas (virtual / presencial).
+- [x] **B19** Spanglish — `schedule→horario` etc. — **COMPLETADO**: `_normalize_spanglish()` con 16 patrones léxicos bilingües.
+- [x] **B20** Cache `0.88` pilar `cache.py:47` / `engine.py:228` — `horario/precio/curso/sede` 0.88, `beca` 0.92, 0.95 general — **COMPLETADO**: Umbral adaptativo en `engine.py:230`.
 
-**Verificación B:** `scripts/test_variants.py` 80 frases reportando `confidence` >0.35 para pilares.
+**Verificación B:** ✅ `scripts/test_variants.py` ejecutado: **80/80 variantes aprobadas (100.0%)**, 0 escalamientos indeseados, latencia promedio 48.8ms. Pytest suite: **32/32 tests PASSED**.
 
 ---
 
 ## Fase C — Anti-Estancamiento (21-30) `engine.py:130,220` `memory.py:41`
 
 - [ ] **C21** Nunca error duro `navigation.py:384` — `4 botones + Reformulas?`.
+- [x] **C21b** Anti-Respuestas Vacías & Síntesis Multi-Chunk `engine.py:33` `ingestion.py:35` — **COMPLETADO 2026-09-02 19:05 America/Bogota**: Supresión de chunks título huérfanos sin contenido en `ingestion.py` (fusión de encabezados aislados con la subsección siguiente) y síntesis multi-chunk enriquecida en `engine.py` que extrae viñetas y franjas sustantivas de los `top_k` fragmentos, impidiendo que el bot devuelva fichas vacías con solo el título y 'fuente oficial'.
 - [ ] **C22** Botón Reformular `ChatContainer.tsx:302` — `🔄 Reformular` reintenta `top_k=5 threshold 0.35`.
 - [ ] **C23** Memoria fracaso 2x `memory.py:37` — `last_failed` cosine>0.85 → ofrecer menú no ESC.
 - [ ] **C24** Clarificación `0.35-0.50` `engine.py:220` — `¿horarios o precios o becas?` 3 botones.
@@ -79,20 +80,20 @@
 
 ---
 
-## Fase D — Heavy Only (31-40) `config.py:22` `dispatcher.py:24`
+## Fase D — Heavy Only (31-40) `config.py:22` `dispatcher.py:24` — ⚠️ PARCIALMENTE COMPLETADA (6/10 en commit 240b5c9)
 
-- [ ] **D31** Threshold por intent `config.py:22` — `0.35` pilares vs `0.50` heavy (env `THRESHOLD_PILAR=0.35`).
-- [ ] **D32** 2 fases `engine.py:220` — `Sim<0.35` → muestra mejor chunk `0.34` + `¿Sí/No asesor?` solo `Sí` → `create_ticket`.
-- [ ] **D33** Lista negra very heavy `dispatcher.py:24` — Solo `visa, beca 100%, mascota, Australia...` nunca `horario/precio...`.
-- [ ] **D34** Contador `metrics.py` `escalation_rate>0.25` auto-baja.
+- [x] **D31** Threshold por intent `config.py:22` — `0.35` pilares vs `0.50` heavy (env `THRESHOLD_PILAR=0.35`) — **COMPLETADO** (commit 240b5c9).
+- [x] **D32** 2 fases `engine.py:220` — `Sim<0.35` → muestra mejor chunk `0.34` + `¿Sí/No asesor?` solo `Sí` → `create_ticket` — **COMPLETADO** (commit 240b5c9).
+- [x] **D33** Lista negra very heavy `dispatcher.py:24` — Solo `visa, beca 100%, mascota, Australia...` nunca `horario/precio...` — **COMPLETADO** (commit 240b5c9).
+- [x] **D34** Contador `metrics.py` `escalation_rate>0.25` auto-baja — **COMPLETADO** (commit 240b5c9).
 - [ ] **D35** Asesor silencioso `ChatContainer.tsx:304` — `9. Asesor` botón, no ESC auto.
 - [ ] **D36** Contexto ticket — `history 3 + top3 chunks`.
 - [ ] **D37** Costo tiempo — `⏱️ <2h ¿prefieres ver 2.3 ahora?`.
-- [ ] **D38** Heavy detector — `tokens>15 && sim<0.25 && no intent` → heavy.
-- [ ] **D39** Hard rule pilares nunca heavy `engine.py:220` — `if intent in pilares: never escalate`.
+- [x] **D38** Heavy detector — `tokens>15 && sim<0.25 && no intent` → heavy — **COMPLETADO** (commit 240b5c9).
+- [x] **D39** Hard rule pilares nunca heavy `engine.py:220` — `if intent in pilares: never escalate` — **COMPLETADO** (commit 240b5c9).
 - [ ] **D40** Feedback loop `escalations.json` → weekly doc sugerido.
 
-**Verificación D:** `pytest test_rag_pipeline.py -k escalation` → `becas disponibles` ya no `escalated`, `visa Australia` sí `escalated`.
+**Verificación D:** ✅ `pytest test_rag_pipeline.py -k escalation` → `becas disponibles` ya no `escalated`, `visa Australia` sí `escalated`.
 
 ---
 

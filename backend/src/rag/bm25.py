@@ -1,6 +1,6 @@
 import math
 import re
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, Optional
 
 
 class PureBM25:
@@ -21,9 +21,19 @@ class PureBM25:
         "informacion", "quiero", "quisiera", "favor", "hola", "buenos", "dias", "tardes"
     }
 
+    # B15: Explicitly protected domain keywords (never filtered as stop words)
+    DOMAIN_PROTECTED_WORDS = {
+        "beca", "becas", "descuento", "descuentos", "precio", "precios",
+        "tarifa", "tarifas", "costo", "costos", "horario", "horarios",
+        "curso", "cursos", "sede", "sedes", "subsidio", "subsidios",
+        "bono", "bonos", "convenio", "convenios", "matricula", "matriculas"
+    }
+
     def __init__(self, k1: float = 1.5, b: float = 0.75):
         self.k1 = k1
         self.b = b
+        # Ensure domain words are never in stop words
+        self.STOP_WORDS = set(self.STOP_WORDS) - self.DOMAIN_PROTECTED_WORDS
         self.corpus_size = 0
         self.avg_doc_len = 0.0
         self.doc_lengths: List[int] = []
@@ -71,11 +81,12 @@ class PureBM25:
                     self.inverted_index[token] = []
                 self.inverted_index[token].append((doc_idx, count))
 
-    def search(self, query: str, top_k: int = 5) -> List[Tuple[str, float]]:
+    def search(self, query: str, top_k: int = 5, b: Optional[float] = None) -> List[Tuple[str, float]]:
         query_tokens = self._tokenize(query)
         if not query_tokens or self.corpus_size == 0:
             return []
 
+        effective_b = self.b if b is None else b
         scores: Dict[int, float] = {}
 
         for token in query_tokens:
@@ -89,7 +100,7 @@ class PureBM25:
             for doc_idx, freq in postings:
                 doc_len = self.doc_lengths[doc_idx]
                 numerator = freq * (self.k1 + 1.0)
-                denominator = freq + self.k1 * (1.0 - self.b + self.b * (doc_len / self.avg_doc_len))
+                denominator = freq + self.k1 * (1.0 - effective_b + effective_b * (doc_len / self.avg_doc_len))
                 term_score = idf * (numerator / denominator)
                 scores[doc_idx] = scores.get(doc_idx, 0.0) + term_score
 

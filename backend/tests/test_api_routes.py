@@ -36,14 +36,13 @@ async def test_api_chat_and_metrics():
         })
         assert webhook_resp.status_code == 200
 
-        # Quote tool
-        quote_resp = await client.post("/api/v1/tools/quote", json={
-            "idioma": "inglés",
-            "modalidad": "intensivo",
-            "tipo_pago": "contado"
-        })
-        assert quote_resp.status_code == 200
-        assert quote_resp.json()["total_a_pagar_cop"] == 648000
+        # Root endpoint status
+        root_resp = await client.get("/")
+        assert root_resp.status_code == 200
+        root_data = root_resp.json()
+        assert root_data["status"] == "online"
+        assert root_data["version"] == "2.6.0"
+        assert "/docs" in root_data["docs_url"]
 
         # JSON Metrics
         metrics_resp = await client.get("/api/v1/metrics")

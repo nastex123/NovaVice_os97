@@ -13,7 +13,7 @@ async def test_rag_pipeline_end_to_end():
     # 1. Test In-Scope Admissions Query in Spanish
     res = await rag_engine.answer_query("¿Cuáles son los planes de pago y cuotas para el curso intensivo de inglés?")
     assert res["status"] == "success"
-    assert res["confidence_score"] >= 0.50
+    assert res["confidence_score"] >= 0.35
     assert not res["escalated_to_human"]
     assert len(res["source_documents"]) > 0
 

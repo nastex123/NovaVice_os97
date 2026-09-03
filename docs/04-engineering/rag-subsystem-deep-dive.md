@@ -102,42 +102,29 @@ donde:
 
 ---
 
-### 2.3 `src/rag/hybrid_retriever.py:62` — Fusión RRF + Boost por Intent + Centroid (Fase B11/B16)
-Combina densa (Chroma) y BM25 con **RRF k=60 + `coverage*1.4` para pilar detectado + centroid 5 pilares + fallback `b=0.6`** antes de escalar.
+### 2.3 `src/rag/hybrid_retriever.py` — Fusión RRF + Boost por Intent + Centroides Vectoriales (Fase B Completada)
+Combina búsqueda densa y léxica mediante **RRF ($k=60$)**, potenciado con:
+1. **Normalización Spanglish (B19):** Mapeo de términos bilingües (`schedules`, `fees`, `campus`, `placement tests`) a vocabulario canónico institucional.
+2. **Expansión Léxica (B17):** Inyección contextual de sinónimos (`becas` $\to$ `descuento subsidio 12_04`, etc.).
+3. **Boost por Intent (B11):** Multiplicador de cobertura $\times 1.4$ para tokens clave de pilares y bonificación $+0.15$ para chunks de clusters afines.
+4. **Centroides Semánticos por Pilar (B16):** Fusión ponderada con los 5 centroides vectoriales canónicos:
+   $$\text{Score}_{\text{fused}} = 0.7 \cdot \text{Score}_{\text{base}} + 0.3 \cdot \cos(\vec{q}_{\text{emb}}, \vec{C}_{\text{pilar}})$$
+5. **Fallback BM25 Relajado (B12):** Si el candidato top1 obtiene $\text{sim} < 0.50$, se ejecuta búsqueda con $b=0.6$ y `candidate_k=30`.
+6. **Re-ranking por Cluster (B13):** Bonificación aditiva de $+0.015$ al score RRF para documentos pertenecientes al cluster detectado.
 
-```python
-# src/rag/hybrid_retriever.py
-class HybridRetriever:
-    def __init__(self, rrf_k: int = 60):
-        self.rrf_k = rrf_k
-
-    def _ensure_bm25_populated(self):
-        # Auto-inicialización y ajuste en caliente del índice BM25
-        if bm25_index.corpus_size == 0:
-            docs = vector_store.get_all_documents()
-            if docs:
-                bm25_index.fit(docs)
-
-    def retrieve(self, query: str, top_k: int = 4, candidate_k: int = 15):
-        self._ensure_bm25_populated()
-        dense_results = vector_store.query(query, top_k=candidate_k)
-        bm25_results = bm25_index.search(query, top_k=candidate_k)
-
-        # Cálculo de Reciprocal Rank Fusion (RRF)
-        rrf_scores = {}
-        for rank, item in enumerate(dense_results):
-            rrf_scores[item["id"]] = rrf_scores.get(item["id"], 0.0) + (1.0 / (self.rrf_k + rank + 1))
-
-        for rank, (doc_id, score) in enumerate(bm25_results):
-            rrf_scores[doc_id] = rrf_scores.get(doc_id, 0.0) + (1.0 / (self.rrf_k + rank + 1))
-        ...
-```
-
-#### Fórmula Matemática de Reciprocal Rank Fusion (RRF):
-$$RRF(d) = \sum_{m \in \{dense, bm25\}} \frac{1}{k + \text{rank}_m(d)}$$
-donde $k = 60$. La constante $60$ evita que las primeras posiciones tengan un peso desproporcionado sobre candidatos que aparecen consistentemente en ambos rankings.
+#### Fórmula Matemática de Reciprocal Rank Fusion Enriquecido (RRF):
+$$RRF(d) = \sum_{m \in \{\text{dense}, \text{bm25}\}} \frac{1}{k + \text{rank}_m(d)} + \Delta_{\text{cluster}}(d)$$
+donde $k = 60$ y $\Delta_{\text{cluster}}(d) = 0.015$ si el documento $d$ pertenece al cluster temático del pilar detectado.
 
 ---
 
-### 2.4 `src/rag/engine.py:164,220` — Orquestador Maestro + Cache Dual + Heavy Only
-Controla: 1) `navigation.py:330` (80 synonyms, typo, multi-intent), 2) guardrails, 3) **cache dual** `SHA-256` + **semantic `0.88` pilar** (`becas→descuentos` 0.92) via `vector_store.embed_query()`, 4) **threshold pilar `0.35` vs heavy `0.50`** con **2 fases `¿Sí/No?`** y hard rule `D39` pilares nunca heavy, 5) `advisor_mode` 5 chunks. Ver `ADR-008` y `TODO` Fase D.
+### 2.4 `src/rag/engine.py` — Orquestador Maestro + Cache Dual Adaptativa + Heavy Only
+Controla:
+1. Normalización y mapeo en `navigation.py` (~85 sinónimos, Levenshtein $\le 2$, embeddings 384d).
+2. Guardrails de inyección de prompts.
+3. **Caché Dual Adaptativa (B20):** Exacta SHA-256 + Semántica por similitud coseno con umbrales elásticos:
+   - $0.88$ para consultas de pilares catalogados (`horarios`, `precios`, `cursos`, `sedes`).
+   - $0.92$ para consultas sobre `becas` (redirección canónica a `12_04` descuentos).
+   - $0.95$ para consultas abiertas generales.
+4. **Umbrales Diferenciados & 2 Fases (D31-D39):** Umbral pilar $0.35$ vs heavy $0.50$, clarificación en 2 fases con confirmación `Sí/No` en memoria de sesión, y regla dura que impide el auto-escalamiento de consultas de pilares rutinarias.
+5. Modo Asesor (`advisor_mode`) con inyección de 5 fragmentos contextuales profundos hacia OpenCode o AGY Antigravity CLI.

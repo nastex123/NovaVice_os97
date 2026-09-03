@@ -99,7 +99,6 @@ synapse-admissions-ai/ (NovaVice_os97)
 ├── EXPLICACION_TECNICA.md                 # Master technical presentation guide (Spanish)
 ├── README.md                              # Main repository overview (English)
 ├── README.es.md                           # Repository overview (Spanish)
-├── Dockerfile                             # Production container definition
 ├── pytest.ini                             # Root Pytest discovery configuration
 ├── run.py                                 # Process supervisor with advisor engine switch
 ├── start.sh                               # Linux / macOS launch wrapper

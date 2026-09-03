@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 Nova Idiomas Colombia - Admissions Assistant RAG
 Unified Multi-Process Program Supervisor & Launcher

@@ -1,5 +1,6 @@
 import time
 import os
+import re
 from typing import Dict, Any, List, Optional, AsyncGenerator
 import httpx
 from src.config import settings
@@ -25,32 +26,55 @@ class PurePythonRAGEngine:
         # Grounded fallback if no API key is provided
         if not api_key or self.settings.llm_provider == "mock":
             if chunks:
-                top_chunk = chunks[0]
-                chunk_text = top_chunk.get("text", "")
-                section = top_chunk.get("metadata", {}).get("section", "Información Oficial")
-                source = top_chunk.get("metadata", {}).get("source", "Admisiones")
-
-                lines = [l.strip() for l in chunk_text.split("\n") if l.strip()]
-                title = section.replace("#", "").strip()
                 content_lines = []
-                for line in lines:
-                    if line.startswith("#"):
-                        continue
-                    if line.startswith("|") and "---" in line:
-                        continue
-                    clean_line = line.strip()
-                    if clean_line.startswith("-"):
-                        content_lines.append(f"• {clean_line[1:].strip()}")
-                    elif clean_line.startswith("*") and not clean_line.startswith("**"):
-                        content_lines.append(f"• {clean_line[1:].strip()}")
-                    else:
-                        content_lines.append(clean_line)
+                seen_lines = set()
+                primary_title = None
+                primary_source = None
 
-                body = "\n".join(content_lines[:6]) if content_lines else chunk_text[:280]
+                for chunk in chunks[:4]:
+                    c_text = chunk.get("text", "")
+                    c_section = chunk.get("metadata", {}).get("section", "Información Oficial")
+                    c_source = chunk.get("metadata", {}).get("source", "Admisiones")
+
+                    clean_sec = c_section.replace("#", "").strip()
+                    if not primary_title and clean_sec and clean_sec.lower() != "general":
+                        primary_title = clean_sec
+                    if not primary_source:
+                        primary_source = c_source
+
+                    lines = [l.strip() for l in c_text.split("\n") if l.strip()]
+                    for line in lines:
+                        if line.startswith("#") or line.startswith("---"):
+                            continue
+                        if line.startswith("|") and "---" in line:
+                            continue
+                        clean_line = line.strip()
+                        if clean_line.startswith("-"):
+                            clean_line = f"• {clean_line[1:].strip()}"
+                        elif clean_line.startswith("*") and not clean_line.startswith("**"):
+                            clean_line = f"• {clean_line[1:].strip()}"
+                        elif re.match(r"^\d+\.\s+", clean_line):
+                            clean_line = f"• {re.sub(r'^\d+\.\s+', '', clean_line)}"
+
+                        norm_key = clean_line.lower().replace("•", "").replace("*", "").strip()
+                        if norm_key not in seen_lines and len(norm_key) > 5:
+                            seen_lines.add(norm_key)
+                            content_lines.append(clean_line)
+
+                if not primary_title:
+                    primary_title = chunks[0].get("metadata", {}).get("section", "Información Oficial").replace("#", "").strip()
+                if not primary_source:
+                    primary_source = chunks[0].get("metadata", {}).get("source", "Admisiones")
+
+                if content_lines:
+                    body = "\n".join(content_lines[:10])
+                else:
+                    body = chunks[0].get("text", "")[:280]
+
                 formatted_response = (
-                    f"📌 **{title}**\n\n"
+                    f"📌 **{primary_title}**\n\n"
                     f"{body}\n\n"
-                    f"🏛️ *Fuente oficial:* {source}"
+                    f"🏛️ *Fuente oficial:* {primary_source}"
                 )
             else:
                 formatted_response = (
@@ -112,8 +136,7 @@ class PurePythonRAGEngine:
         query: str,
         user_id: str = "guest_applicant",
         session_id: str = "default_session",
-        use_opencode_mode: bool = False,
-        use_hermes_mode: bool = False
+        use_opencode_mode: bool = False
     ) -> Dict[str, Any]:
         start_time = time.time()
 
@@ -225,11 +248,22 @@ class PurePythonRAGEngine:
             result["action_buttons"] = [{"label": "0. Menú Principal", "value": "0"}, {"label": "5. Pregunta Libre", "value": "5"}]
             return result
 
-        # 2b. Semantic cache via embedding cosine 0.95 (paraphrase hit without exact match)
+        # 2b. Semantic cache via embedding cosine (B20: 0.88 pilar, 0.92 beca, 0.95 general)
         try:
             from src.rag.vector_store import vector_store as _vs_for_cache
             q_embedding = _vs_for_cache.embed_query(effective_query)
-            semantic_hit = query_cache.find_semantic_match(q_embedding, threshold=0.95)
+            _eff_low = effective_query.lower()
+            if "beca" in _eff_low or "descuento" in _eff_low:
+                semantic_threshold = 0.92
+            elif any(kw in _eff_low for kw in (
+                "horario", "precio", "curso", "sede", "modalidad", "tarifa", "costo",
+                "programa", "idioma", "cuota", "pago", "financiacion", "matricula"
+            )):
+                semantic_threshold = 0.88
+            else:
+                semantic_threshold = 0.95
+
+            semantic_hit = query_cache.find_semantic_match(q_embedding, threshold=semantic_threshold)
             if semantic_hit:
                 payload, sim = semantic_hit
                 latency = time.time() - start_time
@@ -237,7 +271,6 @@ class PurePythonRAGEngine:
                 result = dict(payload)
                 result["cached"] = True
                 result["latency_ms"] = round(latency * 1000, 1)
-                # Keep original semantic similarity hint if needed
                 result["semantic_similarity"] = round(sim, 4)
                 result["action_buttons"] = [{"label": "0. Menú Principal", "value": "0"}, {"label": "5. Pregunta Libre", "value": "5"}]
                 return result
@@ -252,7 +285,7 @@ class PurePythonRAGEngine:
         current_state = session_data.get("attributes", {}).get("menu_state", "root")
 
         # 4. Handle Advisor Mode via Selected Intermediary (OpenCode or AGY)
-        if current_state == "advisor_mode" or use_opencode_mode or use_hermes_mode:
+        if current_state == "advisor_mode" or use_opencode_mode:
             from src.core.opencode_client import opencode_advisor
             # Retrieve 5 rich context chunks for comprehensive multi-document reasoning
             advisor_chunks = hybrid_retriever.retrieve(effective_query, top_k=5)
@@ -290,11 +323,12 @@ class PurePythonRAGEngine:
 
         # 5. Heavy vs Pilar Handling (D31, D33, D38, D39) — threshold 0.35 pilar vs 0.50 heavy, hard rule + 2-phase
         pilar_keywords = {
-            "horario","horarios","precio","precios","costo","costos","tarifa","tarifas","valor","valores","pago","pagos","cuota","cuotas","descuento","descuentos","financiacion",
-            "curso","cursos","programa","programas","idioma","idiomas","nivel","niveles","mcer","a1","b1","ingles","frances","aleman","italiano","portugues","ielts","toefl","cambridge","delf","goethe",
+            "horario","horarios","precio","precios","costo","costos","tarifa","tarifas","valor","valores","pago","pagos","cuota","cuotas","descuento","descuentos","financiacion","cuanto","cuesta","vale",
+            "curso","cursos","programa","programas","idioma","idiomas","nivel","niveles","mcer","a1","b1","ingles","frances","aleman","italiano","portugues","ielts","toefl","cambridge","delf","goethe","clase","clases",
             "modalidad","modalidades","virtual","presencial","hibrida","hibrido","online","linea","grabaciones","hyflex","sincronico","sincronica",
             "sede","sedes","sucursal","sucursales","ubicacion","direccion","direcciones","bogota","medellin","cali","donde","quedan","estan",
-            "beca","becas","ayuda","ayudas","subsidio","subsidios","scholarship","apoyo","inscripcion","matricula","matriculas","test","placement","congelar","asistencia","reembolso","clubes","horario","jornada","turno"
+            "beca","becas","ayuda","ayudas","subsidio","subsidios","scholarship","apoyo","inscripcion","matricula","matriculas","test","placement","congelar","asistencia","reembolso","clubes","horario","jornada","turno",
+            "inicio","inicios","calendario","admision","admisiones","cuando","empieza","comienza","proximo","academico"
         }
         very_heavy_keywords = {"visa","australia","nueva zelanda","nueva zelanda","beca 100%","otorga beca","otorgame beca","mascota","iguana","perro","gato","tutela","demanda","abogado","scholarship 100%","100% gratis","beca del 100","scholarship 100"}
         _eff_low = effective_query.lower()
@@ -376,7 +410,7 @@ class PurePythonRAGEngine:
             "confidence_score": top_similarity,
             "escalated_to_human": False,
             "cached": False,
-            "mode": "opencode_advisor" if (use_opencode_mode or use_hermes_mode) else "rag_direct",
+            "mode": "opencode_advisor" if use_opencode_mode else "rag_direct",
             "latency_ms": round(latency * 1000, 1),
             "action_buttons": action_buttons if action_buttons else [
                 {"label": "1. Cursos & Certificaciones", "value": "1"},

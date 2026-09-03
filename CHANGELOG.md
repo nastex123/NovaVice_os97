@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [2026-09-02 19:20] [Fixed/Conversational-Sanitization/Fase-E]
+- **Sanitización Institucional de Jargon Técnico y Erradicación de Endpoints REST (Ítem E44b):**
+  - **Detección del Problema:** Al consultar *"que medios de pagos hay?"*, el sistema citaba un fragmento de `12_04_becas_descuentos_aclaratoria.md` instruyendo al aspirante a calcular su cotización mediante una llamada técnica HTTP: `POST /api/v1/tools/quote`.
+  - **Corrección Documental:** Reescrita la sección *"¿Cómo consultar mi caso?"* en `12_04_becas_descuentos_aclaratoria.md:31` con lenguaje puramente humano y conversacional (*"calcular tu cotización personalizada directamente en este chat o pregunta '¿cuánto cuesta el curso de inglés con descuento?'"*).
+  - **Blindaje en Motor RAG (`engine.py:450`):** Implementado un filtro de sanitización regex post-LLM que intercepta y neutraliza cualquier fuga de verbos o rutas HTTP internas (`POST /api/...`, `GET /api/...`, `/api/v1/...`), transformándolas en redacción amigable institucional.
+  - **Enrutamiento de Intenciones de Pago (`navigation.py:360`):** Mapeadas las expresiones coloquiales de pago (`medios de pago`, `formas de pago`, `como puedo pagar`, `pse`, `nequi`, `daviplata`) directamente hacia el catálogo oficial de medios de pago (`10_03` y `03_precios`), garantizando que preguntas de pago reciban los métodos electrónicos y presenciales autorizados.
+  - **Registrado en Roadmap:** Asignado formalmente en `docs/08-operations/TODO_SPRINT_BECAS_DESCUENTOS.md` bajo el ítem **E44b** de la **Fase E (Calidad de Respuestas)**.
+- Motivo: Garantizar una experiencia de usuario 100% natural, cercana y libre de tecnicismos o URLs internas de backend para los aspirantes de Nova Idiomas.
+
 ### [2026-09-02 19:15] [Feature/Anti-Stagnation/Fase-C]
 - **Culminación Integral de la Fase C — Anti-Estancamiento y Resiliencia Conversacional (C21-C30):**
   - **C21 (Sin Errores Duros):** Fallback conversacional suave en `navigation.py:652` con 4 botones rectores y re-enrutamiento automático ante cualquier término no contemplado.

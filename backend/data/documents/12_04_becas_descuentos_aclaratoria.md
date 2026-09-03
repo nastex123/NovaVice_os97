@@ -28,7 +28,7 @@ Para formación en idiomas, la academia opera exclusivamente bajo el esquema de 
 
 ## ¿Cómo consultar mi caso?
 
-Indica tu afiliación a caja de compensación, si aplica descuento familiar y tu modalidad de pago (contado o 3 cuotas sin interés 40%/30%/30%) para calcular tu cotización exacta vía `POST /api/v1/tools/quote` o pregunta “¿cuánto cuesta el curso X con descuento Y?”.
+Indica tu afiliación a caja de compensación, si aplica descuento familiar y tu modalidad de pago (contado o 3 cuotas sin interés 40%/30%/30%) para calcular tu cotización personalizada directamente en este chat o pregunta “¿cuánto cuesta el curso de inglés con descuento?”.
 
 ## Canales
 

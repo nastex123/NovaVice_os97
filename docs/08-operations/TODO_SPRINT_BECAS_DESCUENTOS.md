@@ -103,6 +103,7 @@
 - [ ] **E42** Memoria preferencia `memory.py:37` — `modalidad_preferida`.
 - [ ] **E43** Resumen 20 tokens.
 - [ ] **E44** Validación post-LLM regex `$`/`6:00`.
+- [x] **E44b** Sanitización de Jargon Técnico & Erradicación de Endpoints en Respuestas (`engine.py:450`, `12_04_becas_descuentos_aclaratoria.md:31`) — **COMPLETADO 2026-09-02 19:18 America/Bogota**: Eliminación de fugas de endpoints REST (como `POST /api/v1/tools/quote`) en el corpus documental y blindaje con filtro regex en la síntesis RAG para garantizar un lenguaje 100% conversacional, natural y amigable para el aspirante.
 - [ ] **E45** Citas siempre aunque `cached`.
 - [ ] **E46** Idioma ES forzado.
 - [ ] **E47** Tono empático.

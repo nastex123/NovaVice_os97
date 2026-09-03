@@ -446,6 +446,11 @@ class PurePythonRAGEngine:
         # 6. LLM Synthesis
         llm_output = await self._call_llm_api(prompt, chunks=chunks)
         answer_text = llm_output["text"]
+
+        # D38b / E44b: Conversational sanitization: never leak raw REST endpoints to the applicant
+        answer_text = re.sub(r"`?(?:POST|GET|PUT|DELETE)\s+/api/[^\s`\"']+`?", "directamente en este chat", answer_text)
+        answer_text = re.sub(r"`?/api/v1/[^\s`\"']+`?", "nuestros canales oficiales", answer_text)
+
         if mapped_query:
             answer_text += "\n\n*(Escribe '0' para regresar al Menu Principal)*"
 

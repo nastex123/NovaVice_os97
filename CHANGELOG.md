@@ -7,6 +7,47 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [2026-09-04 07:28] [Docs/TODO-2.11-Cascaded-Intent-Routing-Pipeline]
+- **Incorporación de TODO-2.11 al Tablero Maestro de la Fase 2 (Rendimiento y Resiliencia):**
+  - **Especificación de Tarea ([`docs/01-product/TODO_50_PROPOSITAS.md`](docs/01-product/TODO_50_PROPOSITAS.md)):** Agregada formalmente la tarea **TODO-2.11 [CRÍTICO] Pipeline de Enrutamiento de Intenciones en Cascada y Erradicación de Cruces entre Pilares** basada en el informe técnico de arquitectura experta:
+    - **1. Clasificador de Intención Cerrado & Confidence Gate:** Detección estricta de intents sin permitir búsqueda global no restringida en los 82 documentos.
+    - **2. Hard Domain Mask Obligatorio:** Bloqueo booleano físico en `hybrid_retriever.py` mediante `PILLAR_STRICT_CLUSTERS` (veto absoluto a clústeres incompatibles).
+    - **3. Score Híbrido con Intent Match:** Ponderación compuesta $\text{Score} = (0.4 \times \text{Dense}) + (0.3 \times \text{BM25}) + (0.3 \times \text{IntentMatch})$.
+    - **4. Context Validator Pre-LLM:** Auditor de chunks en `engine.py` que rechaza y sustituye documentos fuera del dominio solicitado.
+    - **5. Output Verification & Prompt con Reglas Estrictas:** Directivas de dominio imperativas en `advisor_common.py` y detección de términos prohibidos post-generación.
+    - **6. Tests de Regresión Automáticos:** Verificación de no-contaminación entre los 5 pilares institucionales.
+  - **Sincronización del Roadmap:** Actualizada la Fase 2 en [`docs/01-product/ROADMAP_50_PROPOSITAS.md`](docs/01-product/ROADMAP_50_PROPOSITAS.md) para incluir TODO-2.11 (Fase 1: 11 tareas, Fase 2: 11 tareas, Total: 51 tareas).
+- Motivo: Establecer un pipeline multi-filtro infalible en la Fase 2 de resiliencia para erradicar cualquier alucinación o cruce semántico entre cursos, sedes, horarios y precios.
+
+### [2026-09-04 07:03] [Added/RAG-AST-Atomic-Table-Chunking]
+- **Chunking Semántico Consciente de Tablas Markdown con AST (TODO-1.2 / Propuesta 2):**
+  - **Extracción Estructurada de Bloques (`backend/src/rag/ingestion.py`):** Implementado `_extract_blocks(text)` para segmentar deterministamente el texto en encabezados Markdown (`#`), párrafos en prosa y tablas completas (`|...|`).
+  - **Preservación Atómica de Tablas Financieras y Horarios (`backend/src/rag/ingestion.py:85`):** Las tablas de precios en COP, cronogramas y convenios de descuento se tratan como bloques indivisibles (`is_table_atomic=True`). Si la tabla cabe dentro del umbral extendido (`1400` caracteres), se indexa íntegramente como un chunk único, erradicando cortes a mitad de fila.
+  - **Partición Resiliente con Cabeceras Preservadas:** En tablas de gran volumen que superan el umbral, el algoritmo las divide por filas completas inyectando en cada partición el encabezado de dos líneas (`header` + `delimiter`), asegurando que ningún fragmento pierda el contexto de las columnas.
+  - **Cobertura de Pruebas Unitarias (`backend/tests/test_ingestion.py`):** Añadidos `test_atomic_table_chunking()` y `test_large_table_header_preservation()` validando la conservación atómica de tablas de precios COP ($ 1.350.000, 3 cuotas) y la duplicación de cabeceras en tablas extensas.
+  - **Actualización de Tablero:** Marcada como completada la tarea **TODO-1.2** en [`docs/01-product/TODO_50_PROPOSITAS.md`](docs/01-product/TODO_50_PROPOSITAS.md).
+- Motivo: Garantizar 0% de fragmentación en tarifas oficiales, cronogramas y políticas financieras para que el retriever y el LLM reciban información tabular íntegra.
+
+### [2026-09-04 06:56] [Added/RAG-Adaptive-RRF-Entity-Weighting]
+- **Recalibración Adaptativa de Fusión RRF para Entidades Exactas (TODO-1.1 / Propuesta 1):**
+  - **Detección de Entidades de Alta Precisión (`backend/src/rag/hybrid_retriever.py`):** Implementado `_detect_exact_entities(clean_query)` para detectar automáticamente cifras numéricas y financieras en pesos colombianos (`$`, `COP`, `cuotas`, `descuentos`, porcentajes), niveles y certificaciones (`A1..C2`, `IELTS`, `TOEFL`, `DELF`, `Goethe`), horarios específicos (`6:00`, `6:30`, `8:00`, `8:30`, `am/pm`) y sedes físicas concretas (`Chicó`, `Chapinero`, `Poblado`, `Laureles`, `Granada`).
+  - **Ponderación RRF Adaptativa (`backend/src/rag/hybrid_retriever.py:320`):** Implementado `_get_adaptive_rrf_params()`. Ante la presencia de entidades exactas, el sistema ajusta dinámicamente el factor de suavizado léxico a $k_{bm25}=40$ y peso $w_{bm25}=1.25$ frente a $k_{dense}=75$ y peso $w_{dense}=0.9$, garantizando máxima fidelidad y prioridad de ranking en tablas de tarifas y sedes. Para preguntas abiertas y conceptuales se preserva el balance canónico $k=60$ ($w=1.0$).
+  - **Cobertura de Pruebas Unitarias (`backend/tests/test_hybrid_search.py`):** Añadido `test_adaptive_rrf_exact_entities()` validando la detección exhaustiva en escenarios financieros, de certificación, sedes y preguntas generales.
+  - **Actualización de Tablero:** Marcada como completada la tarea **TODO-1.1** en [`docs/01-product/TODO_50_PROPOSITAS.md`](docs/01-product/TODO_50_PROPOSITAS.md).
+- Motivo: Eliminar falsos positivos y priorizar con precisión absoluta documentos de tarifas oficiales, certificaciones y sedes cuando el usuario consulta cifras exactas o códigos normativos.
+
+### [2026-09-04 06:50] [Docs/Roadmap-50-Technical-Enhancement-Proposals]
+- **Documentación del Roadmap Estratégico de 50 Propuestas de Mejora Técnica (v2.7.0):**
+  - **Documento Maestro de Roadmap ([`docs/01-product/ROADMAP_50_PROPOSITAS.md`](docs/01-product/ROADMAP_50_PROPOSITAS.md)):** Creado manual exhaustivo que organiza 50 propuestas técnicas en 5 fases secuenciales (Fase 1: Precisión RAG y Datos, Fase 2: Rendimiento Backend y Resiliencia, Fase 3: Frontend y Accesibilidad, Fase 4: Testing y Tooling DX, Fase 5: Evolución Futura) divididas en 7 categorías arquitectónicas, excluyendo temas de seguridad conforme a requerimiento.
+  - **Tablero TODO Detallado de Seguimiento ([`docs/01-product/TODO_50_PROPOSITAS.md`](docs/01-product/TODO_50_PROPOSITAS.md)):** Creado tablero de control granular con 50 tareas principales y subtareas técnicas con casillas de verificación para monitorear el progreso de cada fase.
+  - **Actualización de Propuestas Tecnológicas ([`docs/03-architecture/technological-enhancement-proposals.md`](docs/03-architecture/technological-enhancement-proposals.md)):** Sincronizado el estado base de v2.6.0 e incorporado el mapa completo de las 50 propuestas del programa estratégico v2.7.0 con referencias directas de arquitectura.
+  - **Actualización del PRD ([`docs/01-product/PRD.md`](docs/01-product/PRD.md)):** Incorporada la Sección 5 con la matriz de fases de evolución técnica planificada y criterios de aceptación.
+  - **Sincronización de Manuales Bilingües y Portada:**
+    - [`EXPLICACION_TECNICA.md`](EXPLICACION_TECNICA.md): Añadida la sección 13 con el resumen del Roadmap y enlaces al documento maestro.
+    - [`TECHNICAL_EXPLANATION.md`](TECHNICAL_EXPLANATION.md): Añadida la sección 13 espejo en inglés con el desglose de fases técnicas.
+    - [`README.md`](README.md) y [`README.es.md`](README.es.md): Añadidos los accesos directos al Roadmap dentro de las guías maestras de documentación.
+- Motivo: Establecer la hoja de ruta técnica formal, estructurada por categorías y fases secuenciales, para ejecutar de manera ordenada y documentada la evolución del sistema sin alterar código fuente hasta su planificación aprobada.
+
 ### [2026-09-02 20:50] [Docs/Exhaustive-Bilingual-Master-Manuals-And-Ecosystem-Sync]
 - **Expansión Exhaustiva y Sincronización Bilingüe de la Documentación Maestra (v2.6.0):**
   - **Manual Técnico Maestro en Español ([`EXPLICACION_TECNICA.md`](EXPLICACION_TECNICA.md)):** Rediseñado íntegramente como una guía exhaustiva de 12 secciones que enseña el proyecto desde 0: Ficha técnica v2.6.0, glosario para principiantes, anatomía del monorepo, 3 diagramas Mermaid UML interactivos (Componentes C4, Máquina de Estados FSM, Secuencia Dual OpenCode/AGY), fórmulas matemáticas (Okapi BM25, Cosine Distance y RRF con $k=60$), trazas didácticas paso a paso del ciclo de vida de peticiones hacia el asesor con snippets de código comentados y rutas exactas de archivo.

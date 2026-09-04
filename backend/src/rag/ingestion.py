@@ -29,86 +29,197 @@ class DocumentIngestionPipeline:
             hasher.update(f.read_bytes())
         return hasher.hexdigest()
 
+    def _extract_blocks(self, text: str) -> List[Dict[str, Any]]:
+        # P2 / TODO-1.2: Parse markdown text into structured semantic blocks (paragraphs, tables, headers)
+        lines = text.split("\n")
+        blocks = []
+        current_lines: List[str] = []
+        in_table = False
+
+        for line in lines:
+            stripped = line.strip()
+            is_table_line = stripped.startswith("|") and stripped.endswith("|") and len(stripped) > 1
+
+            if is_table_line:
+                if not in_table:
+                    if current_lines:
+                        p_text = "\n".join(current_lines).strip()
+                        if p_text:
+                            blocks.append({"type": "prose", "text": p_text})
+                        current_lines = []
+                    in_table = True
+                current_lines.append(line)
+            else:
+                if in_table:
+                    t_text = "\n".join(current_lines).strip()
+                    if t_text:
+                        blocks.append({"type": "table", "text": t_text})
+                    current_lines = []
+                    in_table = False
+
+                if stripped.startswith("#"):
+                    if current_lines:
+                        p_text = "\n".join(current_lines).strip()
+                        if p_text:
+                            blocks.append({"type": "prose", "text": p_text})
+                        current_lines = []
+                    blocks.append({"type": "header", "text": stripped})
+                else:
+                    current_lines.append(line)
+
+        if current_lines:
+            remaining = "\n".join(current_lines).strip()
+            if remaining:
+                blocks.append({"type": "table" if in_table else "prose", "text": remaining})
+
+        return blocks
+
     def _split_into_chunks(self, text: str, source_name: str) -> List[Dict[str, Any]]:
+        # P2 / TODO-1.2: AST-aware semantic chunker that preserves tables as atomic entities
         chunks = []
-        # Split hierarchically by markdown headers and paragraphs
-        raw_sections = re.split(r"\n(?=##?\s)", text)
-        sections = []
-        header_buffer = ""
-        for s in raw_sections:
-            s_clean = s.strip()
-            if not s_clean:
-                continue
-            # Check if section has substantive content beyond header lines and dividers
-            substantive = [
-                l for l in s_clean.split("\n")
-                if l.strip() and not l.strip().startswith("#") and not l.strip().startswith("---")
-            ]
-            if not substantive:
-                # Accumulate title/header into next section
-                header_buffer += s_clean + "\n\n"
-                continue
-            if header_buffer:
-                sections.append(header_buffer + s_clean)
-                header_buffer = ""
-            else:
-                sections.append(s_clean)
-        if header_buffer:
-            if sections:
-                sections[0] = header_buffer + sections[0]
-            else:
-                sections.append(header_buffer)
+        blocks = self._extract_blocks(text)
+        current_section = "General"
+        max_chunk_chars = 900
+        table_limit_chars = 1400
 
-        # B14: Table-aware chunk protection: 600/150 for 02_horarios, 03_precios, 10_planes or tables
-        is_table_dense = (
-            source_name.startswith("02_") or
-            source_name.startswith("03_") or
-            source_name.startswith("10_") or
-            "|" in text
-        )
-        effective_chunk_size = 600 if is_table_dense else self.chunk_size
-        effective_overlap = 150 if is_table_dense else self.chunk_overlap
+        current_accumulator: List[str] = []
+        current_length = 0
 
-        for sec_idx, section in enumerate(sections):
-            lines = section.strip().split("\n")
-            section_title = lines[0].replace("#", "").strip() if lines else "General"
-            sec_text = section.strip()
+        def flush_accumulator():
+            nonlocal current_accumulator, current_length
+            if not current_accumulator:
+                return
+            combined_text = "\n\n".join(current_accumulator).strip()
+            if len(combined_text) >= 30:
+                chunk_id = hashlib.sha256(f"{source_name}_{len(chunks)}_{combined_text}".encode("utf-8")).hexdigest()[:16]
+                chunks.append({
+                    "id": f"chunk_{chunk_id}",
+                    "text": combined_text,
+                    "metadata": {
+                        "source": source_name,
+                        "section": current_section,
+                        "char_length": len(combined_text),
+                        "has_table": "|" in combined_text,
+                        "is_table_atomic": False
+                    }
+                })
+            current_accumulator = []
+            current_length = 0
 
-            if not sec_text:
-                continue
+        for block in blocks:
+            b_type = block["type"]
+            b_text = block["text"]
 
-            # Sliding window chunking with character overlap and table boundary protection
-            start = 0
-            text_len = len(sec_text)
+            if b_type == "header":
+                current_section = b_text.replace("#", "").strip() or current_section
+                if current_length > 400:
+                    flush_accumulator()
+                current_accumulator.append(b_text)
+                current_length += len(b_text)
 
-            while start < text_len:
-                end = min(start + effective_chunk_size, text_len)
-                # Keep markdown table rows intact: if cut inside a table line, extend to newline
-                if end < text_len and "|" in sec_text[start:end]:
-                    next_nl = sec_text.find("\n", end)
-                    if next_nl != -1 and (next_nl - start) <= (effective_chunk_size + 150):
-                        end = next_nl
+            elif b_type == "table":
+                # Tables are prioritized as atomic entities
+                flush_accumulator()
 
-                chunk_str = sec_text[start:end].strip()
-
-                if len(chunk_str) >= 30:
-                    chunk_id = hashlib.sha256(f"{source_name}_{sec_idx}_{start}_{chunk_str}".encode("utf-8")).hexdigest()[:16]
+                table_lines = [l for l in b_text.split("\n") if l.strip()]
+                # If table fits within table_limit_chars, emit as a single atomic chunk
+                if len(b_text) <= table_limit_chars:
+                    t_chunk_id = hashlib.sha256(f"{source_name}_{len(chunks)}_table_{b_text}".encode("utf-8")).hexdigest()[:16]
                     chunks.append({
-                        "id": f"chunk_{chunk_id}",
-                        "text": chunk_str,
+                        "id": f"chunk_{t_chunk_id}",
+                        "text": b_text,
                         "metadata": {
                             "source": source_name,
-                            "section": section_title,
-                            "char_start": start,
-                            "char_end": end,
-                            "has_table": "|" in chunk_str
+                            "section": current_section,
+                            "char_length": len(b_text),
+                            "has_table": True,
+                            "is_table_atomic": True,
+                            "table_rows": len(table_lines)
                         }
                     })
+                else:
+                    # For very large tables, partition row-by-row preserving header
+                    header_lines = table_lines[:2] if len(table_lines) >= 2 else table_lines[:1]
+                    data_rows = table_lines[2:] if len(table_lines) >= 2 else []
+                    header_prefix = "\n".join(header_lines)
 
-                if end >= text_len:
-                    break
-                start += effective_chunk_size - effective_overlap
+                    row_group: List[str] = []
+                    group_len = len(header_prefix)
 
+                    for row in data_rows:
+                        if group_len + len(row) > table_limit_chars and row_group:
+                            sub_table = header_prefix + "\n" + "\n".join(row_group)
+                            s_id = hashlib.sha256(f"{source_name}_{len(chunks)}_subtable_{sub_table}".encode("utf-8")).hexdigest()[:16]
+                            chunks.append({
+                                "id": f"chunk_{s_id}",
+                                "text": sub_table,
+                                "metadata": {
+                                    "source": source_name,
+                                    "section": current_section,
+                                    "char_length": len(sub_table),
+                                    "has_table": True,
+                                    "is_table_atomic": False,
+                                    "table_rows": len(row_group) + len(header_lines)
+                                }
+                            })
+                            row_group = []
+                            group_len = len(header_prefix)
+
+                        row_group.append(row)
+                        group_len += len(row) + 1
+
+                    if row_group:
+                        sub_table = header_prefix + "\n" + "\n".join(row_group)
+                        s_id = hashlib.sha256(f"{source_name}_{len(chunks)}_subtable_{sub_table}".encode("utf-8")).hexdigest()[:16]
+                        chunks.append({
+                            "id": f"chunk_{s_id}",
+                            "text": sub_table,
+                            "metadata": {
+                                "source": source_name,
+                                "section": current_section,
+                                "char_length": len(sub_table),
+                                "has_table": True,
+                                "is_table_atomic": False,
+                                "table_rows": len(row_group) + len(header_lines)
+                            }
+                        })
+
+            else:
+                # Prose paragraph: split by sliding window if exceeding chunk_size
+                p_text = b_text
+                # If accumulator has content, consider flushing if adding p_text exceeds chunk_size
+                if current_accumulator and (current_length + len(p_text) > self.chunk_size):
+                    flush_accumulator()
+
+                if len(p_text) <= self.chunk_size:
+                    current_accumulator.append(p_text)
+                    current_length += len(p_text)
+                else:
+                    flush_accumulator()
+                    p_start = 0
+                    p_len = len(p_text)
+                    step = max(1, self.chunk_size - self.chunk_overlap)
+                    while p_start < p_len:
+                        p_end = min(p_start + self.chunk_size, p_len)
+                        chunk_slice = p_text[p_start:p_end].strip()
+                        if len(chunk_slice) >= 30:
+                            c_id = hashlib.sha256(f"{source_name}_{len(chunks)}_{chunk_slice}".encode("utf-8")).hexdigest()[:16]
+                            chunks.append({
+                                "id": f"chunk_{c_id}",
+                                "text": chunk_slice,
+                                "metadata": {
+                                    "source": source_name,
+                                    "section": current_section,
+                                    "char_length": len(chunk_slice),
+                                    "has_table": False,
+                                    "is_table_atomic": False
+                                }
+                            })
+                        if p_end >= p_len:
+                            break
+                        p_start += step
+
+        flush_accumulator()
         return chunks
 
     def load_and_chunk_documents(self) -> List[Dict[str, Any]]:

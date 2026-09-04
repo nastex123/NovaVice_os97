@@ -587,6 +587,21 @@ Once initialized:
 
 ---
 
+## 🗺️ 13. Strategic Roadmap: 50 Technical Enhancement Proposals (v2.7.0)
+
+The system features a structured **5-phase engineering roadmap** covering **50 technical proposals** across 7 architectural areas (preserving security guardrails intact):
+
+* 📖 **Complete Master Document:** [Roadmap de 50 Propuestas Técnicas (`docs/01-product/ROADMAP_50_PROPOSITAS.md`)](docs/01-product/ROADMAP_50_PROPOSITAS.md)
+
+### Phase Executive Summary:
+1. **Phase 1: Core RAG & Data Precision:** Markdown AST table chunking, adaptive RRF entity weighting, lightweight local Cross-Encoder re-ranking, and sub-5ms multi-tier semantic cache.
+2. **Phase 2: Backend Architecture, Resilience & Persistence:** Real-time token-by-token SSE streaming, persistent HTTP connection pooling, transactional SQLite WAL storage, and Docker Compose.
+3. **Phase 3: Modern Frontend, Retro Engine & Accessibility:** Zustand global state management, progressive SSE reader, GPU/WebGL-accelerated CRT optical filter, and WCAG AAA accessibility mode.
+4. **Phase 4: Automated Testing, QA & Tooling DX:** Continuous RAG evaluation pipeline (Ragas/G-Eval), Locust concurrent load testing, CLI `run.py doctor`, and automated pre-commits.
+5. **Phase 5: Future Horizons & Specialized Deployments:** Graph RAG for prerequisite trees, synthetic procedural retro audio, and standalone Tauri desktop packaging for campus reception kiosks.
+
+---
+
 ## 🏆 Architectural Conclusion
 
 Nova OS '97 is not a wrapper around external commercial APIs. It is a **Sovereign, Deterministic, Local-First Architecture** engineered with software rigor:

@@ -21,6 +21,7 @@
 
 * 📖 **[Master Technical Presentation & Architecture Guide (English)](TECHNICAL_EXPLANATION.md):** Exhaustive 12-section technical manual, Mermaid UML diagrams, code snippets with file paths, and step-by-step request traces.
 * 📖 **[Guía Maestra de Explicación Técnica (Español)](EXPLICACION_TECNICA.md):** Manual técnico exhaustivo en Español con paridad espejo 1:1, arquitectura de código, diagramas y trazas didácticas.
+* 🚀 **[Roadmap Estratégico de 50 Propuestas Técnicas](docs/01-product/ROADMAP_50_PROPOSITAS.md):** Programa de evolución técnica en 5 fases secuenciales (RAG, Backend, Frontend, Testing y DevOps) sin tocar seguridad.
 * 📜 **[Changelog](CHANGELOG.md):** Chronological log of all additions, refactors, and releases tracked under `America/Bogota` timezone.
 * 🏛️ **[Architecture & Decision Records (docs/)](docs/):** System PRD, engineering deep-dives, AI integrations, and ADRs (ADR-001 through ADR-008).
 

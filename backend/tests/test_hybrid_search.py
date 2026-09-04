@@ -82,3 +82,37 @@ def test_bm25_dynamic_b_and_domain_protection():
     res = bm25.search("pago cuotas", top_k=2, b=0.6)
     assert len(res) > 0
     assert res[0][0] == "doc_a"
+
+
+def test_adaptive_rrf_exact_entities():
+    # P1 / TODO-1.1: Verify detection of exact entities and adaptive RRF weights
+    retriever = HybridRetriever()
+
+    # Case 1: Financial exact entity ($ COP, cuotas, discount)
+    entities_fin = retriever._detect_exact_entities("cuanto vale en COP la cuota con 10% de descuento?")
+    assert entities_fin["financial"] is True
+    assert entities_fin["has_any_exact"] is True
+    k_dense, k_bm25, w_dense, w_bm25 = retriever._get_adaptive_rrf_params(entities_fin)
+    assert k_bm25 == 40
+    assert k_dense == 75
+    assert w_bm25 > w_dense
+
+    # Case 2: Certification / CEFR level code
+    entities_cert = retriever._detect_exact_entities("tienen curso de preparacion para examen IELTS o nivel B2?")
+    assert entities_cert["certification"] is True
+    assert entities_cert["has_any_exact"] is True
+
+    # Case 3: Exact venue / neighborhood
+    entities_campus = retriever._detect_exact_entities("donde queda la sede en Chapinero o Poblado?")
+    assert entities_campus["campus"] is True
+    assert entities_campus["has_any_exact"] is True
+
+    # Case 4: General conceptual query (no exact entity)
+    entities_general = retriever._detect_exact_entities("como funciona la metodologia de ensenanza?")
+    assert entities_general["has_any_exact"] is False
+    k_dense_g, k_bm25_g, w_dense_g, w_bm25_g = retriever._get_adaptive_rrf_params(entities_general)
+    assert k_bm25_g == 60
+    assert k_dense_g == 60
+    assert w_dense_g == 1.0
+    assert w_bm25_g == 1.0
+

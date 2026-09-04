@@ -104,6 +104,30 @@ class HybridRetriever:
             "no_presencial": bool(re.search(r"\bno\s+(?:presencial|en\s+sede|en\s+persona)\b", q_low))
         }
 
+    def _detect_exact_entities(self, query: str) -> Dict[str, bool]:
+        # P1 / TODO-1.1: Detect exact entity patterns requiring higher lexical BM25 precision
+        q_low = query.lower()
+        has_financial = bool(re.search(r"(\$|\bcop\b|\bpesos\b|\bcuotas?\b|\bdescuentos?\b|\b10%|\b15%|\b40/30/30\b|\bcontado\b|\b\d{2,}\b)", q_low))
+        has_code_or_cert = bool(re.search(r"\b(a1|a2|b1|b2|c1|c2|ielts|toefl|delf|dalf|goethe|cambridge)\b", q_low))
+        has_schedule_entity = bool(re.search(r"(\b\d{1,2}:\d{2}\b|\b6:00\b|\b6:30\b|\b8:00\b|\b8:30\b|\bam\b|\bpm\b|\bmadrugadores?\b|\bafter\s+work\b)", q_low))
+        has_specific_campus = bool(re.search(r"\b(chic[oó]|chapinero|poblado|laureles|granada)\b", q_low))
+        return {
+            "financial": has_financial,
+            "certification": has_code_or_cert,
+            "schedule": has_schedule_entity,
+            "campus": has_specific_campus,
+            "has_any_exact": has_financial or has_code_or_cert or has_schedule_entity or has_specific_campus
+        }
+
+    def _get_adaptive_rrf_params(self, entities: Dict[str, bool]) -> Tuple[int, int, float, float]:
+        # P1 / TODO-1.1: Compute adaptive RRF smoothing parameters and weighting factors
+        # Returns: (k_dense, k_bm25, weight_dense, weight_bm25)
+        if entities.get("has_any_exact", False):
+            # Prioritize lexical exact match for financial figures, codes, or specific campus venues
+            return 75, 40, 0.9, 1.25
+        # Standard balanced RRF for open conceptual questions
+        return self.rrf_k, self.rrf_k, 1.0, 1.0
+
     def _detect_pillar(self, query: str) -> Optional[str]:
         q_tokens = set(re.findall(r"\b[a-zA-Z0-9_áéíóúÁÉÍÓÚñÑ]{2,}\b", query.lower()))
         # Prioritize becas_descuentos if beca/descuento is present
@@ -293,13 +317,17 @@ class HybridRetriever:
                 intent_match=intent_match
             )
 
-        # 4. Reciprocal Rank Fusion (RRF) with B13 cluster re-ranking bonus & Micro-Intent boosts
+        # P1 / TODO-1.1: Recalibrate RRF smoothing factors & weights adaptively based on detected exact entities
+        exact_entities = self._detect_exact_entities(clean_query)
+        k_dense, k_bm25, w_dense, w_bm25 = self._get_adaptive_rrf_params(exact_entities)
+
+        # 4. Reciprocal Rank Fusion (RRF) with adaptive entity weighting & cluster bonuses
         rrf_scores: Dict[str, float] = {}
         for doc_id, rank in dense_ranks.items():
-            rrf_scores[doc_id] = rrf_scores.get(doc_id, 0.0) + (1.0 / (self.rrf_k + rank + 1))
+            rrf_scores[doc_id] = rrf_scores.get(doc_id, 0.0) + (w_dense / (k_dense + rank + 1))
 
         for doc_id, rank in bm25_ranks.items():
-            rrf_scores[doc_id] = rrf_scores.get(doc_id, 0.0) + (1.0 / (self.rrf_k + rank + 1))
+            rrf_scores[doc_id] = rrf_scores.get(doc_id, 0.0) + (w_bm25 / (k_bm25 + rank + 1))
 
         # B13: Soft cluster re-ranking bonus (+0.015 RRF score) for docs matching detected pillar
         if detected_pillar:

@@ -589,6 +589,21 @@ Una vez iniciado:
 
 ---
 
+## 🗺️ 13. Hoja de Ruta Estratégica: 50 Propuestas de Mejora Técnica (v2.7.0)
+
+El proyecto cuenta con un plan de evolución estructurado en **5 fases de ejecución** que abarcan **50 propuestas técnicas** agrupadas en 7 categorías arquitectónicas (preservando intacto el diseño de seguridad):
+
+* 📖 **Documento Maestro Completo:** [Roadmap de 50 Propuestas Técnicas (`docs/01-product/ROADMAP_50_PROPOSITAS.md`)](docs/01-product/ROADMAP_50_PROPOSITAS.md)
+
+### Resumen de Fases:
+1. **Fase 1: Precisión del Núcleo RAG y Datos:** Chunking de tablas Markdown con AST, recalibración de pesos RRF adaptativos, re-ranking local con Cross-Encoder y caché semántico multicapa (<5ms).
+2. **Fase 2: Arquitectura Backend, Resiliencia y Persistencia:** Streaming SSE en tiempo real token a token, connection pooling HTTP persistente, SQLite transaccional WAL y Docker Compose.
+3. **Fase 3: Frontend Moderno, UI Retro y Accesibilidad:** Gestión de estado global con Zustand, decodificador progresivo SSE, filtro óptico CRT acelerado por GPU/WebGL y modo accesible WCAG AAA.
+4. **Fase 4: Testing Automatizado, QA y Tooling DX:** Pipeline de evaluación continua de RAG (Ragas/G-Eval), pruebas de carga concurrentes con Locust, CLI `run.py doctor` y pre-commits.
+5. **Fase 5: Horizontes Futuros y Despliegues Especializados:** Graph RAG para prerrequisitos, audio procedural retro sintético, empaquetado nativo de escritorio Tauri para modo kiosco en recepciones de sedes físicas.
+
+---
+
 ## 🏆 Conclusión y Valor Técnico
 
 Nova OS '97 no es un simple envoltorio alrededor de un LLM comercial. Es una solución de arquitectura **Local-First integral, soberana y determinista**, diseñada con ingeniería de software rigurosa:

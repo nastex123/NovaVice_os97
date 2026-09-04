@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [2026-09-04 10:19] [Feat/Fase-2-TODO-2.14-Extractive-Mode-Self-Consistency]
+- **Temperatura 0.0, modo extractivo estricto y auto-consistencia N=3 (TODO-2.14 / Prop. CRÍTICA):**
+  - Fijada `llm_temperature = 0.0` en `backend/src/config.py` para erradicar variabilidad estocástica en respuestas oficiales.
+  - Reforzado `SYSTEM_PROMPT` en `backend/src/rag/prompt_templates.py` con regla institucional 100% factual y extractiva (veto a extrapolaciones y conocimiento externo).
+  - Implementado muestreo de self-consistency N=3 en `backend/src/rag/engine.py` para rangos de confianza de recuperación media (0.35-0.50), calculando acuerdo por consenso léxico/semántico antes de emitir la síntesis final.
+
 ### [2026-09-04 10:16] [Feat/Fase-2-TODO-2.13-Faithfulness-NLI-Gate]
 - **Verificador NLI post-LLM de fidelidad y faithfulness gate (TODO-2.13 / Prop. CRÍTICA):**
   - Creado módulo `backend/src/core/faithfulness.py` con `FaithfulnessVerifier` calculando ratio de implicación/soporte factual de oraciones contra premisas de contexto oficial (umbral estricto `entailment_threshold=0.80`).

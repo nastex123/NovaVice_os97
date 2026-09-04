@@ -21,7 +21,7 @@ class PurePythonRAGEngine:
     def __init__(self):
         self.settings = settings
 
-    async def _call_llm_api(self, prompt: str, chunks: Optional[List[Dict[str, Any]]] = None) -> Dict[str, Any]:
+    async def _call_llm_api(self, prompt: str, chunks: Optional[List[Dict[str, Any]]] = None, temperature: Optional[float] = None) -> Dict[str, Any]:
         # Connects to OpenRouter / Hermes / OpenAI or falls back to deterministic grounded response.
         api_key = self.settings.openrouter_api_key or self.settings.openai_api_key or os.getenv("OPENROUTER_API_KEY") or os.getenv("OPENAI_API_KEY")
 
@@ -99,9 +99,10 @@ class PurePythonRAGEngine:
         # OpenRouter or OpenAI endpoint
         endpoint = "https://openrouter.ai/api/v1/chat/completions" if self.settings.llm_provider == "openrouter" else "https://api.openai.com/v1/chat/completions"
 
+        target_temp = self.settings.llm_temperature if temperature is None else temperature
         payload = {
             "model": self.settings.llm_model,
-            "temperature": self.settings.llm_temperature,
+            "temperature": target_temp,
             "messages": [
                 {"role": "system", "content": SYSTEM_PROMPT},
                 {"role": "user", "content": prompt}
@@ -543,9 +544,34 @@ class PurePythonRAGEngine:
             conversation_summary=conv_summary
         )
 
-        # 6. LLM Synthesis
-        llm_output = await self._call_llm_api(prompt, chunks=compressed_chunks)
-        answer_text = llm_output["text"]
+        # 6. LLM Synthesis (TODO-2.14: Self-Consistency N=3 when retrieval confidence is in medium range [0.35, 0.50])
+        if 0.35 <= top_similarity <= 0.50:
+            # Self-consistency sampling: generate N=3 candidates with small temperature variation and select majority / most coherent
+            candidates = []
+            for t_sample in [0.0, 0.2, 0.4]:
+                sample_out = await self._call_llm_api(prompt, chunks=compressed_chunks, temperature=t_sample)
+                txt = sample_out.get("text", "").strip()
+                if txt:
+                    candidates.append(txt)
+
+            if candidates:
+                # Majority agreement or select the candidate with highest overlap with context
+                best_candidate = candidates[0]
+                if len(candidates) > 1:
+                    # Select the response that has the highest token overlap among candidates (consensus)
+                    consensus_scores = []
+                    for cand in candidates:
+                        overlap = sum(1 for other in candidates if cand in other or other in cand or len(set(cand.split()) & set(other.split())) > 15)
+                        consensus_scores.append(overlap)
+                    best_idx = consensus_scores.index(max(consensus_scores))
+                    best_candidate = candidates[best_idx]
+                answer_text = best_candidate
+            else:
+                llm_output = await self._call_llm_api(prompt, chunks=compressed_chunks)
+                answer_text = llm_output["text"]
+        else:
+            llm_output = await self._call_llm_api(prompt, chunks=compressed_chunks)
+            answer_text = llm_output["text"]
 
         # D38b / E44b: Conversational sanitization: never leak raw REST endpoints to the applicant
         answer_text = re.sub(r"`?(?:POST|GET|PUT|DELETE)\s+/api/[^\s`\"']+`?", "directamente en este chat", answer_text)

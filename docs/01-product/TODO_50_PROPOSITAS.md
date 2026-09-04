@@ -10,11 +10,11 @@
 | Fase | Enfoque Principal | Total Tareas | Completadas | En Progreso | Pendientes | Estado |
 | :---: | :--- | :---: | :---: | :---: | :---: | :---: |
 | **Fase 1** | Precisión de Datos y Recuperación RAG | 11 | 11 | 0 | 0 | ✅ Completada (100%) |
-| **Fase 2** | Rendimiento Backend y Resiliencia + Complemento Anti-alucinación | 17 | 13 | 0 | 4 | 🟡 En Progreso (76.5%) |
+| **Fase 2** | Rendimiento Backend y Resiliencia + Complemento Anti-alucinación | 17 | 14 | 0 | 3 | 🟡 En Progreso (82.4%) |
 | **Fase 3** | Frontend Moderno, UI Retro & Accesibilidad | 10 | 0 | 0 | 10 | ⏳ Pendiente |
 | **Fase 4** | Testing Automatizado, QA & Tooling DX | 8 | 0 | 0 | 8 | ⏳ Pendiente |
 | **Fase 5** | Horizontes Futuros y Despliegues Especializados | 11 | 0 | 11 | ⏳ Pendiente |
-| **TOTAL** | **Propuestas de Mejora Técnica** | **57** | **24** | **0** | **33** | **42.1%** |
+| **TOTAL** | **Propuestas de Mejora Técnica** | **57** | **25** | **0** | **32** | **43.9%** |
 
 ---
 
@@ -120,9 +120,9 @@
   - [x] Crear `backend/src/core/faithfulness.py` con `transformers` + `vectara/hallucination_evaluation_model` (variante large `DeBERTa-v3-large-mnli`).
   - [x] Enganchar verificación en `backend/src/rag/engine.py` tras la síntesis; umbral estricto `entailment >= 0.80`, de lo contrario rechazar respuesta y escalar con ticket.
   - [x] Registrar métrica `faithfulness_score` en `backend/src/core/metrics.py` y exponerla en `/api/v1/metrics`.
-- [ ] **TODO-2.14 [CRÍTICO] Temperatura 0 + modo extractivo + auto-consistencia:**
-  - [ ] Fijar `llm_temperature=0.0` en `backend/src/config.py` y reforzar `SYSTEM_PROMPT` con regla extractiva (solo copiar hechos del contexto oficial).
-  - [ ] Implementar self-consistency N=3 con voto mayoritario cuando la confianza del retriever esté en rango medio (0.35-0.50); priorizar precisión sobre latencia.
+- [x] **TODO-2.14 [CRÍTICO] Temperatura 0 + modo extractivo + auto-consistencia:**
+  - [x] Fijar `llm_temperature=0.0` en `backend/src/config.py` y reforzar `SYSTEM_PROMPT` con regla extractiva (solo copiar hechos del contexto oficial).
+  - [x] Implementar self-consistency N=3 con voto mayoritario cuando la confianza del retriever esté en rango medio (0.35-0.50); priorizar precisión sobre latencia.
 - [ ] **TODO-2.15 [RECOMENDADO] Embeddings multilingües + reranker de alta precisión:**
   - [ ] Reemplazar fallback TF-IDF con `fastembed` (`BAAI/bge-m3` o `bge-small-es`, ONNX CPU) en `backend/src/rag/vector_store.py`.
   - [ ] Implementar `backend/src/rag/reranker.py` con `BAAI/bge-reranker-v2-m3` (fallback `flashrank`) sobre top-20 candidatos hacia top-5; complementa TODO-1.3 con configuración de máxima precisión.

@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [2026-09-04 10:08] [Feat/Fase-2-TODO-2.6-Pydantic-V2-Native-Serializers]
+- **Validación de esquemas y serializadores nativos Pydantic V2 (TODO-2.6 / Prop. 16):**
+  - Creado `BaseSchema` en `backend/src/api/schemas.py` con `ConfigDict` (`populate_by_name=True`, `extra='ignore'`, `arbitrary_types_allowed=True`) y serializadores de alto rendimiento `to_json()` (`model_dump_json()`) y `to_dict()` (`model_dump()`).
+  - Migrados todos los modelos (`ChatRequest`, `ChatResponse`, `HealthResponse`, `MetricsResponse`, `WebhookRequest`) a la arquitectura unificada `BaseSchema`.
+  - Verificada compatibilidad y deserialización correcta mediante tests de integración en `backend/tests/test_api_routes.py` (4/4 passed).
+
 ### [2026-09-04 10:07] [Feat/Fase-2-TODO-2.5-SQLite-WAL-Tickets]
 - **Migración de `escalations.json` a SQLite transaccional con WAL (TODO-2.5 / Prop. 15):**
   - Creado repositorio `backend/src/data/sqlite_tickets.py` con esquema de tabla `escalation_tickets`, índices sobre fecha y estado, y configuración de concurrencia cero bloqueos (`PRAGMA journal_mode=WAL; PRAGMA synchronous=NORMAL;`).

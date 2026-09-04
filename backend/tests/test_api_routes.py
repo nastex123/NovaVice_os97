@@ -7,12 +7,21 @@ from src.rag.ingestion import ingestion_pipeline
 @pytest.mark.asyncio
 async def test_api_health():
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        # Request without X-Request-ID (server generates one)
         resp = await client.get("/api/v1/health")
         assert resp.status_code == 200
+        assert "x-request-id" in resp.headers
+        assert len(resp.headers["x-request-id"]) > 10
         data = resp.json()
         assert data["status"] == "healthy"
         assert data["version"] in ("2.5.0", "2.6.0")
         assert "advisor_engine" in data
+
+        # Request with custom X-Request-ID (server preserves and echoes)
+        custom_id = "req_custom_tracer_999"
+        resp2 = await client.get("/api/v1/health", headers={"X-Request-ID": custom_id})
+        assert resp2.status_code == 200
+        assert resp2.headers.get("x-request-id") == custom_id
 
 
 @pytest.mark.asyncio
@@ -62,3 +71,29 @@ async def test_api_escalations_endpoint():
         resp = await client.get("/api/v1/escalations")
         assert resp.status_code == 200
         assert isinstance(resp.json(), list)
+
+
+@pytest.mark.asyncio
+async def test_api_chat_stream_endpoint():
+    import json
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        resp = await client.post("/api/v1/chat/stream", json={
+            "query": "¿Qué opciones de financiación tienen para el curso de inglés?",
+            "user_id": "test_streamer_01",
+            "session_id": "stream_session_01"
+        })
+        assert resp.status_code == 200
+        assert "text/event-stream" in resp.headers.get("content-type", "")
+
+        events = [line for line in resp.text.split("\n\n") if line.strip().startswith("data: ")]
+        assert len(events) >= 2
+
+        # Check initial/intermediate data payload
+        first_event = json.loads(events[0].replace("data: ", ""))
+        assert "token" in first_event or "done" in first_event
+
+        # Check final event
+        last_event = json.loads(events[-1].replace("data: ", ""))
+        assert last_event.get("done") is True
+        assert "confidence_score" in last_event
+        assert "source_documents" in last_event

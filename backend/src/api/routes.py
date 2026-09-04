@@ -45,7 +45,8 @@ async def chat_stream_endpoint(request: ChatRequest):
         rag_engine.stream_query(
             query=request.query,
             user_id=request.user_id or "guest_applicant",
-            session_id=request.session_id or "default_session"
+            session_id=request.session_id or "default_session",
+            use_opencode_mode=bool(request.use_opencode_mode)
         ),
         media_type="text/event-stream"
     )
@@ -77,6 +78,14 @@ async def get_prometheus_metrics():
 
 @api_router.get("/escalations")
 async def get_escalation_tickets():
+    try:
+        from src.data.sqlite_tickets import sqlite_ticket_repo
+        tickets = sqlite_ticket_repo.get_all_tickets(limit=200)
+        if tickets:
+            return tickets
+    except Exception:
+        pass
+
     log_file = settings.escalations_log_path
     if not log_file.exists():
         return []
@@ -85,4 +94,13 @@ async def get_escalation_tickets():
             return json.load(f)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Could not read escalations: {str(e)}")
+
+
+@api_router.post("/admin/vacuum")
+async def trigger_database_vacuum():
+    """
+    Triggers routine compression and vacuum on ChromaDB underlying store.
+    """
+    res = vector_store.vacuum()
+    return res
 

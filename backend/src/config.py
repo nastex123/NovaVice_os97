@@ -41,7 +41,7 @@ class Settings(BaseSettings):
     openrouter_api_key: str = ""
     openai_api_key: str = ""
     llm_model: str = "opencode/advisor"
-    llm_temperature: float = 0.2
+    llm_temperature: float = 0.0
 
     # Human Escalation and Webhook Dispatcher
     admissions_office_email: str = "admisiones@novaidiomas.edu.co"

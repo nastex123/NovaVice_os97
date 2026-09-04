@@ -12,6 +12,12 @@ try:
 except ImportError:
     HAS_CHROMADB = False
 
+try:
+    from fastembed import TextEmbedding
+    HAS_FASTEMBED = True
+except ImportError:
+    HAS_FASTEMBED = False
+
 
 class PurePythonEmbeddingEngine:
     # Pure Python TF-IDF embedding engine with Spanish and English stemming.
@@ -105,6 +111,15 @@ class ChromaVectorStore:
         if self.use_chroma:
             try:
                 self.client = chromadb.PersistentClient(path=str(self.persist_dir))
+                # High-precision Multilingual embedding or Default embedding function (TODO-2.15)
+                if HAS_FASTEMBED:
+                    try:
+                        self.fastembed_model = TextEmbedding(model_name="BAAI/bge-small-en-v1.5")
+                    except Exception:
+                        self.fastembed_model = None
+                else:
+                    self.fastembed_model = None
+
                 self.embedding_fn = embedding_functions.DefaultEmbeddingFunction()
                 # P3 / TODO-1.9: Optimize HNSW parameters (M=16, construction_ef=64, search_ef=32)
                 self.collection = self.client.get_or_create_collection(
@@ -269,6 +284,33 @@ class ChromaVectorStore:
             except Exception:
                 self.use_chroma = False
         return len(self.fallback_docs)
+
+    def vacuum(self) -> Dict[str, Any]:
+        """
+        Runs database defragmentation and VACUUM on ChromaDB's underlying SQLite store.
+        Reclaims deleted disk blocks and reorganizes index pages.
+        """
+        sqlite_file = self.persist_dir / "chroma.sqlite3"
+        if not sqlite_file.exists():
+            return {"status": "skipped", "message": "chroma.sqlite3 does not exist"}
+
+        size_before = sqlite_file.stat().st_size
+        import sqlite3
+        try:
+            conn = sqlite3.connect(str(sqlite_file), timeout=15.0)
+            conn.execute("VACUUM;")
+            conn.close()
+            size_after = sqlite_file.stat().st_size
+            freed_bytes = max(0, size_before - size_after)
+            return {
+                "status": "success",
+                "size_before_bytes": size_before,
+                "size_after_bytes": size_after,
+                "freed_bytes": freed_bytes,
+                "freed_kb": round(freed_bytes / 1024, 2)
+            }
+        except Exception as e:
+            return {"status": "error", "error": str(e)}
 
 
 vector_store = ChromaVectorStore()

@@ -20,6 +20,7 @@ class OpenCodeAdvisorClient:
         self.session_map: Dict[str, str] = {}
         self._server_process: Optional[subprocess.Popen] = None
         self._client: Optional[httpx.AsyncClient] = None
+        self._sync_client: Optional[httpx.Client] = None
 
     def _get_http_client(self) -> httpx.AsyncClient:
         if self._client is None or self._client.is_closed:
@@ -28,6 +29,21 @@ class OpenCodeAdvisorClient:
                 timeout=httpx.Timeout(connect=5.0, read=45.0, write=10.0, pool=10.0)
             )
         return self._client
+
+    def _get_sync_client(self) -> httpx.Client:
+        if self._sync_client is None or self._sync_client.is_closed:
+            self._sync_client = httpx.Client(
+                limits=httpx.Limits(max_keepalive_connections=10, max_connections=20, keepalive_expiry=60.0),
+                timeout=httpx.Timeout(connect=2.0, read=5.0, write=5.0, pool=5.0)
+            )
+        return self._sync_client
+
+    async def close(self):
+        """Cleanly closes persistent async and sync connection pools."""
+        if self._client and not self._client.is_closed:
+            await self._client.aclose()
+        if self._sync_client and not self._sync_client.is_closed:
+            self._sync_client.close()
 
     async def is_server_alive_async(self) -> bool:
         try:
@@ -39,7 +55,8 @@ class OpenCodeAdvisorClient:
 
     def is_server_alive(self) -> bool:
         try:
-            r = httpx.get(f"{self.base_url}/session", timeout=0.8)
+            client = self._get_sync_client()
+            r = client.get(f"{self.base_url}/session", timeout=0.8)
             return r.status_code == 200
         except Exception:
             return False
@@ -98,44 +115,51 @@ class OpenCodeAdvisorClient:
         start_t = time.time()
         reasoning_prompt = build_advisor_reasoning_prompt(query, context_chunks)
 
-        # 1. Query OpenCode Server
-        sid = await self.create_fresh_session(app_session_id)
-        if sid:
-            try:
-                client = self._get_http_client()
-                post_payload = {
-                    "parts": [
-                        {
-                            "type": "text",
-                            "text": reasoning_prompt
-                        }
-                    ]
-                }
-                resp = await client.post(
-                    f"{self.base_url}/session/{sid}/message",
-                    json=post_payload
-                )
+        # 1. Query OpenCode Server (guarded by CircuitBreaker)
+        from src.core.resilience import opencode_circuit
+        if opencode_circuit.can_attempt():
+            sid = await self.create_fresh_session(app_session_id)
+            if sid:
+                try:
+                    client = self._get_http_client()
+                    post_payload = {
+                        "parts": [
+                            {
+                                "type": "text",
+                                "text": reasoning_prompt
+                            }
+                        ]
+                    }
+                    resp = await client.post(
+                        f"{self.base_url}/session/{sid}/message",
+                        json=post_payload
+                    )
 
-                if resp.status_code == 200:
-                    data = resp.json()
-                    parts = data.get("parts", [])
-                    extracted_texts = [p.get("text", "") for p in parts if p.get("type") == "text" and p.get("text")]
-                    full_text = "\n".join(extracted_texts).strip()
+                    if resp.status_code == 200:
+                        data = resp.json()
+                        parts = data.get("parts", [])
+                        extracted_texts = [p.get("text", "") for p in parts if p.get("type") == "text" and p.get("text")]
+                        full_text = "\n".join(extracted_texts).strip()
 
-                    if full_text and len(full_text) > 30:
-                        elapsed = round((time.time() - start_t) * 1000, 1)
-                        return {
-                            "success": True,
-                            "text": full_text,
-                            "source": "opencode_advisor",
-                            "engine": "opencode",
-                            "opencode_session_id": sid,
-                            "latency_ms": elapsed
-                        }
-            except Exception:
-                pass
+                        if full_text and len(full_text) > 30:
+                            opencode_circuit.record_success()
+                            elapsed = round((time.time() - start_t) * 1000, 1)
+                            return {
+                                "success": True,
+                                "text": full_text,
+                                "source": "opencode_advisor",
+                                "engine": "opencode",
+                                "opencode_session_id": sid,
+                                "latency_ms": elapsed
+                            }
+                    else:
+                        opencode_circuit.record_failure()
+                except Exception:
+                    opencode_circuit.record_failure()
+            else:
+                opencode_circuit.record_failure()
 
-        # 2. Secondary Bridge: Check AGY if OpenCode daemon is offline
+        # 2. Secondary Bridge: Failover to AGY if OpenCode daemon circuit is open or failed
         try:
             from src.core.agy_client import agy_advisor
             if agy_advisor.is_cli_available():

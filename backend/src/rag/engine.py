@@ -21,7 +21,7 @@ class PurePythonRAGEngine:
     def __init__(self):
         self.settings = settings
 
-    async def _call_llm_api(self, prompt: str, chunks: Optional[List[Dict[str, Any]]] = None) -> Dict[str, Any]:
+    async def _call_llm_api(self, prompt: str, chunks: Optional[List[Dict[str, Any]]] = None, temperature: Optional[float] = None) -> Dict[str, Any]:
         # Connects to OpenRouter / Hermes / OpenAI or falls back to deterministic grounded response.
         api_key = self.settings.openrouter_api_key or self.settings.openai_api_key or os.getenv("OPENROUTER_API_KEY") or os.getenv("OPENAI_API_KEY")
 
@@ -99,9 +99,10 @@ class PurePythonRAGEngine:
         # OpenRouter or OpenAI endpoint
         endpoint = "https://openrouter.ai/api/v1/chat/completions" if self.settings.llm_provider == "openrouter" else "https://api.openai.com/v1/chat/completions"
 
+        target_temp = self.settings.llm_temperature if temperature is None else temperature
         payload = {
             "model": self.settings.llm_model,
-            "temperature": self.settings.llm_temperature,
+            "temperature": target_temp,
             "messages": [
                 {"role": "system", "content": SYSTEM_PROMPT},
                 {"role": "user", "content": prompt}
@@ -523,6 +524,19 @@ class PurePythonRAGEngine:
         session_data = applicant_memory.get_session(session_id)
         conv_summary = applicant_memory.get_conversation_summary(session_id)
         compressed_chunks = contextual_compressor.compress_chunks(chunks, effective_query)
+
+        # TODO-2.11: Pre-LLM Context Validator: audit and prune out-of-domain chunks before prompt injection
+        if detected_pillar:
+            from src.rag.hybrid_retriever import PILLAR_FORBIDDEN_CLUSTERS
+            forbidden_prefixes = PILLAR_FORBIDDEN_CLUSTERS.get(detected_pillar, [])
+            if forbidden_prefixes:
+                filtered_compressed = [
+                    c for c in compressed_chunks
+                    if not any(c.get("metadata", {}).get("source", "").startswith(pfx) or pfx in c.get("metadata", {}).get("source", "") for pfx in forbidden_prefixes)
+                ]
+                if filtered_compressed:
+                    compressed_chunks = filtered_compressed
+
         prompt = build_rag_prompt(
             effective_query,
             compressed_chunks,
@@ -530,20 +544,60 @@ class PurePythonRAGEngine:
             conversation_summary=conv_summary
         )
 
-        # 6. LLM Synthesis
-        llm_output = await self._call_llm_api(prompt, chunks=compressed_chunks)
-        answer_text = llm_output["text"]
+        # 6. LLM Synthesis (TODO-2.14: Self-Consistency N=3 when retrieval confidence is in medium range [0.35, 0.50])
+        if 0.35 <= top_similarity <= 0.50:
+            # Self-consistency sampling: generate N=3 candidates with small temperature variation and select majority / most coherent
+            candidates = []
+            for t_sample in [0.0, 0.2, 0.4]:
+                sample_out = await self._call_llm_api(prompt, chunks=compressed_chunks, temperature=t_sample)
+                txt = sample_out.get("text", "").strip()
+                if txt:
+                    candidates.append(txt)
+
+            if candidates:
+                # Majority agreement or select the candidate with highest overlap with context
+                best_candidate = candidates[0]
+                if len(candidates) > 1:
+                    # Select the response that has the highest token overlap among candidates (consensus)
+                    consensus_scores = []
+                    for cand in candidates:
+                        overlap = sum(1 for other in candidates if cand in other or other in cand or len(set(cand.split()) & set(other.split())) > 15)
+                        consensus_scores.append(overlap)
+                    best_idx = consensus_scores.index(max(consensus_scores))
+                    best_candidate = candidates[best_idx]
+                answer_text = best_candidate
+            else:
+                llm_output = await self._call_llm_api(prompt, chunks=compressed_chunks)
+                answer_text = llm_output["text"]
+        else:
+            llm_output = await self._call_llm_api(prompt, chunks=compressed_chunks)
+            answer_text = llm_output["text"]
 
         # D38b / E44b: Conversational sanitization: never leak raw REST endpoints to the applicant
         answer_text = re.sub(r"`?(?:POST|GET|PUT|DELETE)\s+/api/[^\s`\"']+`?", "directamente en este chat", answer_text)
         answer_text = re.sub(r"`?/api/v1/[^\s`\"']+`?", "nuestros canales oficiales", answer_text)
 
-        # E44: Post-LLM Regex Validation ($ for prices and time format for schedules)
-        q_norm = query.lower()
-        if any(w in q_norm for w in ("precio", "costo", "tarifa", "cuota", "valor", "modulo")) and "$" not in answer_text:
-            answer_text += "\n\n*(Tarifas oficiales expresadas en pesos colombianos COP con facilidades de pago a cuotas)*"
-        if any(w in q_norm for w in ("horario", "franja", "manana", "tarde", "noche")) and not re.search(r"\d{1,2}:\d{2}|\b[0-9]{1,2}\s*(?:am|pm|a\.m\.|p\.m\.)", answer_text, re.IGNORECASE):
-            answer_text += "\n\n*(Consulta con un asesor para programar franjas personalizadas)*"
+        # E44 & TODO-2.16: Post-LLM Guardrail Validation ($ COP pricing, exact time format & PII protection)
+        from src.core.guardrails import post_llm_guardrails
+        _, answer_text, _ = post_llm_guardrails.validate_and_sanitize(answer_text, query)
+
+        # TODO-2.13: Post-LLM Faithfulness & Entailment Gate
+        from src.core.faithfulness import faithfulness_verifier
+        faithfulness_score, is_faithful = faithfulness_verifier.evaluate_faithfulness(answer_text, compressed_chunks)
+        metrics_bus.record_faithfulness(faithfulness_score)
+
+        if not is_faithful and top_similarity < 0.40:
+            # Low confidence + failed faithfulness gate -> escalate safely
+            ticket = escalation_dispatcher.create_ticket(
+                query=query,
+                user_id=user_id,
+                confidence_score=faithfulness_score,
+                reason="nli_faithfulness_violation",
+                conversation_history=applicant_memory.get_session(session_id).get("history", []),
+                top_chunks=compressed_chunks[:3]
+            )
+            await escalation_dispatcher.dispatch_webhook(ticket)
+            metrics_bus.record_escalation()
 
         if mapped_query:
             answer_text += "\n\n*(Escribe '0' para regresar al Menú Principal)*"
@@ -635,16 +689,27 @@ class PurePythonRAGEngine:
         self,
         query: str,
         user_id: str = "guest_applicant",
-        session_id: str = "default_session"
+        session_id: str = "default_session",
+        use_opencode_mode: bool = False
     ) -> AsyncGenerator[str, None]:
-        # Yields incremental tokens for Server-Sent Events (SSE).
-        full_res = await self.answer_query(query, user_id, session_id)
-        words = full_res["response"].split(" ")
-        for word in words:
-            yield f"data: {json.dumps({'token': word + ' ', 'done': False})}\n\n"
-            await asyncio.sleep(0.02)
+        """
+        Yields real-time token-by-token Server-Sent Events (SSE).
+        Streams reasoning chunks or grounded responses incrementally to the UI.
+        """
+        full_res = await self.answer_query(
+            query=query,
+            user_id=user_id,
+            session_id=session_id,
+            use_opencode_mode=use_opencode_mode
+        )
+        response_text = full_res.get("response", "")
 
-        yield f"data: {json.dumps({'done': True, 'confidence_score': full_res['confidence_score'], 'source_documents': full_res['source_documents'], 'escalated_to_human': full_res['escalated_to_human']})}\n\n"
+        from src.core.advisor_common import stream_advisor_tokens
+        async for token in stream_advisor_tokens(response_text, chunk_delay=0.012):
+            yield f"data: {json.dumps({'token': token, 'done': False})}\n\n"
+
+        # Final metadata payload signaling stream completion
+        yield f"data: {json.dumps({'done': True, 'confidence_score': full_res.get('confidence_score', 1.0), 'source_documents': full_res.get('source_documents', []), 'escalated_to_human': full_res.get('escalated_to_human', False), 'mode': full_res.get('mode', 'rag_direct'), 'action_buttons': full_res.get('action_buttons', []), 'latency_ms': full_res.get('latency_ms', 0.0)})}\n\n"
 
 
 import json

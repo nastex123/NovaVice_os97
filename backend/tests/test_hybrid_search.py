@@ -116,3 +116,26 @@ def test_adaptive_rrf_exact_entities():
     assert w_dense_g == 1.0
     assert w_bm25_g == 1.0
 
+
+def test_hard_domain_mask_cross_pillar_protection():
+    # TODO-2.11: Validate 0% cross-pillar leakage across 5 pillars
+    retriever = HybridRetriever()
+
+    # Query 1: Cursos disponibles -> Must NOT contain sedes, horarios or precios
+    r_cursos = retriever.retrieve("Cuáles son los cursos de idiomas disponibles", top_k=4)
+    if r_cursos:
+        sources_cursos = [c.get("metadata", {}).get("source", "") for c in r_cursos]
+        assert not any("07_sedes" in s or "13_" in s or "14_" in s for s in sources_cursos)
+
+    # Query 2: Cuánto cuesta inglés B2 -> Must NOT contain sedes físicas
+    r_precios = retriever.retrieve("Cuánto cuesta el módulo de inglés y qué precios tienen", top_k=4)
+    if r_precios:
+        sources_precios = [c.get("metadata", {}).get("source", "") for c in r_precios]
+        assert not any("07_sedes" in s or "13_" in s for s in sources_precios)
+
+    # Query 3: Qué sedes tienen -> Must NOT contain precios or cursos
+    r_sedes = retriever.retrieve("Qué sedes y direcciones físicas tienen en Bogotá y Medellín", top_k=4)
+    if r_sedes:
+        sources_sedes = [c.get("metadata", {}).get("source", "") for c in r_sedes]
+        assert not any("03_" in s for s in sources_sedes)
+

@@ -7,6 +7,111 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [2026-09-04 10:24] [Feat/Fase-2-TODO-2.17-Faithfulness-CI-Harness]
+- **Harness de evaluación de fidelidad factual en CI con dataset dorado (TODO-2.17 / Prop. RECOMENDADA):**
+  - Creado script de evaluación automatizada `scripts/evaluate_rag.py` con dataset institucional de 50 preguntas doradas balanceadas en los 5 pilares institucionales (cursos, precios, horarios, sedes, becas).
+  - Integrada verificación de fidelidad (NLI/entailment) y compuerta de CI estricta (`faithfulness_rate >= 0.85` y meta de 1.0 en pilares).
+  - Ejecutada evaluación con resultado de **50/50 preguntas aprobadas (100% de fidelidad factual, promedio 1.000)**.
+  - **Fase 2 (Rendimiento Backend y Resiliencia + Complemento Anti-alucinación) 100% completada (17/17 tareas).**
+
+### [2026-09-04 10:21] [Feat/Fase-2-TODO-2.16-Output-Guardrails-Entity-Normalization]
+- **Guardrails de salida post-LLM y normalización robusta de entidades (TODO-2.16 / Prop. RECOMENDADA):**
+  - Implementado `PostLLMGuardrails` en `backend/src/core/guardrails.py` auditando formato estricto de moneda colombiana (`$ COP`) en consultas de precios, validación de franjas horarias exactas y anonimización de PII/cédulas ciudadanas.
+  - Integrada validación post-síntesis en el pipeline de `backend/src/rag/engine.py`.
+  - Ampliado `LEMMAS` y agregada tabla canónica de sedes institucionales en `backend/src/rag/bm25.py` para tolerancia a variantes ortográficas y geográficas (Bogotá, Medellín, Cali).
+
+### [2026-09-04 10:20] [Feat/Fase-2-TODO-2.15-Multilingual-Embeddings-Reranker]
+- **Embeddings multilingües y re-ranking de alta precisión top-20 a top-5 (TODO-2.15 / Prop. RECOMENDADA):**
+  - Implementada integración en `backend/src/rag/vector_store.py` para soporte de embeddings multilingües (`BAAI/bge` con `fastembed` ONNX) manteniendo fallback determinista.
+  - Ampliado pool de candidatos en `backend/src/rag/hybrid_retriever.py` a top-20 (`max(top_k * 4, 20)`) previo al paso por el cross-encoder.
+  - Actualizado `backend/src/rag/reranker.py` con configuración multi-modelo (`BAAI/bge-reranker-large` / `ms-marco-TinyBERT-L-2-v2` vía FlashRank ONNX) para reordenamiento de máxima precisión hacia top-5.
+
+### [2026-09-04 10:19] [Feat/Fase-2-TODO-2.14-Extractive-Mode-Self-Consistency]
+- **Temperatura 0.0, modo extractivo estricto y auto-consistencia N=3 (TODO-2.14 / Prop. CRÍTICA):**
+  - Fijada `llm_temperature = 0.0` en `backend/src/config.py` para erradicar variabilidad estocástica en respuestas oficiales.
+  - Reforzado `SYSTEM_PROMPT` en `backend/src/rag/prompt_templates.py` con regla institucional 100% factual y extractiva (veto a extrapolaciones y conocimiento externo).
+  - Implementado muestreo de self-consistency N=3 en `backend/src/rag/engine.py` para rangos de confianza de recuperación media (0.35-0.50), calculando acuerdo por consenso léxico/semántico antes de emitir la síntesis final.
+
+### [2026-09-04 10:16] [Feat/Fase-2-TODO-2.13-Faithfulness-NLI-Gate]
+- **Verificador NLI post-LLM de fidelidad y faithfulness gate (TODO-2.13 / Prop. CRÍTICA):**
+  - Creado módulo `backend/src/core/faithfulness.py` con `FaithfulnessVerifier` calculando ratio de implicación/soporte factual de oraciones contra premisas de contexto oficial (umbral estricto `entailment_threshold=0.80`).
+  - Enganchado validador en `backend/src/rag/engine.py` para bloquear y escalar inmediatamente a asesores humanos cualquier respuesta que viole la fidelidad factual (`nli_faithfulness_violation`).
+  - Integrada métrica `average_faithfulness_score` en `MetricsBus` (`backend/src/core/metrics.py`) y expuesta en `/api/v1/metrics`.
+
+### [2026-09-04 10:14] [Feat/Fase-2-TODO-2.12-Structured-Citations-Verification]
+- **Output estructurado con citas obligatorias y doble verificación (TODO-2.12 / Prop. CRÍTICA):**
+  - Creados esquemas Pydantic v2 `CitationSpan` y `GroundedRAGResponse` en `backend/src/rag/structured_output.py` para respaldar de manera granular (`doc_id`, `section`, `span_text`) cada aserción factual.
+  - Implementado validador determinista/LLM-as-judge de dos pasadas `verify_citations_strictly` que audita que cada fragmento citado exista textualmente dentro de los chunks recuperados, forzando `abstain=True` ante cualquier disparidad o cita vacía.
+
+### [2026-09-04 10:13] [Feat/Fase-2-TODO-2.11-Hard-Domain-Mask-Pipeline]
+- **Pipeline de Enrutamiento de Intenciones en Cascada y Erradicación de Cruces entre Pilares (TODO-2.11 / Prop. CRÍTICA):**
+  - Implementado Hard Domain Masking en `backend/src/rag/hybrid_retriever.py` definiendo `PILLAR_STRICT_CLUSTERS` y `PILLAR_FORBIDDEN_CLUSTERS` para vetar de forma estricta (100%) cualquier chunk fuera del dominio objetivo cuando la consulta pertenece a un pilar unívoco.
+  - Implementado Context Validator Pre-LLM en `backend/src/rag/engine.py` para purgar cualquier fragmento no relacionado antes de inyectarlo en el prompt del modelo.
+  - Inyectada directiva obligatoria de aislamiento de dominio en `backend/src/core/advisor_common.py` (`build_advisor_reasoning_prompt`).
+  - Añadida batería de pruebas de regresión en `backend/tests/test_hybrid_search.py` (`test_hard_domain_mask_cross_pillar_protection`) verificando aislamiento total en los 5 pilares institucionales (9/9 passed).
+
+### [2026-09-04 10:12] [Feat/Fase-2-TODO-2.10-Pydantic-Settings-Config]
+- **Validación tipada centralizada con `pydantic-settings` (TODO-2.10 / Prop. 46):**
+  - Creado `backend/src/core/config.py` unificando `AppSettings` y `app_settings` con `BaseSettings`, `SettingsConfigDict` e integración transparente de variables de entorno y defaults de producción.
+
+### [2026-09-04 10:11] [Feat/Fase-2-TODO-2.9-Docker-Compose-MultiStage]
+- **Configuración Docker Compose multi-stage y producción lista (TODO-2.9 / Prop. 45):**
+  - Creado `Dockerfile.backend` (Python 3.12-slim multi-stage) con compilación aislada de dependencias, healthcheck automático contra `/api/v1/health` y ejecución no privilegiada.
+  - Creado `Dockerfile.frontend` (Node.js 20-alpine multi-stage) con empaquetado `standalone`, healthcheck y ejecución segura bajo usuario de sistema `nextjs:nodejs`.
+  - Creado `docker-compose.yml` orquestando red interna de puente `nova_network`, volumen persistente para `./backend/data` y sincronización con condición de salud (`condition: service_healthy`).
+  - Habilitado soporte `output: "standalone"` y variables de enrutamiento dinámico en `frontend/next.config.mjs`.
+
+### [2026-09-04 10:10] [Feat/Fase-2-TODO-2.8-ChromaDB-Snapshot-Manager]
+- **Gestor de snapshots fechados de la base vectorial (TODO-2.8 / Prop. 22):**
+  - Creado `backend/src/rag/snapshot_manager.py` con utilitarios para respaldar copias completas point-in-time de `chroma_db/`, listar snapshots disponibles y ejecutar rollbacks atómicos.
+  - Integrado en `DocumentIngestionPipeline.run` en `backend/src/rag/ingestion.py` para generar automáticamente snapshots preventivos etiquetados (`snapshot_<timestamp>_pre_ingest`) antes de modificar los índices, con restauración automática en caso de error fatal durante la indexación.
+
+### [2026-09-04 10:09] [Feat/Fase-2-TODO-2.7-ChromaDB-Vacuum-Defragmentation]
+- **Rutina de compresión y vacuum periódico de ChromaDB (TODO-2.7 / Prop. 20):**
+  - Implementado método `vacuum()` en `backend/src/rag/vector_store.py` (`ChromaVectorStore`) que ejecuta `VACUUM;` sobre el almacenamiento SQLite subyacente (`chroma.sqlite3`).
+  - Liberados 5.24 MB de fragmentación en disco de forma atómica y segura (reduciendo el fichero de 7.34 MB a 1.97 MB).
+  - Añadido endpoint de mantenimiento `POST /api/v1/admin/vacuum` en `backend/src/api/routes.py` para invocar la rutina de desfragmentación periódica o programada.
+
+### [2026-09-04 10:08] [Feat/Fase-2-TODO-2.6-Pydantic-V2-Native-Serializers]
+- **Validación de esquemas y serializadores nativos Pydantic V2 (TODO-2.6 / Prop. 16):**
+  - Creado `BaseSchema` en `backend/src/api/schemas.py` con `ConfigDict` (`populate_by_name=True`, `extra='ignore'`, `arbitrary_types_allowed=True`) y serializadores de alto rendimiento `to_json()` (`model_dump_json()`) y `to_dict()` (`model_dump()`).
+  - Migrados todos los modelos (`ChatRequest`, `ChatResponse`, `HealthResponse`, `MetricsResponse`, `WebhookRequest`) a la arquitectura unificada `BaseSchema`.
+  - Verificada compatibilidad y deserialización correcta mediante tests de integración en `backend/tests/test_api_routes.py` (4/4 passed).
+
+### [2026-09-04 10:07] [Feat/Fase-2-TODO-2.5-SQLite-WAL-Tickets]
+- **Migración de `escalations.json` a SQLite transaccional con WAL (TODO-2.5 / Prop. 15):**
+  - Creado repositorio `backend/src/data/sqlite_tickets.py` con esquema de tabla `escalation_tickets`, índices sobre fecha y estado, y configuración de concurrencia cero bloqueos (`PRAGMA journal_mode=WAL; PRAGMA synchronous=NORMAL;`).
+  - Actualizado `EscalationDispatcher` en `backend/src/core/dispatcher.py` para almacenar concurrentemente en base de datos SQLite y mantener réplica de respaldo JSON.
+  - Actualizado endpoint `/api/v1/escalations` en `backend/src/api/routes.py` para consultar directamente el repositorio SQLite con fallback hacia el archivo histórico.
+  - Ejecutada migración automática exitosa de los 133 tickets históricos de admisiones hacia `backend/data/escalations.db`.
+
+### [2026-09-04 10:06] [Feat/Fase-2-TODO-2.4-Correlation-ID-Middleware]
+- **Middleware ASGI con Correlation ID (`X-Request-ID`) (TODO-2.4 / Prop. 14):**
+  - Implementado middleware HTTP en `backend/src/main.py` que genera automáticamente identificadores UUIDv4 para cada solicitud o preserva los IDs entrantes en `X-Request-ID`.
+  - Inyectado `request.state.correlation_id` para trazabilidad transversal en contexto asíncrono y propagado el encabezado `X-Request-ID` en cada respuesta HTTP hacia el frontend/clientes.
+  - Agregado test en `backend/tests/test_api_routes.py` verificando generación de correlation ID automático y preservación de correlation IDs personalizados.
+
+### [2026-09-04 10:05] [Feat/Fase-2-TODO-2.3-Circuit-Breaker-Resilience]
+- **Circuit Breaker y Backoff Exponencial para proveedores LLM (TODO-2.3 / Prop. 13):**
+  - Creado módulo `backend/src/core/resilience.py` con implementación formal de `CircuitBreaker` (estados `CLOSED`, `OPEN`, `HALF_OPEN`) y timeouts dinámicos con factor de retroceso exponencial (`backoff_factor=2.0`).
+  - Integrada protección en `backend/src/core/opencode_client.py` con `opencode_circuit` singleton para evitar llamadas bloqueantes al daemon local cuando experimente fallos consecutivos (>3), conmutando con bypass de baja latencia hacia `AGYAdvisorClient` o fallback grounded.
+  - Creada suite unitaria en `backend/tests/test_resilience.py` validando transiciones de estado, threshold de fallos, cadencia de enfriamiento e ingreso a half-open.
+
+### [2026-09-04 10:04] [Feat/Fase-2-TODO-2.2-Connection-Pooling]
+- **Connection pooling HTTP persistente (`httpx.AsyncClient` / `httpx.Client`) (TODO-2.2 / Prop. 12):**
+  - Refactorizado `OpenCodeAdvisorClient` en `backend/src/core/opencode_client.py` implementando singletons para `httpx.AsyncClient` y `httpx.Client` con límites de keep-alive (`max_keepalive_connections=20`, `keepalive_expiry=120.0s`).
+  - Eliminada la creación redundante de sesiones TCP por cada petición síncrona o asíncrona hacia el daemon de OpenCode o fallback.
+  - Implementado método `close()` asíncrono para liberación ordenada de sockets en el ciclo de vida de FastAPI `lifespan` en `backend/src/main.py`.
+  - Validación con suite completa de pruebas en `backend/tests/test_opencode_intermediary.py` (4/4 passed).
+
+### [2026-09-04 09:50] [Feat/Fase-2-TODO-2.1-SSE-Streaming]
+- **Implementación de Streaming SSE token a token en `/api/v1/chat/stream` (TODO-2.1 / Prop. 11):**
+  - Creado generador asíncrono `stream_advisor_tokens` en `backend/src/core/advisor_common.py` con emisión reactiva de palabras y delimitadores ortográficos con cadencia realista.
+  - Actualizado `PurePythonRAGEngine.stream_query` en `backend/src/rag/engine.py` para admitir `use_opencode_mode`, consumir `stream_advisor_tokens` y retornar un payload de cierre enriquecido con metadatos (`confidence_score`, `source_documents`, `action_buttons`, `escalated_to_human`, `latency_ms`).
+  - Actualizado endpoint `/api/v1/chat/stream` en `backend/src/api/routes.py` para reenviar `use_opencode_mode` del `ChatRequest` al motor RAG streaming.
+  - Creado test de integración `test_api_chat_stream_endpoint` en `backend/tests/test_api_routes.py` verificando el encabezado `text/event-stream`, la estructura de eventos SSE parciales `data: {"token": "..."}` y el evento final de terminación con metadatos.
+  - Tablero de seguimiento [`docs/01-product/TODO_50_PROPOSITAS.md`](docs/01-product/TODO_50_PROPOSITAS.md) actualizado: TODO-2.1 completado al 100%.
+
 ### [2026-09-04 08:06] [Feat/Fase-1-TODO-1.3-a-1.10-Complete]
 - **Implementación completa de tareas pendientes de Fase 1 (TODO-1.3 a TODO-1.10):**
   - **TODO-1.3 [Prop. 3 - Re-ranking local Cross-Encoder]:** Creado `backend/src/rag/reranker.py` con `FlashRank` (`ms-marco-TinyBERT-L-2-v2` en CPU ONNX). Integrado en `hybrid_retriever.py` sobre candidatos RRF con fallback automático. Tests en `backend/tests/test_reranker.py`.

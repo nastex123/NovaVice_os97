@@ -1,5 +1,6 @@
 import re
-from typing import Dict, Any, Optional, List
+import asyncio
+from typing import Dict, Any, Optional, List, AsyncGenerator
 
 
 def format_context_chunks(context_chunks: Optional[List[Dict[str, Any]]] = None) -> str:
@@ -31,12 +32,13 @@ def build_advisor_reasoning_prompt(query: str, context_chunks: Optional[List[Dic
         "Tu objetivo es brindar respuestas exhaustivas, certeras, cálidas, empáticas y fundamentadas exclusivamente en la documentación oficial del negocio.\n\n"
         "DIRECTRICES DE RAZONAMIENTO, SÍNTESIS Y FORMATO:\n"
         "1. Analiza cuidadosamente todo el contexto oficial proporcionado y responde de manera completa a lo que el estudiante o interesado pregunta.\n"
-        "2. Si el usuario solicita tablas, comparativas o resúmenes estructurados, genera tablas Markdown limpias y completas.\n"
-        "3. Si la pregunta abarca precios, detalla los valores en pesos colombianos ($ COP), el 10% de descuento por pronto pago y la financiación directa a 3 cuotas sin interés (40%/30%/30%).\n"
-        "4. Si la pregunta abarca horarios, incluye las franjas exactas (Madrugadores 6-8am, Diurnas, Nocturna After Work 6:30-8:30pm, Sabatinos y Dominicales) y modalidades (Virtual en vivo, Presencial, HyFlex 360°).\n"
-        "5. Utiliza formato Markdown profesional con títulos claros (###), tablas cuando aporten valor o se soliciten, viñetas (•) y negritas.\n"
-        "6. Mantén siempre un tono humano, cercano, motivador e institucionalmente riguroso en español.\n"
-        "7. Cierra tu mensaje haciendo una pregunta de seguimiento orientada a su perfil o invitándolo a agendar su Placement Test 100% gratuito.\n\n"
+        "2. REGLA ESTRICTA DE AISLAMIENTO DE DOMINIO: Responde exclusivamente a la intención explícita del usuario. Nunca mezcles sedes o direcciones físicas si el usuario preguntó por cursos o precios, ni mezcles precios detallados si solo preguntó por sedes u horarios.\n"
+        "3. Si el usuario solicita tablas, comparativas o resúmenes estructurados, genera tablas Markdown limpias y completas.\n"
+        "4. Si la pregunta abarca precios, detalla los valores en pesos colombianos ($ COP), el 10% de descuento por pronto pago y la financiación directa a 3 cuotas sin interés (40%/30%/30%).\n"
+        "5. Si la pregunta abarca horarios, incluye las franjas exactas (Madrugadores 6-8am, Diurnas, Nocturna After Work 6:30-8:30pm, Sabatinos y Dominicales) y modalidades (Virtual en vivo, Presencial, HyFlex 360°).\n"
+        "6. Utiliza formato Markdown profesional con títulos claros (###), tablas cuando aporten valor o se soliciten, viñetas (•) y negritas.\n"
+        "7. Mantén siempre un tono humano, cercano, motivador e institucionalmente riguroso en español.\n"
+        "8. Cierra tu mensaje haciendo una pregunta de seguimiento orientada a su perfil o invitándolo a agendar su Placement Test 100% gratuito.\n\n"
         f"CONTEXTO OFICIAL VERIFICADO:\n{context_str}\n\n"
         f"CONSULTA DEL USUARIO:\n{query}"
     )
@@ -155,3 +157,18 @@ def generate_advisor_fallback(query: str, context_chunks: Optional[List[Dict[str
         "¡Hola! Con gusto te oriento en todo lo que necesites sobre nuestros programas de idiomas (inglés, francés, alemán, italiano, portugués, español), tarifas oficiales en COP, modalidades virtual y presencial, o certificaciones internacionales (IELTS, DELF, Goethe).\n\n"
         "¿Podrías indicarme qué idioma deseas aprender o qué aspecto te gustaría consultar en detalle?"
     )
+
+
+async def stream_advisor_tokens(
+    text: str,
+    chunk_delay: float = 0.015
+):
+    """
+    Asynchronous token-by-token streamer for admissions advisor answers.
+    Emits natural word and punctuation tokens with realistic cadence.
+    """
+    tokens = re.findall(r"\S+|\s+", text)
+    for token in tokens:
+        yield token
+        if chunk_delay > 0:
+            await asyncio.sleep(chunk_delay)

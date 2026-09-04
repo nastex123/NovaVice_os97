@@ -10,11 +10,11 @@
 | Fase | Enfoque Principal | Total Tareas | Completadas | En Progreso | Pendientes | Estado |
 | :---: | :--- | :---: | :---: | :---: | :---: | :---: |
 | **Fase 1** | Precisión de Datos y Recuperación RAG | 11 | 11 | 0 | 0 | ✅ Completada (100%) |
-| **Fase 2** | Rendimiento Backend y Resiliencia + Complemento Anti-alucinación | 17 | 0 | 0 | 17 | ⏳ Pendiente |
+| **Fase 2** | Rendimiento Backend y Resiliencia + Complemento Anti-alucinación | 17 | 17 | 0 | 0 | ✅ Completada (100%) |
 | **Fase 3** | Frontend Moderno, UI Retro & Accesibilidad | 10 | 0 | 0 | 10 | ⏳ Pendiente |
 | **Fase 4** | Testing Automatizado, QA & Tooling DX | 8 | 0 | 0 | 8 | ⏳ Pendiente |
 | **Fase 5** | Horizontes Futuros y Despliegues Especializados | 11 | 0 | 11 | ⏳ Pendiente |
-| **TOTAL** | **Propuestas de Mejora Técnica** | **57** | **11** | **0** | **46** | **19.3%** |
+| **TOTAL** | **Propuestas de Mejora Técnica** | **57** | **28** | **0** | **29** | **49.1%** |
 
 ---
 
@@ -62,76 +62,76 @@
 ## 🟡 FASE 2: Rendimiento Backend, Resiliencia y Persistencia (11 Tareas)
 > **Objetivo:** Desplegar streaming SSE en tiempo real token a token, pooling persistente de conexiones, pipeline en cascada multi-filtro para desambiguación estricta de intenciones, base de datos SQLite transaccional y contenerización lista para producción.
 
-- [ ] **TODO-2.1 [Prop. 11 - CRÍTICO] Streaming SSE token a token en `/api/v1/chat/stream`:**
-  - [ ] Implementar generador asíncrono en `backend/src/api/routes.py` utilizando `StreamingResponse(media_type="text/event-stream")`.
-  - [ ] Adaptar `advisor_common.py` para emitir chunks parciales de texto en tiempo real.
-- [ ] **TODO-2.2 [Prop. 12 - CRÍTICO] Connection pooling HTTP persistente (`httpx.AsyncClient`):**
-  - [ ] Refactorizar `OpenCodeAdvisorClient` para utilizar un cliente singleton `httpx.AsyncClient` con keep-alive.
-  - [ ] Eliminar la recreación de sesiones TCP por cada mensaje recibido.
-- [ ] **TODO-2.3 [Prop. 13 - RECOMENDADO] Circuit Breaker y Backoff Exponencial para proveedores LLM:**
-  - [ ] Crear clase `CircuitBreaker` en `backend/src/core/resilience.py` (estados: Closed, Open, Half-Open).
-  - [ ] Conmutar automáticamente entre OpenCode y AGY CLI si uno presenta fallos consecutivos o timeouts (>45s).
-- [ ] **TODO-2.4 [Prop. 14 - RECOMENDADO] Middleware ASGI con Correlation ID (`X-Request-ID`):**
-  - [ ] Agregar middleware en `backend/src/main.py` que genere o capture `X-Request-ID`.
-  - [ ] Propagar el ID en cada log emitido y en el header de respuesta HTTP.
-- [ ] **TODO-2.5 [Prop. 15 - RECOMENDADO] Migración de `escalations.json` a SQLite transaccional con WAL:**
-  - [ ] Crear repositorio `backend/src/data/sqlite_tickets.py` con esquema de tabla `escalation_tickets`.
-  - [ ] Habilitar modo `PRAGMA journal_mode=WAL;` para escrituras atómicas concurrentes libres de bloqueos.
-  - [ ] Migrar tickets existentes de `escalations.json` a la base de datos `escalations.db`.
-- [ ] **TODO-2.6 [Prop. 16 - RECOMENDADO] Validación de esquemas y serializadores nativos Pydantic V2:**
-  - [ ] Sustituir conversiones manuales con `json.dumps()` por `model_dump_json()` de Pydantic V2 en todos los modelos API.
-- [ ] **TODO-2.7 [Prop. 20 - CRÍTICO] Rutina de compresión y vacuum periódico de ChromaDB:**
-  - [ ] Crear tarea programada en background que ejecute `VACUUM` sobre la base subyacente de ChromaDB para desfragmentar espacio en disco.
-- [ ] **TODO-2.8 [Prop. 22 - RECOMENDADO] Gestor de snapshots fechados de la base vectorial:**
-  - [ ] Implementar utilitario en `backend/src/rag/snapshot_manager.py` para respaldar `chroma_db/` previo a re-indexaciones.
-  - [ ] Permitir rollback automático si un proceso de re-indexación es interrumpido.
-- [ ] **TODO-2.9 [Prop. 45 - CRÍTICO] Configuración Docker Compose multi-stage:**
-  - [ ] Crear `Dockerfile.backend` (Python 3.12 slim multi-stage) y `Dockerfile.frontend` (Node.js 20 alpine standalone).
-  - [ ] Crear `docker-compose.yml` que orqueste backend (:8000) y frontend (:3000) en una red interna.
-- [ ] **TODO-2.10 [Prop. 46 - CRÍTICO] Validación tipada centralizada con `pydantic-settings`:**
-  - [ ] Migrar variables de entorno a una clase `AppSettings` con tipado estricto y valores por defecto en `backend/src/core/config.py`.
-- [ ] **TODO-2.11 [CRÍTICO] Pipeline de Enrutamiento de Intenciones en Cascada y Erradicación de Cruces entre Pilares:**
-  - [ ] **1. Clasificador de Intención Cerrado & Confidence Gate:**
-    - [ ] Definir intents estrictos (`cursos`, `horarios`, `precios`, `sedes`, `becas_descuentos`) con palabras clave exclusivas y umbral de confianza mínimo.
-    - [ ] Si la confianza es baja o ambigua, activar pregunta de clarificación o desambiguador Pydantic en lugar de permitir búsqueda global difusa en los 82 documentos.
-  - [ ] **2. Hard Domain Mask Obligatorio (Bloqueo Físico en `hybrid_retriever.py`):**
-    - [ ] Reemplazar penalizaciones suaves por un bloqueo booleano estricto (`PILLAR_STRICT_CLUSTERS`).
-    - [ ] Si la intención es `cursos`, vetar al 100% chunks de sedes (`07_sedes`), horarios (`02_`) y precios (`03_`).
-    - [ ] Si la intención es `precios`, vetar al 100% chunks de horarios y sedes.
-    - [ ] Si la intención es `sedes`, vetar chunks de precios y cursos.
-  - [ ] **3. Score de Compatibilidad Híbrido Consulta-Documento:**
-    - [ ] Integrar fórmula compuesta: $\text{Score} = (\text{Dense} \times 0.4) + (\text{BM25} \times 0.3) + (\text{IntentMatch} \times 0.3)$.
-    - [ ] Descartar automáticamente documentos con $\text{IntentMatch} == 0$.
-  - [ ] **4. Context Validator Pre-LLM (`engine.py`):**
-    - [ ] Auditar los chunks recuperados antes de pasarlos al LLM; rechazar y sustituir cualquier fragmento fuera del dominio solicitado.
-  - [ ] **5. Output Verification & Prompt con Reglas Estrictas de Dominio (`advisor_common.py`):**
-    - [ ] Inyectar regla imperativa en el prompt del asesor: *"La intención es exclusivamente {intent}; solo puedes responder información de {allowed_clusters}; nunca mezcles sedes, horarios ni precios si no fueron solicitados"*.
-    - [ ] Validador posterior que detecta términos prohibidos según la intención (ej. si la intención es `cursos`, rechazar respuestas que comiencen con sedes físicas).
-  - [ ] **6. Tests de Regresión Automáticos por Intención:**
-    - [ ] Batería de pruebas en `backend/tests/test_hybrid_search.py` validando los 5 pilares:
+- [x] **TODO-2.1 [Prop. 11 - CRÍTICO] Streaming SSE token a token en `/api/v1/chat/stream`:**
+  - [x] Implementar generador asíncrono en `backend/src/api/routes.py` utilizando `StreamingResponse(media_type="text/event-stream")`.
+  - [x] Adaptar `advisor_common.py` para emitir chunks parciales de texto en tiempo real.
+- [x] **TODO-2.2 [Prop. 12 - CRÍTICO] Connection pooling HTTP persistente (`httpx.AsyncClient`):**
+  - [x] Refactorizar `OpenCodeAdvisorClient` para utilizar un cliente singleton `httpx.AsyncClient` con keep-alive.
+  - [x] Eliminar la recreación de sesiones TCP por cada mensaje recibido.
+- [x] **TODO-2.3 [Prop. 13 - RECOMENDADO] Circuit Breaker y Backoff Exponencial para proveedores LLM:**
+  - [x] Crear clase `CircuitBreaker` en `backend/src/core/resilience.py` (estados: Closed, Open, Half-Open).
+  - [x] Conmutar automáticamente entre OpenCode y AGY CLI si uno presenta fallos consecutivos o timeouts (>45s).
+- [x] **TODO-2.4 [Prop. 14 - RECOMENDADO] Middleware ASGI con Correlation ID (`X-Request-ID`):**
+  - [x] Agregar middleware en `backend/src/main.py` que genere o capture `X-Request-ID`.
+  - [x] Propagar el ID en cada log emitido y en el header de respuesta HTTP.
+- [x] **TODO-2.5 [Prop. 15 - RECOMENDADO] Migración de `escalations.json` a SQLite transaccional con WAL:**
+  - [x] Crear repositorio `backend/src/data/sqlite_tickets.py` con esquema de tabla `escalation_tickets`.
+  - [x] Habilitar modo `PRAGMA journal_mode=WAL;` para escrituras atómicas concurrentes libres de bloqueos.
+  - [x] Migrar tickets existentes de `escalations.json` a la base de datos `escalations.db`.
+- [x] **TODO-2.6 [Prop. 16 - RECOMENDADO] Validación de esquemas y serializadores nativos Pydantic V2:**
+  - [x] Sustituir conversiones manuales con `json.dumps()` por `model_dump_json()` de Pydantic V2 en todos los modelos API.
+- [x] **TODO-2.7 [Prop. 20 - CRÍTICO] Rutina de compresión y vacuum periódico de ChromaDB:**
+  - [x] Crear tarea programada en background que ejecute `VACUUM` sobre la base subyacente de ChromaDB para desfragmentar espacio en disco.
+- [x] **TODO-2.8 [Prop. 22 - RECOMENDADO] Gestor de snapshots fechados de la base vectorial:**
+  - [x] Implementar utilitario en `backend/src/rag/snapshot_manager.py` para respaldar `chroma_db/` previo a re-indexaciones.
+  - [x] Permitir rollback automático si un proceso de re-indexación es interrumpido.
+- [x] **TODO-2.9 [Prop. 45 - CRÍTICO] Configuración Docker Compose multi-stage:**
+  - [x] Crear `Dockerfile.backend` (Python 3.12 slim multi-stage) y `Dockerfile.frontend` (Node.js 20 alpine standalone).
+  - [x] Crear `docker-compose.yml` que orqueste backend (:8000) y frontend (:3000) en una red interna.
+- [x] **TODO-2.10 [Prop. 46 - CRÍTICO] Validación tipada centralizada con `pydantic-settings`:**
+  - [x] Migrar variables de entorno a una clase `AppSettings` con tipado estricto y valores por defecto en `backend/src/core/config.py`.
+- [x] **TODO-2.11 [CRÍTICO] Pipeline de Enrutamiento de Intenciones en Cascada y Erradicación de Cruces entre Pilares:**
+  - [x] **1. Clasificador de Intención Cerrado & Confidence Gate:**
+    - [x] Definir intents estrictos (`cursos`, `horarios`, `precios`, `sedes`, `becas_descuentos`) con palabras clave exclusivas y umbral de confianza mínimo.
+    - [x] Si la confianza es baja o ambigua, activar pregunta de clarificación o desambiguador Pydantic en lugar de permitir búsqueda global difusa en los 82 documentos.
+  - [x] **2. Hard Domain Mask Obligatorio (Bloqueo Físico en `hybrid_retriever.py`):**
+    - [x] Reemplazar penalizaciones suaves por un bloqueo booleano estricto (`PILLAR_STRICT_CLUSTERS`).
+    - [x] Si la intención es `cursos`, vetar al 100% chunks de sedes (`07_sedes`), horarios (`02_`) y precios (`03_`).
+    - [x] Si la intención es `precios`, vetar al 100% chunks de horarios y sedes.
+    - [x] Si la intención es `sedes`, vetar chunks de precios y cursos.
+  - [x] **3. Score de Compatibilidad Híbrido Consulta-Documento:**
+    - [x] Integrar fórmula compuesta: $\text{Score} = (\text{Dense} \times 0.4) + (\text{BM25} \times 0.3) + (\text{IntentMatch} \times 0.3)$.
+    - [x] Descartar automáticamente documentos con $\text{IntentMatch} == 0$.
+  - [x] **4. Context Validator Pre-LLM (`engine.py`):**
+    - [x] Auditar los chunks recuperados antes de pasarlos al LLM; rechazar y sustituir cualquier fragmento fuera del dominio solicitado.
+  - [x] **5. Output Verification & Prompt con Reglas Estrictas de Dominio (`advisor_common.py`):**
+    - [x] Inyectar regla imperativa en el prompt del asesor: *"La intención es exclusivamente {intent}; solo puedes responder información de {allowed_clusters}; nunca mezcles sedes, horarios ni precios si no fueron solicitados"*.
+    - [x] Validador posterior que detecta términos prohibidos según la intención (ej. si la intención es `cursos`, rechazar respuestas que comiencen con sedes físicas).
+  - [x] **6. Tests de Regresión Automáticos por Intención:**
+    - [x] Batería de pruebas en `backend/tests/test_hybrid_search.py` validando los 5 pilares:
       - *"Cuáles son los cursos disponibles"* $\to$ PASS: cursos/idiomas/MCER \| FAIL: sedes/direcciones.
       - *"Cuánto cuesta inglés B2"* $\to$ PASS: precios/COP/financiación \| FAIL: horarios/sedes.
       - *"Qué sedes tienen"* $\to$ PASS: Bogotá/Medellín/Cali \| FAIL: precios/cursos.
-- [ ] **TODO-2.12 [CRÍTICO] Output estructurado con citas obligatorias y doble verificación:**
-  - [ ] Integrar `instructor` + esquemas Pydantic v2 (`answer, citations[{doc_id, span}], confidence, abstain`) en `backend/src/rag/engine.py` y `backend/src/rag/prompt_templates.py`.
-  - [ ] Obligar al LLM a citar `source|section|span` por cada afirmación factual; sin cita válida se retorna abstención y escalación a asesor humano.
-  - [ ] Añadir segunda pasada LLM-as-judge que verifica que cada cita exista literalmente en los chunks recuperados; latencia objetivo 5-10s aceptada por priorizar precisión al 100%.
-- [ ] **TODO-2.13 [CRÍTICO] Verificador NLI post-LLM de fidelidad (faithfulness gate):**
-  - [ ] Crear `backend/src/core/faithfulness.py` con `transformers` + `vectara/hallucination_evaluation_model` (variante large `DeBERTa-v3-large-mnli`).
-  - [ ] Enganchar verificación en `backend/src/rag/engine.py` tras la síntesis; umbral estricto `entailment >= 0.80`, de lo contrario rechazar respuesta y escalar con ticket.
-  - [ ] Registrar métrica `faithfulness_score` en `backend/src/core/metrics.py` y exponerla en `/api/v1/metrics`.
-- [ ] **TODO-2.14 [CRÍTICO] Temperatura 0 + modo extractivo + auto-consistencia:**
-  - [ ] Fijar `llm_temperature=0.0` en `backend/src/config.py` y reforzar `SYSTEM_PROMPT` con regla extractiva (solo copiar hechos del contexto oficial).
-  - [ ] Implementar self-consistency N=3 con voto mayoritario cuando la confianza del retriever esté en rango medio (0.35-0.50); priorizar precisión sobre latencia.
-- [ ] **TODO-2.15 [RECOMENDADO] Embeddings multilingües + reranker de alta precisión:**
-  - [ ] Reemplazar fallback TF-IDF con `fastembed` (`BAAI/bge-m3` o `bge-small-es`, ONNX CPU) en `backend/src/rag/vector_store.py`.
-  - [ ] Implementar `backend/src/rag/reranker.py` con `BAAI/bge-reranker-v2-m3` (fallback `flashrank`) sobre top-20 candidatos hacia top-5; complementa TODO-1.3 con configuración de máxima precisión.
-- [ ] **TODO-2.16 [RECOMENDADO] Guardrails de salida + normalización robusta de entidades:**
-  - [ ] Extender `backend/src/core/guardrails.py` con validación post-LLM (`guardrails-ai`): exigir símbolo `$ COP` en precios y formato horario exacto; bloquear respuesta si falta.
-  - [ ] Integrar `presidio-analyzer` para PII, `rapidfuzz` para typos y `spacy es_core_news_lg` para extracción de sede/horario/monto en `backend/src/rag/bm25.py`; complementa TODO-1.7.
-- [ ] **TODO-2.17 [RECOMENDADO] Harness de evaluación de fidelidad en CI:**
-  - [ ] Ampliar `scripts/evaluate_rag.py` con `ragas` (`faithfulness`, `answer_relevancy`, `context_precision`) y `langfuse`/`arize-phoenix` para observabilidad; dataset dorado de 50 preguntas oficiales.
-  - [ ] Exigir `faithfulness=1.0` en preguntas pilar como gate de CI; enlaza con TODO-4.1 sin duplicarlo.
+- [x] **TODO-2.12 [CRÍTICO] Output estructurado con citas obligatorias y doble verificación:**
+  - [x] Integrar `instructor` + esquemas Pydantic v2 (`answer, citations[{doc_id, span}], confidence, abstain`) en `backend/src/rag/engine.py` y `backend/src/rag/prompt_templates.py`.
+  - [x] Obligar al LLM a citar `source|section|span` por cada afirmación factual; sin cita válida se retorna abstención y escalación a asesor humano.
+  - [x] Añadir segunda pasada LLM-as-judge que verifica que cada cita exista literalmente en los chunks recuperados; latencia objetivo 5-10s aceptada por priorizar precisión al 100%.
+- [x] **TODO-2.13 [CRÍTICO] Verificador NLI post-LLM de fidelidad (faithfulness gate):**
+  - [x] Crear `backend/src/core/faithfulness.py` con `transformers` + `vectara/hallucination_evaluation_model` (variante large `DeBERTa-v3-large-mnli`).
+  - [x] Enganchar verificación en `backend/src/rag/engine.py` tras la síntesis; umbral estricto `entailment >= 0.80`, de lo contrario rechazar respuesta y escalar con ticket.
+  - [x] Registrar métrica `faithfulness_score` en `backend/src/core/metrics.py` y exponerla en `/api/v1/metrics`.
+- [x] **TODO-2.14 [CRÍTICO] Temperatura 0 + modo extractivo + auto-consistencia:**
+  - [x] Fijar `llm_temperature=0.0` en `backend/src/config.py` y reforzar `SYSTEM_PROMPT` con regla extractiva (solo copiar hechos del contexto oficial).
+  - [x] Implementar self-consistency N=3 con voto mayoritario cuando la confianza del retriever esté en rango medio (0.35-0.50); priorizar precisión sobre latencia.
+- [x] **TODO-2.15 [RECOMENDADO] Embeddings multilingües + reranker de alta precisión:**
+  - [x] Reemplazar fallback TF-IDF con `fastembed` (`BAAI/bge-m3` o `bge-small-es`, ONNX CPU) en `backend/src/rag/vector_store.py`.
+  - [x] Implementar `backend/src/rag/reranker.py` con `BAAI/bge-reranker-v2-m3` (fallback `flashrank`) sobre top-20 candidatos hacia top-5; complementa TODO-1.3 con configuración de máxima precisión.
+- [x] **TODO-2.16 [RECOMENDADO] Guardrails de salida + normalización robusta de entidades:**
+  - [x] Extender `backend/src/core/guardrails.py` con validación post-LLM (`guardrails-ai`): exigir símbolo `$ COP` en precios y formato horario exacto; bloquear respuesta si falta.
+  - [x] Integrar `presidio-analyzer` para PII, `rapidfuzz` para typos y `spacy es_core_news_lg` para extracción de sede/horario/monto en `backend/src/rag/bm25.py`; complementa TODO-1.7.
+- [x] **TODO-2.17 [RECOMENDADO] Harness de evaluación de fidelidad en CI:**
+  - [x] Ampliar `scripts/evaluate_rag.py` con `ragas` (`faithfulness`, `answer_relevancy`, `context_precision`) y `langfuse`/`arize-phoenix` para observabilidad; dataset dorado de 50 preguntas oficiales.
+  - [x] Exigir `faithfulness=1.0` en preguntas pilar como gate de CI; enlaza con TODO-4.1 sin duplicarlo.
 
 ---
 

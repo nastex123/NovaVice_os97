@@ -34,7 +34,7 @@ class PureBM25:
         "colsubsidio", "compensar", "cafam", "comfandi", "nequi", "daviplata"
     }
 
-    # P1 / TODO-1.7: Canonical lemma dictionary for Colombian entities & campus names
+    # P1 / TODO-1.7 & TODO-2.16: Canonical entity normalization (Colombian campuses, cities, payment providers)
     LEMMAS = {
         "chico": "chico",
         "chicó": "chico",
@@ -45,14 +45,24 @@ class PureBM25:
         "laureles": "laureles",
         "poblado": "poblado",
         "granada": "granada",
+        "medellin": "medellin",
+        "medellín": "medellin",
+        "bogota": "bogota",
+        "bogotá": "bogota",
+        "cali": "cali",
         "comfama": "comfama",
         "colsubsidio": "colsubsidio",
         "compensar": "compensar",
         "cafam": "cafam",
         "comfandi": "comfandi",
         "daviplata": "daviplata",
-        "nequi": "nequi"
+        "nequi": "nequi",
+        "bancolombia": "bancolombia",
+        "pse": "pse"
     }
+
+    # Entity extraction helpers for sedes, horarios and montos (TODO-2.16)
+    SEDES_CANONICAL = {"chico": "Sede Chicó (Bogotá)", "chapinero": "Sede Chapinero (Bogotá)", "poblado": "Sede El Poblado (Medellín)", "laureles": "Sede Laureles (Medellín)", "granada": "Sede Granada (Cali)"}
 
     def __init__(self, k1: float = 1.5, b: float = 0.75):
         self.k1 = k1

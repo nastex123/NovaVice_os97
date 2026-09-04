@@ -1,5 +1,6 @@
 import re
-from typing import Dict, Any, Optional, List
+import asyncio
+from typing import Dict, Any, Optional, List, AsyncGenerator
 
 
 def format_context_chunks(context_chunks: Optional[List[Dict[str, Any]]] = None) -> str:
@@ -155,3 +156,18 @@ def generate_advisor_fallback(query: str, context_chunks: Optional[List[Dict[str
         "¡Hola! Con gusto te oriento en todo lo que necesites sobre nuestros programas de idiomas (inglés, francés, alemán, italiano, portugués, español), tarifas oficiales en COP, modalidades virtual y presencial, o certificaciones internacionales (IELTS, DELF, Goethe).\n\n"
         "¿Podrías indicarme qué idioma deseas aprender o qué aspecto te gustaría consultar en detalle?"
     )
+
+
+async def stream_advisor_tokens(
+    text: str,
+    chunk_delay: float = 0.015
+):
+    """
+    Asynchronous token-by-token streamer for admissions advisor answers.
+    Emits natural word and punctuation tokens with realistic cadence.
+    """
+    tokens = re.findall(r"\S+|\s+", text)
+    for token in tokens:
+        yield token
+        if chunk_delay > 0:
+            await asyncio.sleep(chunk_delay)

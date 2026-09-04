@@ -635,16 +635,27 @@ class PurePythonRAGEngine:
         self,
         query: str,
         user_id: str = "guest_applicant",
-        session_id: str = "default_session"
+        session_id: str = "default_session",
+        use_opencode_mode: bool = False
     ) -> AsyncGenerator[str, None]:
-        # Yields incremental tokens for Server-Sent Events (SSE).
-        full_res = await self.answer_query(query, user_id, session_id)
-        words = full_res["response"].split(" ")
-        for word in words:
-            yield f"data: {json.dumps({'token': word + ' ', 'done': False})}\n\n"
-            await asyncio.sleep(0.02)
+        """
+        Yields real-time token-by-token Server-Sent Events (SSE).
+        Streams reasoning chunks or grounded responses incrementally to the UI.
+        """
+        full_res = await self.answer_query(
+            query=query,
+            user_id=user_id,
+            session_id=session_id,
+            use_opencode_mode=use_opencode_mode
+        )
+        response_text = full_res.get("response", "")
 
-        yield f"data: {json.dumps({'done': True, 'confidence_score': full_res['confidence_score'], 'source_documents': full_res['source_documents'], 'escalated_to_human': full_res['escalated_to_human']})}\n\n"
+        from src.core.advisor_common import stream_advisor_tokens
+        async for token in stream_advisor_tokens(response_text, chunk_delay=0.012):
+            yield f"data: {json.dumps({'token': token, 'done': False})}\n\n"
+
+        # Final metadata payload signaling stream completion
+        yield f"data: {json.dumps({'done': True, 'confidence_score': full_res.get('confidence_score', 1.0), 'source_documents': full_res.get('source_documents', []), 'escalated_to_human': full_res.get('escalated_to_human', False), 'mode': full_res.get('mode', 'rag_direct'), 'action_buttons': full_res.get('action_buttons', []), 'latency_ms': full_res.get('latency_ms', 0.0)})}\n\n"
 
 
 import json

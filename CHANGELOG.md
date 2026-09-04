@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [2026-09-04 09:50] [Feat/Fase-2-TODO-2.1-SSE-Streaming]
+- **Implementación de Streaming SSE token a token en `/api/v1/chat/stream` (TODO-2.1 / Prop. 11):**
+  - Creado generador asíncrono `stream_advisor_tokens` en `backend/src/core/advisor_common.py` con emisión reactiva de palabras y delimitadores ortográficos con cadencia realista.
+  - Actualizado `PurePythonRAGEngine.stream_query` en `backend/src/rag/engine.py` para admitir `use_opencode_mode`, consumir `stream_advisor_tokens` y retornar un payload de cierre enriquecido con metadatos (`confidence_score`, `source_documents`, `action_buttons`, `escalated_to_human`, `latency_ms`).
+  - Actualizado endpoint `/api/v1/chat/stream` en `backend/src/api/routes.py` para reenviar `use_opencode_mode` del `ChatRequest` al motor RAG streaming.
+  - Creado test de integración `test_api_chat_stream_endpoint` en `backend/tests/test_api_routes.py` verificando el encabezado `text/event-stream`, la estructura de eventos SSE parciales `data: {"token": "..."}` y el evento final de terminación con metadatos.
+  - Tablero de seguimiento [`docs/01-product/TODO_50_PROPOSITAS.md`](docs/01-product/TODO_50_PROPOSITAS.md) actualizado: TODO-2.1 completado al 100%.
+
 ### [2026-09-04 08:06] [Feat/Fase-1-TODO-1.3-a-1.10-Complete]
 - **Implementación completa de tareas pendientes de Fase 1 (TODO-1.3 a TODO-1.10):**
   - **TODO-1.3 [Prop. 3 - Re-ranking local Cross-Encoder]:** Creado `backend/src/rag/reranker.py` con `FlashRank` (`ms-marco-TinyBERT-L-2-v2` en CPU ONNX). Integrado en `hybrid_retriever.py` sobre candidatos RRF con fallback automático. Tests en `backend/tests/test_reranker.py`.

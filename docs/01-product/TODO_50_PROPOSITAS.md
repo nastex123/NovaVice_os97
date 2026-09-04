@@ -10,11 +10,11 @@
 | Fase | Enfoque Principal | Total Tareas | Completadas | En Progreso | Pendientes | Estado |
 | :---: | :--- | :---: | :---: | :---: | :---: | :---: |
 | **Fase 1** | Precisión de Datos y Recuperación RAG | 11 | 11 | 0 | 0 | ✅ Completada (100%) |
-| **Fase 2** | Rendimiento Backend y Resiliencia + Complemento Anti-alucinación | 17 | 0 | 0 | 17 | ⏳ Pendiente |
+| **Fase 2** | Rendimiento Backend y Resiliencia + Complemento Anti-alucinación | 17 | 1 | 0 | 16 | 🟡 En Progreso (5.9%) |
 | **Fase 3** | Frontend Moderno, UI Retro & Accesibilidad | 10 | 0 | 0 | 10 | ⏳ Pendiente |
 | **Fase 4** | Testing Automatizado, QA & Tooling DX | 8 | 0 | 0 | 8 | ⏳ Pendiente |
 | **Fase 5** | Horizontes Futuros y Despliegues Especializados | 11 | 0 | 11 | ⏳ Pendiente |
-| **TOTAL** | **Propuestas de Mejora Técnica** | **57** | **11** | **0** | **46** | **19.3%** |
+| **TOTAL** | **Propuestas de Mejora Técnica** | **57** | **12** | **0** | **45** | **21.0%** |
 
 ---
 
@@ -62,9 +62,9 @@
 ## 🟡 FASE 2: Rendimiento Backend, Resiliencia y Persistencia (11 Tareas)
 > **Objetivo:** Desplegar streaming SSE en tiempo real token a token, pooling persistente de conexiones, pipeline en cascada multi-filtro para desambiguación estricta de intenciones, base de datos SQLite transaccional y contenerización lista para producción.
 
-- [ ] **TODO-2.1 [Prop. 11 - CRÍTICO] Streaming SSE token a token en `/api/v1/chat/stream`:**
-  - [ ] Implementar generador asíncrono en `backend/src/api/routes.py` utilizando `StreamingResponse(media_type="text/event-stream")`.
-  - [ ] Adaptar `advisor_common.py` para emitir chunks parciales de texto en tiempo real.
+- [x] **TODO-2.1 [Prop. 11 - CRÍTICO] Streaming SSE token a token en `/api/v1/chat/stream`:**
+  - [x] Implementar generador asíncrono en `backend/src/api/routes.py` utilizando `StreamingResponse(media_type="text/event-stream")`.
+  - [x] Adaptar `advisor_common.py` para emitir chunks parciales de texto en tiempo real.
 - [ ] **TODO-2.2 [Prop. 12 - CRÍTICO] Connection pooling HTTP persistente (`httpx.AsyncClient`):**
   - [ ] Refactorizar `OpenCodeAdvisorClient` para utilizar un cliente singleton `httpx.AsyncClient` con keep-alive.
   - [ ] Eliminar la recreación de sesiones TCP por cada mensaje recibido.

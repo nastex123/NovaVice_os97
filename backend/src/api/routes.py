@@ -45,7 +45,8 @@ async def chat_stream_endpoint(request: ChatRequest):
         rag_engine.stream_query(
             query=request.query,
             user_id=request.user_id or "guest_applicant",
-            session_id=request.session_id or "default_session"
+            session_id=request.session_id or "default_session",
+            use_opencode_mode=bool(request.use_opencode_mode)
         ),
         media_type="text/event-stream"
     )

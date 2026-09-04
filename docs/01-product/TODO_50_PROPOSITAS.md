@@ -9,12 +9,12 @@
 
 | Fase | Enfoque Principal | Total Tareas | Completadas | En Progreso | Pendientes | Estado |
 | :---: | :--- | :---: | :---: | :---: | :---: | :---: |
-| **Fase 1** | Precisión de Datos y Recuperación RAG | 11 | 10 | 0 | 1 | 🚀 Casi Completa (91%) |
+| **Fase 1** | Precisión de Datos y Recuperación RAG | 11 | 11 | 0 | 0 | ✅ Completada (100%) |
 | **Fase 2** | Rendimiento Backend y Resiliencia + Complemento Anti-alucinación | 17 | 0 | 0 | 17 | ⏳ Pendiente |
 | **Fase 3** | Frontend Moderno, UI Retro & Accesibilidad | 10 | 0 | 0 | 10 | ⏳ Pendiente |
 | **Fase 4** | Testing Automatizado, QA & Tooling DX | 8 | 0 | 0 | 8 | ⏳ Pendiente |
 | **Fase 5** | Horizontes Futuros y Despliegues Especializados | 11 | 0 | 11 | ⏳ Pendiente |
-| **TOTAL** | **Propuestas de Mejora Técnica** | **57** | **10** | **0** | **47** | **17.5%** |
+| **TOTAL** | **Propuestas de Mejora Técnica** | **57** | **11** | **0** | **46** | **19.3%** |
 
 ---
 
@@ -54,8 +54,8 @@
 - [x] **TODO-1.10 [Prop. 23 - RECOMENDADO] Serialización y persistencia en disco del índice BM25:**
   - [x] Implementar guardado y carga binaria del vocabulario de BM25 (`bm25_index.pkl`) en `backend/src/rag/bm25.py`.
   - [x] Agregar validación por hash SHA-256 de los documentos fuente en `backend/src/rag/ingestion.py` para invalidar el archivo al haber cambios.
-- [ ] **TODO-1.11 [Prop. 43 - RECOMENDADO] Validador sintáctico CI para documentos Markdown:**
-  - [ ] Escribir script de test `backend/tests/test_document_integrity.py` que valide sintaxis, columnas y tablas de los 82 documentos.
+- [x] **TODO-1.11 [Prop. 43 - RECOMENDADO] Validador sintáctico CI para documentos Markdown:**
+  - [x] Escribir suite de validación `backend/tests/test_document_integrity.py` validando encabezados, sintaxis y estructura en los 83 documentos.
 
 ---
 

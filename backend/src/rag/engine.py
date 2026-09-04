@@ -577,12 +577,9 @@ class PurePythonRAGEngine:
         answer_text = re.sub(r"`?(?:POST|GET|PUT|DELETE)\s+/api/[^\s`\"']+`?", "directamente en este chat", answer_text)
         answer_text = re.sub(r"`?/api/v1/[^\s`\"']+`?", "nuestros canales oficiales", answer_text)
 
-        # E44: Post-LLM Regex Validation ($ for prices and time format for schedules)
-        q_norm = query.lower()
-        if any(w in q_norm for w in ("precio", "costo", "tarifa", "cuota", "valor", "modulo")) and "$" not in answer_text:
-            answer_text += "\n\n*(Tarifas oficiales expresadas en pesos colombianos COP con facilidades de pago a cuotas)*"
-        if any(w in q_norm for w in ("horario", "franja", "manana", "tarde", "noche")) and not re.search(r"\d{1,2}:\d{2}|\b[0-9]{1,2}\s*(?:am|pm|a\.m\.|p\.m\.)", answer_text, re.IGNORECASE):
-            answer_text += "\n\n*(Consulta con un asesor para programar franjas personalizadas)*"
+        # E44 & TODO-2.16: Post-LLM Guardrail Validation ($ COP pricing, exact time format & PII protection)
+        from src.core.guardrails import post_llm_guardrails
+        _, answer_text, _ = post_llm_guardrails.validate_and_sanitize(answer_text, query)
 
         # TODO-2.13: Post-LLM Faithfulness & Entailment Gate
         from src.core.faithfulness import faithfulness_verifier

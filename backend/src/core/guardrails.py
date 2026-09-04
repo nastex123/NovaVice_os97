@@ -44,4 +44,41 @@ class PreFlightGuardrails:
         return top_similarity >= self.similarity_threshold
 
 
+class PostLLMGuardrails:
+    # Post-LLM compliance guardrails (TODO-2.16):
+    # Enforces Colombian currency symbols ($ COP) on pricing queries, exact time format on schedule queries,
+    # and validates PII / sensitive data redaction.
+
+    PRICE_KEYWORDS = ("precio", "costo", "tarifa", "cuota", "valor", "modulo", "pagar", "financiacion", "matricula")
+    SCHEDULE_KEYWORDS = ("horario", "franja", "manana", "tarde", "noche", "turno", "sabado")
+
+    TIME_REGEX = re.compile(r"\b(?:\d{1,2}:\d{2}\s*(?:am|pm|a\.m\.|p\.m\.)?|\d{1,2}\s*(?:am|pm|a\.m\.|p\.m\.))\b", re.IGNORECASE)
+    COP_REGEX = re.compile(r"\$\s*\d{1,3}(?:\.\d{3})*(?:,\d+)?|\bCOP\b", re.IGNORECASE)
+
+    def validate_and_sanitize(self, response_text: str, user_query: str) -> Tuple[bool, str, list]:
+        violations = []
+        q_low = user_query.lower()
+        cleaned_text = response_text
+
+        # 1. Pricing validation: enforce $ / COP symbol
+        if any(kw in q_low for kw in self.PRICE_KEYWORDS):
+            if not self.COP_REGEX.search(cleaned_text):
+                violations.append("missing_cop_pricing_format")
+                cleaned_text += "\n\n*(Nota: Todas las tarifas oficiales están expresadas en Pesos Colombianos $ COP)*"
+
+        # 2. Schedule validation: enforce exact time format
+        if any(kw in q_low for kw in self.SCHEDULE_KEYWORDS):
+            if not self.TIME_REGEX.search(cleaned_text):
+                violations.append("missing_exact_time_format")
+                cleaned_text += "\n\n*(Nota: Franjas disponibles de 6:00 a 8:00 a.m. y 6:30 a 8:30 p.m. de lunes a viernes)*"
+
+        # 3. PII Redaction / Guard: Mask any accidental national ID or sensitive credit card patterns
+        # Colombian CC pattern: 7-10 digit continuous sequences not preceded by $ or phone code
+        cleaned_text = re.sub(r"\b(?<!\+57\s?)(?<!\$)(?<!\d)[1-9]\d{6,9}(?!\d)\b", "[DOCUMENTO_VERIFICADO]", cleaned_text)
+
+        is_compliant = len(violations) == 0
+        return is_compliant, cleaned_text, violations
+
+
 guardrails = PreFlightGuardrails()
+post_llm_guardrails = PostLLMGuardrails()

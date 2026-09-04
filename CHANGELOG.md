@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [2026-09-04 10:21] [Feat/Fase-2-TODO-2.16-Output-Guardrails-Entity-Normalization]
+- **Guardrails de salida post-LLM y normalización robusta de entidades (TODO-2.16 / Prop. RECOMENDADA):**
+  - Implementado `PostLLMGuardrails` en `backend/src/core/guardrails.py` auditando formato estricto de moneda colombiana (`$ COP`) en consultas de precios, validación de franjas horarias exactas y anonimización de PII/cédulas ciudadanas.
+  - Integrada validación post-síntesis en el pipeline de `backend/src/rag/engine.py`.
+  - Ampliado `LEMMAS` y agregada tabla canónica de sedes institucionales en `backend/src/rag/bm25.py` para tolerancia a variantes ortográficas y geográficas (Bogotá, Medellín, Cali).
+
 ### [2026-09-04 10:20] [Feat/Fase-2-TODO-2.15-Multilingual-Embeddings-Reranker]
 - **Embeddings multilingües y re-ranking de alta precisión top-20 a top-5 (TODO-2.15 / Prop. RECOMENDADA):**
   - Implementada integración en `backend/src/rag/vector_store.py` para soporte de embeddings multilingües (`BAAI/bge` con `fastembed` ONNX) manteniendo fallback determinista.

@@ -14,9 +14,12 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   isLoading: propIsLoading,
 }) => {
   const storeSendMessage = useChatStore((state) => state.sendMessage);
+  const storeSendStreamMessage = useChatStore((state) => state.sendStreamMessage);
+  const streamMode = useChatStore((state) => state.streamMode);
   const storeIsLoading = useChatStore((state) => state.isLoading);
 
-  const onSendMessage = propOnSendMessage || storeSendMessage;
+  const defaultSend = streamMode ? storeSendStreamMessage : storeSendMessage;
+  const onSendMessage = propOnSendMessage || defaultSend;
   const isLoading = propIsLoading !== undefined ? propIsLoading : storeIsLoading;
 
   const [input, setInput] = useState("");

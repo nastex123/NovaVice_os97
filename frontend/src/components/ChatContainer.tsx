@@ -15,16 +15,24 @@ interface ChatContainerProps {
   onActionButtonClick?: (value: string) => void;
 }
 
-// Typewriter Subcomponent for smooth progressive word revealing
+// Typewriter Subcomponent for smooth progressive word revealing or real-time streaming
 const TypewriterMessage: React.FC<{
   text: string;
   isLatest: boolean;
+  isStreaming?: boolean;
   onFinish?: () => void;
-}> = ({ text, isLatest, onFinish }) => {
-  const [displayedText, setDisplayedText] = useState(isLatest ? "" : text);
-  const [isDone, setIsDone] = useState(!isLatest);
+}> = ({ text, isLatest, isStreaming, onFinish }) => {
+  const [displayedText, setDisplayedText] = useState(isLatest && !isStreaming ? "" : text);
+  const [isDone, setIsDone] = useState(!isLatest || !isStreaming);
 
   useEffect(() => {
+    // If the message is actively streaming tokens from SSE, display directly without client-side lag
+    if (isStreaming) {
+      setDisplayedText(text);
+      setIsDone(false);
+      return;
+    }
+
     if (!isLatest) {
       setDisplayedText(text);
       setIsDone(true);
@@ -49,7 +57,7 @@ const TypewriterMessage: React.FC<{
     }, 18);
 
     return () => clearInterval(interval);
-  }, [text, isLatest]);
+  }, [text, isLatest, isStreaming, onFinish]);
 
   const handleSkip = () => {
     setDisplayedText(text);
@@ -174,10 +182,13 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
   const storeMessages = useChatStore((state) => state.messages);
   const storeIsLoading = useChatStore((state) => state.isLoading);
   const sendMessage = useChatStore((state) => state.sendMessage);
+  const sendStreamMessage = useChatStore((state) => state.sendStreamMessage);
+  const streamMode = useChatStore((state) => state.streamMode);
 
+  const defaultActionClick = streamMode ? sendStreamMessage : sendMessage;
   const messages = propMessages !== undefined ? propMessages : storeMessages;
   const isLoading = propIsLoading !== undefined ? propIsLoading : storeIsLoading;
-  const onActionButtonClick = propOnActionButtonClick || sendMessage;
+  const onActionButtonClick = propOnActionButtonClick || defaultActionClick;
 
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -272,6 +283,7 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
                       <TypewriterMessage
                         text={sanitizeMarkdown(msg.text)}
                         isLatest={isLatest}
+                        isStreaming={msg.isStreaming}
                       />
                     ) : (
                       <p className="text-xs sm:text-sm leading-relaxed text-black font-medium font-sans">

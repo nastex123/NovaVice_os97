@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [2026-09-04 11:31] [Feat/Fase-3-TODO-3.2-SSE-Stream-Progressive-Decoder]
+- **Consumo de streams SSE con decodificador progresivo UTF-8 y cursor retro vintage (TODO-3.2 / Prop. CRÍTICA):**
+  - Implementada función `streamChatMessage` en `frontend/src/lib/api.ts` consumiendo el endpoint `/api/v1/chat/stream` mediante `ReadableStreamDefaultReader` y `TextDecoder("utf-8")` con buffer para líneas `data: {...}`.
+  - Creado hook `useChatStream.ts` en `frontend/src/hooks/` para encapsular la llamada progresiva y la actualización token a token en el estado de Zustand.
+  - Añadida acción `sendStreamMessage` y flag `streamMode: true` en `frontend/src/stores/useChatStore.ts` con manejo de metadatos finales (`confidence_score`, `source_documents`, `action_buttons`, `mode`, `latency_ms`).
+  - Actualizado `TypewriterMessage` en `frontend/src/components/ChatContainer.tsx` para admitir `isStreaming`, renderizar tokens entrantes en tiempo real sin pausas de simulación y mostrar cursor retro parpadeante vintage (`█`).
+  - Actualizados `ChatInput.tsx` y `ChatContainer.tsx` para despachar automáticamente a través de `sendStreamMessage`.
+  - Verificada compilación de producción limpia con `npm run build` en Next.js 15.
+
 ### [2026-09-04 11:27] [Feat/Fase-3-TODO-3.1-Zustand-Centralized-Stores]
 - **Store global centralizado con Zustand y eliminación de prop-drilling (TODO-3.1 / Prop. CRÍTICA):**
   - Instalado `zustand` en `frontend/package.json`.

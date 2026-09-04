@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { ChatMessage, TelemetryMetrics, ServerHealth } from "../lib/types";
-import { sendChatMessage, fetchTelemetryMetrics, fetchServerHealth } from "../lib/api";
+import { sendChatMessage, streamChatMessage, fetchTelemetryMetrics, fetchServerHealth } from "../lib/api";
 
 export const INITIAL_WELCOME_MESSAGE: ChatMessage = {
   id: "msg_welcome",
@@ -35,6 +35,7 @@ interface ChatState {
   currentMenuLabel: string;
   metrics: TelemetryMetrics | null;
   health: ServerHealth | null;
+  streamMode: boolean;
 
   // Actions
   setMessages: (messages: ChatMessage[] | ((prev: ChatMessage[]) => ChatMessage[])) => void;
@@ -43,7 +44,9 @@ interface ChatState {
   setCurrentMenuLabel: (label: string) => void;
   setMetrics: (metrics: TelemetryMetrics | null) => void;
   setHealth: (health: ServerHealth | null) => void;
+  setStreamMode: (enabled: boolean) => void;
   sendMessage: (text: string) => Promise<void>;
+  sendStreamMessage: (text: string) => Promise<void>;
   resetChat: () => void;
   newChat: () => void;
   refreshTelemetry: () => Promise<void>;
@@ -56,6 +59,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
   currentMenuLabel: "Menú Principal - Nova Idiomas",
   metrics: null,
   health: null,
+  streamMode: true,
 
   setMessages: (messagesOrFn) =>
     set((state) => ({
@@ -67,6 +71,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
   setCurrentMenuLabel: (currentMenuLabel) => set({ currentMenuLabel }),
   setMetrics: (metrics) => set({ metrics }),
   setHealth: (health) => set({ health }),
+  setStreamMode: (streamMode) => set({ streamMode }),
 
   refreshTelemetry: async () => {
     const [m, h] = await Promise.all([fetchTelemetryMetrics(), fetchServerHealth()]);
@@ -142,8 +147,120 @@ export const useChatStore = create<ChatState>((set, get) => ({
     }
   },
 
+  sendStreamMessage: async (text: string) => {
+    const { isLoading, sessionId, refreshTelemetry } = get();
+    if (!text.trim() || isLoading) return;
+
+    const userMsg: ChatMessage = {
+      id: "usr_" + Date.now(),
+      sender: "user",
+      text,
+      timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+    };
+
+    const botMsgId = "bot_" + Date.now();
+    const botMsgInitial: ChatMessage = {
+      id: botMsgId,
+      sender: "bot",
+      text: "",
+      timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      isStreaming: true,
+    };
+
+    set((state) => ({
+      messages: [...state.messages, userMsg, botMsgInitial],
+      isLoading: true,
+    }));
+
+    // Update navigation breadcrumb
+    const trimmed = text.trim();
+    if (trimmed === "0" || trimmed.toLowerCase() === "menu") {
+      set({ currentMenuLabel: "Menú Principal - Nova Idiomas" });
+    } else if (trimmed === "1") {
+      set({ currentMenuLabel: "1. Cursos & Certificaciones" });
+    } else if (trimmed === "2") {
+      set({ currentMenuLabel: "2. Horarios & Modalidades" });
+    } else if (trimmed === "3") {
+      set({ currentMenuLabel: "3. Precios & Financiación" });
+    } else if (trimmed === "4") {
+      set({ currentMenuLabel: "4. Admisiones & Sedes" });
+    }
+
+    try {
+      await streamChatMessage(
+        text,
+        sessionId,
+        {
+          onToken: (token: string) => {
+            set((state) => ({
+              messages: state.messages.map((msg) =>
+                msg.id === botMsgId
+                  ? { ...msg, text: msg.text + token }
+                  : msg
+              ),
+            }));
+          },
+          onComplete: (metadata: Partial<ChatMessage>) => {
+            set((state) => ({
+              messages: state.messages.map((msg) =>
+                msg.id === botMsgId
+                  ? {
+                      ...msg,
+                      ...metadata,
+                      isStreaming: false,
+                      text: msg.text.trim() === "" ? "No se obtuvo respuesta del sistema." : msg.text,
+                    }
+                  : msg
+              ),
+              isLoading: false,
+            }));
+            refreshTelemetry();
+          },
+          onError: (err: Error) => {
+            set((state) => ({
+              messages: state.messages.map((msg) =>
+                msg.id === botMsgId
+                  ? {
+                      ...msg,
+                      text:
+                        msg.text +
+                        `\n\n⚠️ **Error en flujo de datos:** ${err.message || "Conexión interrumpida."}`,
+                      isStreaming: false,
+                      mode: "escalation",
+                    }
+                  : msg
+              ),
+              isLoading: false,
+            }));
+            refreshTelemetry();
+          },
+        }
+      );
+    } catch (err: any) {
+      set((state) => ({
+        messages: state.messages.map((msg) =>
+          msg.id === botMsgId
+            ? {
+                ...msg,
+                text: `⚠️ **Error de Comunicación:** No fue posible conectar con el flujo de datos (${err.message}). Verifique que el backend FastAPI esté activo.`,
+                isStreaming: false,
+                mode: "escalation",
+              }
+            : msg
+        ),
+        isLoading: false,
+      }));
+      refreshTelemetry();
+    }
+  },
+
   resetChat: () => {
-    get().sendMessage("0");
+    const { streamMode, sendStreamMessage, sendMessage } = get();
+    if (streamMode) {
+      sendStreamMessage("0");
+    } else {
+      sendMessage("0");
+    }
   },
 
   newChat: () => {

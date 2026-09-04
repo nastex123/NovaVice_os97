@@ -11,10 +11,10 @@
 | :---: | :--- | :---: | :---: | :---: | :---: | :---: |
 | **Fase 1** | Precisión de Datos y Recuperación RAG | 11 | 11 | 0 | 0 | ✅ Completada (100%) |
 | **Fase 2** | Rendimiento Backend y Resiliencia + Complemento Anti-alucinación | 17 | 17 | 0 | 0 | ✅ Completada (100%) |
-| **Fase 3** | Frontend Moderno, UI Retro & Accesibilidad | 10 | 1 | 0 | 9 | 🚀 En Progreso (10%) |
+| **Fase 3** | Frontend Moderno, UI Retro & Accesibilidad | 10 | 2 | 0 | 8 | 🚀 En Progreso (20%) |
 | **Fase 4** | Testing Automatizado, QA & Tooling DX | 8 | 0 | 0 | 8 | ⏳ Pendiente |
 | **Fase 5** | Horizontes Futuros y Despliegues Especializados | 11 | 0 | 0 | 11 | ⏳ Pendiente |
-| **TOTAL** | **Propuestas de Mejora Técnica** | **57** | **29** | **0** | **28** | **50.9%** |
+| **TOTAL** | **Propuestas de Mejora Técnica** | **57** | **30** | **0** | **27** | **52.6%** |
 
 ---
 
@@ -142,9 +142,9 @@
   - [x] Instalar `zustand` en `frontend/`.
   - [x] Crear stores modulares: `useChatStore` (mensajes, estado de envío), `useDesktopStore` (ventanas, z-index), `useSettingsStore` (CRT, accesibilidad).
   - [x] Refactorizar componentes para eliminar prop-drilling en `ChatContainer.tsx` y `Desktop.tsx`.
-- [ ] **TODO-3.2 [Prop. 26 - CRÍTICO] Consumo de streams SSE con decodificador progresivo UTF-8:**
-  - [ ] Crear hook `useChatStream.ts` en el frontend utilizando `ReadableStreamDefaultReader` y `TextDecoder`.
-  - [ ] Mostrar el texto entrante progresivamente con cursor parpadeante retro vintage.
+- [x] **TODO-3.2 [Prop. 26 - CRÍTICO] Consumo de streams SSE con decodificador progresivo UTF-8:**
+  - [x] Crear hook `useChatStream.ts` en el frontend utilizando `ReadableStreamDefaultReader` y `TextDecoder`.
+  - [x] Mostrar el texto entrante progresivamente con cursor parpadeante retro vintage.
 - [ ] **TODO-3.3 [Prop. 27 - RECOMENDADO] Virtualización de mensajes del chat (`@tanstack/react-virtual`):**
   - [ ] Implementar lista virtualizada en el contenedor de mensajes para chats con más de 50 intervenciones.
   - [ ] Mantener el auto-scroll hacia el fondo cuando se generen nuevos tokens en streaming.

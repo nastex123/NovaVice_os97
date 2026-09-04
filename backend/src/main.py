@@ -16,6 +16,12 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         print(f"Startup ingestion note: {e}")
     yield
+    # Clean shutdown of pooled clients
+    try:
+        from src.core.opencode_client import opencode_advisor
+        await opencode_advisor.close()
+    except Exception:
+        pass
 
 
 app = FastAPI(

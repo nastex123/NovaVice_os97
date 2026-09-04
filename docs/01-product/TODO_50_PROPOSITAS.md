@@ -10,11 +10,11 @@
 | Fase | Enfoque Principal | Total Tareas | Completadas | En Progreso | Pendientes | Estado |
 | :---: | :--- | :---: | :---: | :---: | :---: | :---: |
 | **Fase 1** | Precisión de Datos y Recuperación RAG | 11 | 11 | 0 | 0 | ✅ Completada (100%) |
-| **Fase 2** | Rendimiento Backend y Resiliencia + Complemento Anti-alucinación | 17 | 1 | 0 | 16 | 🟡 En Progreso (5.9%) |
+| **Fase 2** | Rendimiento Backend y Resiliencia + Complemento Anti-alucinación | 17 | 2 | 0 | 15 | 🟡 En Progreso (11.8%) |
 | **Fase 3** | Frontend Moderno, UI Retro & Accesibilidad | 10 | 0 | 0 | 10 | ⏳ Pendiente |
 | **Fase 4** | Testing Automatizado, QA & Tooling DX | 8 | 0 | 0 | 8 | ⏳ Pendiente |
 | **Fase 5** | Horizontes Futuros y Despliegues Especializados | 11 | 0 | 11 | ⏳ Pendiente |
-| **TOTAL** | **Propuestas de Mejora Técnica** | **57** | **12** | **0** | **45** | **21.0%** |
+| **TOTAL** | **Propuestas de Mejora Técnica** | **57** | **13** | **0** | **44** | **22.8%** |
 
 ---
 
@@ -65,9 +65,9 @@
 - [x] **TODO-2.1 [Prop. 11 - CRÍTICO] Streaming SSE token a token en `/api/v1/chat/stream`:**
   - [x] Implementar generador asíncrono en `backend/src/api/routes.py` utilizando `StreamingResponse(media_type="text/event-stream")`.
   - [x] Adaptar `advisor_common.py` para emitir chunks parciales de texto en tiempo real.
-- [ ] **TODO-2.2 [Prop. 12 - CRÍTICO] Connection pooling HTTP persistente (`httpx.AsyncClient`):**
-  - [ ] Refactorizar `OpenCodeAdvisorClient` para utilizar un cliente singleton `httpx.AsyncClient` con keep-alive.
-  - [ ] Eliminar la recreación de sesiones TCP por cada mensaje recibido.
+- [x] **TODO-2.2 [Prop. 12 - CRÍTICO] Connection pooling HTTP persistente (`httpx.AsyncClient`):**
+  - [x] Refactorizar `OpenCodeAdvisorClient` para utilizar un cliente singleton `httpx.AsyncClient` con keep-alive.
+  - [x] Eliminar la recreación de sesiones TCP por cada mensaje recibido.
 - [ ] **TODO-2.3 [Prop. 13 - RECOMENDADO] Circuit Breaker y Backoff Exponencial para proveedores LLM:**
   - [ ] Crear clase `CircuitBreaker` en `backend/src/core/resilience.py` (estados: Closed, Open, Half-Open).
   - [ ] Conmutar automáticamente entre OpenCode y AGY CLI si uno presenta fallos consecutivos o timeouts (>45s).

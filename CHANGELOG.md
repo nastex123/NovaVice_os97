@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [2026-09-04 10:04] [Feat/Fase-2-TODO-2.2-Connection-Pooling]
+- **Connection pooling HTTP persistente (`httpx.AsyncClient` / `httpx.Client`) (TODO-2.2 / Prop. 12):**
+  - Refactorizado `OpenCodeAdvisorClient` en `backend/src/core/opencode_client.py` implementando singletons para `httpx.AsyncClient` y `httpx.Client` con límites de keep-alive (`max_keepalive_connections=20`, `keepalive_expiry=120.0s`).
+  - Eliminada la creación redundante de sesiones TCP por cada petición síncrona o asíncrona hacia el daemon de OpenCode o fallback.
+  - Implementado método `close()` asíncrono para liberación ordenada de sockets en el ciclo de vida de FastAPI `lifespan` en `backend/src/main.py`.
+  - Validación con suite completa de pruebas en `backend/tests/test_opencode_intermediary.py` (4/4 passed).
+
 ### [2026-09-04 09:50] [Feat/Fase-2-TODO-2.1-SSE-Streaming]
 - **Implementación de Streaming SSE token a token en `/api/v1/chat/stream` (TODO-2.1 / Prop. 11):**
   - Creado generador asíncrono `stream_advisor_tokens` en `backend/src/core/advisor_common.py` con emisión reactiva de palabras y delimitadores ortográficos con cadencia realista.

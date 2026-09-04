@@ -20,6 +20,7 @@ class OpenCodeAdvisorClient:
         self.session_map: Dict[str, str] = {}
         self._server_process: Optional[subprocess.Popen] = None
         self._client: Optional[httpx.AsyncClient] = None
+        self._sync_client: Optional[httpx.Client] = None
 
     def _get_http_client(self) -> httpx.AsyncClient:
         if self._client is None or self._client.is_closed:
@@ -28,6 +29,21 @@ class OpenCodeAdvisorClient:
                 timeout=httpx.Timeout(connect=5.0, read=45.0, write=10.0, pool=10.0)
             )
         return self._client
+
+    def _get_sync_client(self) -> httpx.Client:
+        if self._sync_client is None or self._sync_client.is_closed:
+            self._sync_client = httpx.Client(
+                limits=httpx.Limits(max_keepalive_connections=10, max_connections=20, keepalive_expiry=60.0),
+                timeout=httpx.Timeout(connect=2.0, read=5.0, write=5.0, pool=5.0)
+            )
+        return self._sync_client
+
+    async def close(self):
+        """Cleanly closes persistent async and sync connection pools."""
+        if self._client and not self._client.is_closed:
+            await self._client.aclose()
+        if self._sync_client and not self._sync_client.is_closed:
+            self._sync_client.close()
 
     async def is_server_alive_async(self) -> bool:
         try:
@@ -39,7 +55,8 @@ class OpenCodeAdvisorClient:
 
     def is_server_alive(self) -> bool:
         try:
-            r = httpx.get(f"{self.base_url}/session", timeout=0.8)
+            client = self._get_sync_client()
+            r = client.get(f"{self.base_url}/session", timeout=0.8)
             return r.status_code == 200
         except Exception:
             return False

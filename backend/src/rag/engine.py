@@ -523,6 +523,19 @@ class PurePythonRAGEngine:
         session_data = applicant_memory.get_session(session_id)
         conv_summary = applicant_memory.get_conversation_summary(session_id)
         compressed_chunks = contextual_compressor.compress_chunks(chunks, effective_query)
+
+        # TODO-2.11: Pre-LLM Context Validator: audit and prune out-of-domain chunks before prompt injection
+        if detected_pillar:
+            from src.rag.hybrid_retriever import PILLAR_FORBIDDEN_CLUSTERS
+            forbidden_prefixes = PILLAR_FORBIDDEN_CLUSTERS.get(detected_pillar, [])
+            if forbidden_prefixes:
+                filtered_compressed = [
+                    c for c in compressed_chunks
+                    if not any(c.get("metadata", {}).get("source", "").startswith(pfx) or pfx in c.get("metadata", {}).get("source", "") for pfx in forbidden_prefixes)
+                ]
+                if filtered_compressed:
+                    compressed_chunks = filtered_compressed
+
         prompt = build_rag_prompt(
             effective_query,
             compressed_chunks,

@@ -41,6 +41,23 @@ PILLAR_CLUSTERS = {
     "sedes": ["04_proceso", "07_sedes", "13_", "14_", "15_", "16_", "17_", "18_", "19_", "20_"]
 }
 
+# TODO-2.11: Strict Domain Masking to eliminate cross-pillar hallucination / contamination
+PILLAR_STRICT_CLUSTERS = {
+    "cursos": ["01_", "04_0", "05_", "06_"],
+    "precios": ["03_", "09_", "10_", "12_04", "12_"],
+    "horarios": ["02_", "07_01", "07_02", "07_03", "07_04", "07_05", "08_"],
+    "sedes": ["04_proceso", "07_sedes", "13_", "14_", "15_", "16_", "17_", "18_", "19_", "20_"],
+    "becas_descuentos": ["12_04", "12_01", "12_02", "12_03", "10_01", "09_03", "12_"]
+}
+
+PILLAR_FORBIDDEN_CLUSTERS = {
+    "cursos": ["07_sedes", "13_", "14_", "15_", "16_", "17_", "02_", "03_"],
+    "precios": ["02_", "07_sedes", "13_", "14_", "15_", "16_", "17_"],
+    "sedes": ["03_", "01_", "05_", "06_"],
+    "horarios": ["03_", "13_", "14_", "15_", "16_", "17_"],
+    "becas_descuentos": ["07_sedes", "13_", "14_", "15_", "16_", "17_"]
+}
+
 # Pillar detection keyword sets
 PILLAR_KEYWORDS = {
     "becas_descuentos": {"beca", "becas", "descuento", "descuentos", "subsidio", "subsidios", "bono", "bonos", "convenio", "convenios", "caja", "cajas", "compensacion"},
@@ -374,8 +391,39 @@ class HybridRetriever:
                 item["rrf_score"] = round(rrf_score, 5)
                 initial_candidates.append(item)
 
+        # TODO-2.11 Hard Domain Mask & Intent Compatibility Score:
+        # Eradicate cross-pillar hallucination by vetoing 100% of forbidden clusters
+        if detected_pillar and detected_pillar in PILLAR_FORBIDDEN_CLUSTERS:
+            forbidden_prefixes = PILLAR_FORBIDDEN_CLUSTERS[detected_pillar]
+            strict_allowed = PILLAR_STRICT_CLUSTERS.get(detected_pillar, [])
+
+            # Filter candidates: reject any forbidden source unless explicitly multi-intent
+            if not (intent_match and intent_match.is_multi_intent):
+                filtered_candidates = []
+                for cand in initial_candidates:
+                    s_name = cand.get("metadata", {}).get("source", "")
+                    # Check if candidate contains forbidden prefix
+                    is_forbidden = any(s_name.startswith(pfx) or pfx in s_name for pfx in forbidden_prefixes)
+                    if not is_forbidden:
+                        # Boost intent compatibility score
+                        is_strict = any(s_name.startswith(pfx) for pfx in strict_allowed)
+                        cand["intent_match_score"] = 1.0 if is_strict else 0.5
+                        filtered_candidates.append(cand)
+
+                if filtered_candidates:
+                    initial_candidates = filtered_candidates
+
         # Cross-Encoder re-ranking via FlashRank (CPU ONNX)
         final_results = local_reranker.rerank(clean_query, initial_candidates, top_k=top_k)
+
+        # Secondary safety pass: if a pure single-pillar intent was detected, ensure no forbidden leak
+        if detected_pillar and detected_pillar in PILLAR_FORBIDDEN_CLUSTERS and not (intent_match and intent_match.is_multi_intent):
+            forbidden_prefixes = PILLAR_FORBIDDEN_CLUSTERS[detected_pillar]
+            final_results = [
+                r for r in final_results
+                if not any(r.get("metadata", {}).get("source", "").startswith(pfx) or pfx in r.get("metadata", {}).get("source", "") for pfx in forbidden_prefixes)
+            ]
+
         return final_results
 
 

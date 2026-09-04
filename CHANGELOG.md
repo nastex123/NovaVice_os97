@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [2026-09-04 10:13] [Feat/Fase-2-TODO-2.11-Hard-Domain-Mask-Pipeline]
+- **Pipeline de Enrutamiento de Intenciones en Cascada y Erradicación de Cruces entre Pilares (TODO-2.11 / Prop. CRÍTICA):**
+  - Implementado Hard Domain Masking en `backend/src/rag/hybrid_retriever.py` definiendo `PILLAR_STRICT_CLUSTERS` y `PILLAR_FORBIDDEN_CLUSTERS` para vetar de forma estricta (100%) cualquier chunk fuera del dominio objetivo cuando la consulta pertenece a un pilar unívoco.
+  - Implementado Context Validator Pre-LLM en `backend/src/rag/engine.py` para purgar cualquier fragmento no relacionado antes de inyectarlo en el prompt del modelo.
+  - Inyectada directiva obligatoria de aislamiento de dominio en `backend/src/core/advisor_common.py` (`build_advisor_reasoning_prompt`).
+  - Añadida batería de pruebas de regresión en `backend/tests/test_hybrid_search.py` (`test_hard_domain_mask_cross_pillar_protection`) verificando aislamiento total en los 5 pilares institucionales (9/9 passed).
+
 ### [2026-09-04 10:12] [Feat/Fase-2-TODO-2.10-Pydantic-Settings-Config]
 - **Validación tipada centralizada con `pydantic-settings` (TODO-2.10 / Prop. 46):**
   - Creado `backend/src/core/config.py` unificando `AppSettings` y `app_settings` con `BaseSettings`, `SettingsConfigDict` e integración transparente de variables de entorno y defaults de producción.

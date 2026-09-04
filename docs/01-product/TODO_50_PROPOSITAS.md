@@ -10,11 +10,11 @@
 | Fase | Enfoque Principal | Total Tareas | Completadas | En Progreso | Pendientes | Estado |
 | :---: | :--- | :---: | :---: | :---: | :---: | :---: |
 | **Fase 1** | Precisión de Datos y Recuperación RAG | 11 | 11 | 0 | 0 | ✅ Completada (100%) |
-| **Fase 2** | Rendimiento Backend y Resiliencia + Complemento Anti-alucinación | 17 | 10 | 0 | 7 | 🟡 En Progreso (58.8%) |
+| **Fase 2** | Rendimiento Backend y Resiliencia + Complemento Anti-alucinación | 17 | 11 | 0 | 6 | 🟡 En Progreso (64.7%) |
 | **Fase 3** | Frontend Moderno, UI Retro & Accesibilidad | 10 | 0 | 0 | 10 | ⏳ Pendiente |
 | **Fase 4** | Testing Automatizado, QA & Tooling DX | 8 | 0 | 0 | 8 | ⏳ Pendiente |
 | **Fase 5** | Horizontes Futuros y Despliegues Especializados | 11 | 0 | 11 | ⏳ Pendiente |
-| **TOTAL** | **Propuestas de Mejora Técnica** | **57** | **21** | **0** | **36** | **36.8%** |
+| **TOTAL** | **Propuestas de Mejora Técnica** | **57** | **22** | **0** | **35** | **38.6%** |
 
 ---
 
@@ -90,25 +90,25 @@
   - [x] Crear `docker-compose.yml` que orqueste backend (:8000) y frontend (:3000) en una red interna.
 - [x] **TODO-2.10 [Prop. 46 - CRÍTICO] Validación tipada centralizada con `pydantic-settings`:**
   - [x] Migrar variables de entorno a una clase `AppSettings` con tipado estricto y valores por defecto en `backend/src/core/config.py`.
-- [ ] **TODO-2.11 [CRÍTICO] Pipeline de Enrutamiento de Intenciones en Cascada y Erradicación de Cruces entre Pilares:**
-  - [ ] **1. Clasificador de Intención Cerrado & Confidence Gate:**
-    - [ ] Definir intents estrictos (`cursos`, `horarios`, `precios`, `sedes`, `becas_descuentos`) con palabras clave exclusivas y umbral de confianza mínimo.
-    - [ ] Si la confianza es baja o ambigua, activar pregunta de clarificación o desambiguador Pydantic en lugar de permitir búsqueda global difusa en los 82 documentos.
-  - [ ] **2. Hard Domain Mask Obligatorio (Bloqueo Físico en `hybrid_retriever.py`):**
-    - [ ] Reemplazar penalizaciones suaves por un bloqueo booleano estricto (`PILLAR_STRICT_CLUSTERS`).
-    - [ ] Si la intención es `cursos`, vetar al 100% chunks de sedes (`07_sedes`), horarios (`02_`) y precios (`03_`).
-    - [ ] Si la intención es `precios`, vetar al 100% chunks de horarios y sedes.
-    - [ ] Si la intención es `sedes`, vetar chunks de precios y cursos.
-  - [ ] **3. Score de Compatibilidad Híbrido Consulta-Documento:**
-    - [ ] Integrar fórmula compuesta: $\text{Score} = (\text{Dense} \times 0.4) + (\text{BM25} \times 0.3) + (\text{IntentMatch} \times 0.3)$.
-    - [ ] Descartar automáticamente documentos con $\text{IntentMatch} == 0$.
-  - [ ] **4. Context Validator Pre-LLM (`engine.py`):**
-    - [ ] Auditar los chunks recuperados antes de pasarlos al LLM; rechazar y sustituir cualquier fragmento fuera del dominio solicitado.
-  - [ ] **5. Output Verification & Prompt con Reglas Estrictas de Dominio (`advisor_common.py`):**
-    - [ ] Inyectar regla imperativa en el prompt del asesor: *"La intención es exclusivamente {intent}; solo puedes responder información de {allowed_clusters}; nunca mezcles sedes, horarios ni precios si no fueron solicitados"*.
-    - [ ] Validador posterior que detecta términos prohibidos según la intención (ej. si la intención es `cursos`, rechazar respuestas que comiencen con sedes físicas).
-  - [ ] **6. Tests de Regresión Automáticos por Intención:**
-    - [ ] Batería de pruebas en `backend/tests/test_hybrid_search.py` validando los 5 pilares:
+- [x] **TODO-2.11 [CRÍTICO] Pipeline de Enrutamiento de Intenciones en Cascada y Erradicación de Cruces entre Pilares:**
+  - [x] **1. Clasificador de Intención Cerrado & Confidence Gate:**
+    - [x] Definir intents estrictos (`cursos`, `horarios`, `precios`, `sedes`, `becas_descuentos`) con palabras clave exclusivas y umbral de confianza mínimo.
+    - [x] Si la confianza es baja o ambigua, activar pregunta de clarificación o desambiguador Pydantic en lugar de permitir búsqueda global difusa en los 82 documentos.
+  - [x] **2. Hard Domain Mask Obligatorio (Bloqueo Físico en `hybrid_retriever.py`):**
+    - [x] Reemplazar penalizaciones suaves por un bloqueo booleano estricto (`PILLAR_STRICT_CLUSTERS`).
+    - [x] Si la intención es `cursos`, vetar al 100% chunks de sedes (`07_sedes`), horarios (`02_`) y precios (`03_`).
+    - [x] Si la intención es `precios`, vetar al 100% chunks de horarios y sedes.
+    - [x] Si la intención es `sedes`, vetar chunks de precios y cursos.
+  - [x] **3. Score de Compatibilidad Híbrido Consulta-Documento:**
+    - [x] Integrar fórmula compuesta: $\text{Score} = (\text{Dense} \times 0.4) + (\text{BM25} \times 0.3) + (\text{IntentMatch} \times 0.3)$.
+    - [x] Descartar automáticamente documentos con $\text{IntentMatch} == 0$.
+  - [x] **4. Context Validator Pre-LLM (`engine.py`):**
+    - [x] Auditar los chunks recuperados antes de pasarlos al LLM; rechazar y sustituir cualquier fragmento fuera del dominio solicitado.
+  - [x] **5. Output Verification & Prompt con Reglas Estrictas de Dominio (`advisor_common.py`):**
+    - [x] Inyectar regla imperativa en el prompt del asesor: *"La intención es exclusivamente {intent}; solo puedes responder información de {allowed_clusters}; nunca mezcles sedes, horarios ni precios si no fueron solicitados"*.
+    - [x] Validador posterior que detecta términos prohibidos según la intención (ej. si la intención es `cursos`, rechazar respuestas que comiencen con sedes físicas).
+  - [x] **6. Tests de Regresión Automáticos por Intención:**
+    - [x] Batería de pruebas en `backend/tests/test_hybrid_search.py` validando los 5 pilares:
       - *"Cuáles son los cursos disponibles"* $\to$ PASS: cursos/idiomas/MCER \| FAIL: sedes/direcciones.
       - *"Cuánto cuesta inglés B2"* $\to$ PASS: precios/COP/financiación \| FAIL: horarios/sedes.
       - *"Qué sedes tienen"* $\to$ PASS: Bogotá/Medellín/Cali \| FAIL: precios/cursos.

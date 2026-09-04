@@ -59,6 +59,7 @@ class MetricsResponse(BaseSchema):
     total_tokens: int
     estimated_cost_usd: float
     average_latency_ms: float
+    average_faithfulness_score: Optional[float] = 1.0
 
 
 class WebhookRequest(BaseSchema):

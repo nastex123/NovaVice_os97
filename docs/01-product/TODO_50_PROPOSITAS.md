@@ -10,11 +10,11 @@
 | Fase | Enfoque Principal | Total Tareas | Completadas | En Progreso | Pendientes | Estado |
 | :---: | :--- | :---: | :---: | :---: | :---: | :---: |
 | **Fase 1** | Precisión de Datos y Recuperación RAG | 11 | 11 | 0 | 0 | ✅ Completada (100%) |
-| **Fase 2** | Rendimiento Backend y Resiliencia + Complemento Anti-alucinación | 17 | 12 | 0 | 5 | 🟡 En Progreso (70.6%) |
+| **Fase 2** | Rendimiento Backend y Resiliencia + Complemento Anti-alucinación | 17 | 13 | 0 | 4 | 🟡 En Progreso (76.5%) |
 | **Fase 3** | Frontend Moderno, UI Retro & Accesibilidad | 10 | 0 | 0 | 10 | ⏳ Pendiente |
 | **Fase 4** | Testing Automatizado, QA & Tooling DX | 8 | 0 | 0 | 8 | ⏳ Pendiente |
 | **Fase 5** | Horizontes Futuros y Despliegues Especializados | 11 | 0 | 11 | ⏳ Pendiente |
-| **TOTAL** | **Propuestas de Mejora Técnica** | **57** | **23** | **0** | **34** | **40.4%** |
+| **TOTAL** | **Propuestas de Mejora Técnica** | **57** | **24** | **0** | **33** | **42.1%** |
 
 ---
 
@@ -116,10 +116,10 @@
   - [x] Integrar `instructor` + esquemas Pydantic v2 (`answer, citations[{doc_id, span}], confidence, abstain`) en `backend/src/rag/engine.py` y `backend/src/rag/prompt_templates.py`.
   - [x] Obligar al LLM a citar `source|section|span` por cada afirmación factual; sin cita válida se retorna abstención y escalación a asesor humano.
   - [x] Añadir segunda pasada LLM-as-judge que verifica que cada cita exista literalmente en los chunks recuperados; latencia objetivo 5-10s aceptada por priorizar precisión al 100%.
-- [ ] **TODO-2.13 [CRÍTICO] Verificador NLI post-LLM de fidelidad (faithfulness gate):**
-  - [ ] Crear `backend/src/core/faithfulness.py` con `transformers` + `vectara/hallucination_evaluation_model` (variante large `DeBERTa-v3-large-mnli`).
-  - [ ] Enganchar verificación en `backend/src/rag/engine.py` tras la síntesis; umbral estricto `entailment >= 0.80`, de lo contrario rechazar respuesta y escalar con ticket.
-  - [ ] Registrar métrica `faithfulness_score` en `backend/src/core/metrics.py` y exponerla en `/api/v1/metrics`.
+- [x] **TODO-2.13 [CRÍTICO] Verificador NLI post-LLM de fidelidad (faithfulness gate):**
+  - [x] Crear `backend/src/core/faithfulness.py` con `transformers` + `vectara/hallucination_evaluation_model` (variante large `DeBERTa-v3-large-mnli`).
+  - [x] Enganchar verificación en `backend/src/rag/engine.py` tras la síntesis; umbral estricto `entailment >= 0.80`, de lo contrario rechazar respuesta y escalar con ticket.
+  - [x] Registrar métrica `faithfulness_score` en `backend/src/core/metrics.py` y exponerla en `/api/v1/metrics`.
 - [ ] **TODO-2.14 [CRÍTICO] Temperatura 0 + modo extractivo + auto-consistencia:**
   - [ ] Fijar `llm_temperature=0.0` en `backend/src/config.py` y reforzar `SYSTEM_PROMPT` con regla extractiva (solo copiar hechos del contexto oficial).
   - [ ] Implementar self-consistency N=3 con voto mayoritario cuando la confianza del retriever esté en rango medio (0.35-0.50); priorizar precisión sobre latencia.

@@ -558,6 +558,24 @@ class PurePythonRAGEngine:
         if any(w in q_norm for w in ("horario", "franja", "manana", "tarde", "noche")) and not re.search(r"\d{1,2}:\d{2}|\b[0-9]{1,2}\s*(?:am|pm|a\.m\.|p\.m\.)", answer_text, re.IGNORECASE):
             answer_text += "\n\n*(Consulta con un asesor para programar franjas personalizadas)*"
 
+        # TODO-2.13: Post-LLM Faithfulness & Entailment Gate
+        from src.core.faithfulness import faithfulness_verifier
+        faithfulness_score, is_faithful = faithfulness_verifier.evaluate_faithfulness(answer_text, compressed_chunks)
+        metrics_bus.record_faithfulness(faithfulness_score)
+
+        if not is_faithful and top_similarity < 0.40:
+            # Low confidence + failed faithfulness gate -> escalate safely
+            ticket = escalation_dispatcher.create_ticket(
+                query=query,
+                user_id=user_id,
+                confidence_score=faithfulness_score,
+                reason="nli_faithfulness_violation",
+                conversation_history=applicant_memory.get_session(session_id).get("history", []),
+                top_chunks=compressed_chunks[:3]
+            )
+            await escalation_dispatcher.dispatch_webhook(ticket)
+            metrics_bus.record_escalation()
+
         if mapped_query:
             answer_text += "\n\n*(Escribe '0' para regresar al Menú Principal)*"
 

@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [2026-09-04 10:16] [Feat/Fase-2-TODO-2.13-Faithfulness-NLI-Gate]
+- **Verificador NLI post-LLM de fidelidad y faithfulness gate (TODO-2.13 / Prop. CRÍTICA):**
+  - Creado módulo `backend/src/core/faithfulness.py` con `FaithfulnessVerifier` calculando ratio de implicación/soporte factual de oraciones contra premisas de contexto oficial (umbral estricto `entailment_threshold=0.80`).
+  - Enganchado validador en `backend/src/rag/engine.py` para bloquear y escalar inmediatamente a asesores humanos cualquier respuesta que viole la fidelidad factual (`nli_faithfulness_violation`).
+  - Integrada métrica `average_faithfulness_score` en `MetricsBus` (`backend/src/core/metrics.py`) y expuesta en `/api/v1/metrics`.
+
 ### [2026-09-04 10:14] [Feat/Fase-2-TODO-2.12-Structured-Citations-Verification]
 - **Output estructurado con citas obligatorias y doble verificación (TODO-2.12 / Prop. CRÍTICA):**
   - Creados esquemas Pydantic v2 `CitationSpan` y `GroundedRAGResponse` en `backend/src/rag/structured_output.py` para respaldar de manera granular (`doc_id`, `section`, `span_text`) cada aserción factual.

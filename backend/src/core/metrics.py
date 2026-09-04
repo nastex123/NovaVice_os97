@@ -15,6 +15,8 @@ class MetricsBus:
         self.cost_per_million_input: float = 0.15
         self.cost_per_million_output: float = 0.60
         self.start_time: float = time.time()
+        self.total_faithfulness_score: float = 0.0
+        self.evaluated_queries_count: int = 0
         # E48: Telemetry by admissions pillar
         self.pillar_queries: Dict[str, int] = {
             "cursos": 0,
@@ -23,6 +25,10 @@ class MetricsBus:
             "sedes": 0,
             "becas": 0
         }
+
+    def record_faithfulness(self, score: float) -> None:
+        self.total_faithfulness_score += score
+        self.evaluated_queries_count += 1
 
     def record_query(self, cached: bool = False, latency: float = 0.0) -> None:
         self.total_queries += 1
@@ -90,6 +96,7 @@ class MetricsBus:
             "total_tokens": self.prompt_tokens + self.completion_tokens,
             "estimated_cost_usd": self.estimated_cost_usd,
             "average_latency_ms": self.average_latency_ms,
+            "average_faithfulness_score": round(self.total_faithfulness_score / max(1, self.evaluated_queries_count), 4) if self.evaluated_queries_count > 0 else 1.0,
             "pillar_distribution": dict(self.pillar_queries)
         }
 

@@ -296,21 +296,32 @@ class DocumentIngestionPipeline:
         if not chunks:
             return {"status": "empty", "chunks_indexed": 0, "cache_invalidated": cache_invalidated}
 
-        # Index into ChromaDB
-        indexed_count = vector_store.add_documents(chunks)
+        # Create point-in-time snapshot before re-indexing
+        from src.rag.snapshot_manager import snapshot_manager
+        snapshot_meta = snapshot_manager.create_snapshot(tag="pre_ingest")
 
-        # P1 / TODO-1.10: Fit pure Python BM25 index or load from disk if hash matches
-        bm25_path = settings.chroma_persist_dir / "bm25_index.pkl"
-        if not bm25_index.load(bm25_path, expected_hash=dir_hash):
-            bm25_index.fit(chunks)
-            bm25_index.save(bm25_path, directory_hash=dir_hash)
+        try:
+            # Index into ChromaDB
+            indexed_count = vector_store.add_documents(chunks)
 
-        return {
-            "status": "success",
-            "chunks_indexed": indexed_count,
-            "directory_hash": dir_hash,
-            "cache_invalidated": cache_invalidated
-        }
+            # P1 / TODO-1.10: Fit pure Python BM25 index or load from disk if hash matches
+            bm25_path = settings.chroma_persist_dir / "bm25_index.pkl"
+            if not bm25_index.load(bm25_path, expected_hash=dir_hash):
+                bm25_index.fit(chunks)
+                bm25_index.save(bm25_path, directory_hash=dir_hash)
+
+            return {
+                "status": "success",
+                "chunks_indexed": indexed_count,
+                "directory_hash": dir_hash,
+                "cache_invalidated": cache_invalidated,
+                "snapshot_name": snapshot_meta.get("snapshot_name")
+            }
+        except Exception as e:
+            # Automated rollback to previous snapshot on failure
+            if snapshot_meta.get("snapshot_name"):
+                snapshot_manager.restore_snapshot(snapshot_meta["snapshot_name"])
+            raise RuntimeError(f"Ingestion failed, rolled back to snapshot: {str(e)}")
 
 
 ingestion_pipeline = DocumentIngestionPipeline()

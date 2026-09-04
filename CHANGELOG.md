@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [2026-09-04 10:10] [Feat/Fase-2-TODO-2.8-ChromaDB-Snapshot-Manager]
+- **Gestor de snapshots fechados de la base vectorial (TODO-2.8 / Prop. 22):**
+  - Creado `backend/src/rag/snapshot_manager.py` con utilitarios para respaldar copias completas point-in-time de `chroma_db/`, listar snapshots disponibles y ejecutar rollbacks atómicos.
+  - Integrado en `DocumentIngestionPipeline.run` en `backend/src/rag/ingestion.py` para generar automáticamente snapshots preventivos etiquetados (`snapshot_<timestamp>_pre_ingest`) antes de modificar los índices, con restauración automática en caso de error fatal durante la indexación.
+
 ### [2026-09-04 10:09] [Feat/Fase-2-TODO-2.7-ChromaDB-Vacuum-Defragmentation]
 - **Rutina de compresión y vacuum periódico de ChromaDB (TODO-2.7 / Prop. 20):**
   - Implementado método `vacuum()` en `backend/src/rag/vector_store.py` (`ChromaVectorStore`) que ejecuta `VACUUM;` sobre el almacenamiento SQLite subyacente (`chroma.sqlite3`).

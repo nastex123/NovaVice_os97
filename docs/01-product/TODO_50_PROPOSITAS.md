@@ -10,11 +10,11 @@
 | Fase | Enfoque Principal | Total Tareas | Completadas | En Progreso | Pendientes | Estado |
 | :---: | :--- | :---: | :---: | :---: | :---: | :---: |
 | **Fase 1** | Precisión de Datos y Recuperación RAG | 11 | 11 | 0 | 0 | ✅ Completada (100%) |
-| **Fase 2** | Rendimiento Backend y Resiliencia + Complemento Anti-alucinación | 17 | 7 | 0 | 10 | 🟡 En Progreso (41.2%) |
+| **Fase 2** | Rendimiento Backend y Resiliencia + Complemento Anti-alucinación | 17 | 8 | 0 | 9 | 🟡 En Progreso (47.1%) |
 | **Fase 3** | Frontend Moderno, UI Retro & Accesibilidad | 10 | 0 | 0 | 10 | ⏳ Pendiente |
 | **Fase 4** | Testing Automatizado, QA & Tooling DX | 8 | 0 | 0 | 8 | ⏳ Pendiente |
 | **Fase 5** | Horizontes Futuros y Despliegues Especializados | 11 | 0 | 11 | ⏳ Pendiente |
-| **TOTAL** | **Propuestas de Mejora Técnica** | **57** | **18** | **0** | **39** | **31.6%** |
+| **TOTAL** | **Propuestas de Mejora Técnica** | **57** | **19** | **0** | **38** | **33.3%** |
 
 ---
 
@@ -82,9 +82,9 @@
   - [x] Sustituir conversiones manuales con `json.dumps()` por `model_dump_json()` de Pydantic V2 en todos los modelos API.
 - [x] **TODO-2.7 [Prop. 20 - CRÍTICO] Rutina de compresión y vacuum periódico de ChromaDB:**
   - [x] Crear tarea programada en background que ejecute `VACUUM` sobre la base subyacente de ChromaDB para desfragmentar espacio en disco.
-- [ ] **TODO-2.8 [Prop. 22 - RECOMENDADO] Gestor de snapshots fechados de la base vectorial:**
-  - [ ] Implementar utilitario en `backend/src/rag/snapshot_manager.py` para respaldar `chroma_db/` previo a re-indexaciones.
-  - [ ] Permitir rollback automático si un proceso de re-indexación es interrumpido.
+- [x] **TODO-2.8 [Prop. 22 - RECOMENDADO] Gestor de snapshots fechados de la base vectorial:**
+  - [x] Implementar utilitario en `backend/src/rag/snapshot_manager.py` para respaldar `chroma_db/` previo a re-indexaciones.
+  - [x] Permitir rollback automático si un proceso de re-indexación es interrumpido.
 - [ ] **TODO-2.9 [Prop. 45 - CRÍTICO] Configuración Docker Compose multi-stage:**
   - [ ] Crear `Dockerfile.backend` (Python 3.12 slim multi-stage) y `Dockerfile.frontend` (Node.js 20 alpine standalone).
   - [ ] Crear `docker-compose.yml` que orqueste backend (:8000) y frontend (:3000) en una red interna.

@@ -3,6 +3,8 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageSquare, Gauge, Building2, Phone, Radio, MapPin } from "lucide-react";
+import { useChatStore } from "../stores/useChatStore";
+import { useDesktopStore } from "../stores/useDesktopStore";
 
 interface FooterProps {
   onReset?: () => void;
@@ -17,6 +19,14 @@ export const Footer: React.FC<FooterProps> = ({
 }) => {
   const [showSedesModal, setShowSedesModal] = useState(false);
 
+  const resetChatStore = useChatStore((state) => state.resetChat);
+  const newChatStore = useChatStore((state) => state.newChat);
+  const setIsMetricsOpen = useDesktopStore((state) => state.setIsMetricsOpen);
+
+  const handleReset = onReset || resetChatStore;
+  const handleOpenMetrics = onOpenMetrics || (() => setIsMetricsOpen(true));
+  const handleNewChat = onNewChat || newChatStore;
+
   return (
     <>
       <footer className="h-16 flex items-center justify-center z-30 select-none pb-2 pt-1 px-4 w-full">
@@ -24,7 +34,7 @@ export const Footer: React.FC<FooterProps> = ({
         <div className="bg-retroBeige border-2 border-black shadow-retro-lg rounded-t-2xl px-4 sm:px-6 py-2 flex items-center gap-3 sm:gap-6">
           {/* Tile 1: Chatbot / Reset */}
           <button
-            onClick={onReset}
+            onClick={handleReset}
             className="flex flex-col items-center gap-1 group active:translate-y-0.5 transition-transform"
             title="Ir al Menú Principal (0)"
           >
@@ -36,7 +46,7 @@ export const Footer: React.FC<FooterProps> = ({
 
           {/* Tile 2: Telemetría */}
           <button
-            onClick={onOpenMetrics}
+            onClick={handleOpenMetrics}
             className="flex flex-col items-center gap-1 group active:translate-y-0.5 transition-transform"
             title="Abrir Telemetría del Sistema"
           >

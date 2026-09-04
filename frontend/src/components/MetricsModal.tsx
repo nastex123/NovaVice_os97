@@ -4,20 +4,31 @@ import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Activity, TrendingUp, HelpCircle, DollarSign } from "lucide-react";
 import { TelemetryMetrics, ServerHealth } from "../lib/types";
+import { useChatStore } from "../stores/useChatStore";
+import { useDesktopStore } from "../stores/useDesktopStore";
 
 interface MetricsModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  metrics: TelemetryMetrics | null;
-  health: ServerHealth | null;
+  isOpen?: boolean;
+  onClose?: () => void;
+  metrics?: TelemetryMetrics | null;
+  health?: ServerHealth | null;
 }
 
 export const MetricsModal: React.FC<MetricsModalProps> = ({
-  isOpen,
-  onClose,
-  metrics,
-  health,
+  isOpen: propIsOpen,
+  onClose: propOnClose,
+  metrics: propMetrics,
+  health: propHealth,
 }) => {
+  const storeMetrics = useChatStore((state) => state.metrics);
+  const storeHealth = useChatStore((state) => state.health);
+  const isMetricsOpen = useDesktopStore((state) => state.isMetricsOpen);
+  const setIsMetricsOpen = useDesktopStore((state) => state.setIsMetricsOpen);
+
+  const isOpen = propIsOpen !== undefined ? propIsOpen : isMetricsOpen;
+  const onClose = propOnClose || (() => setIsMetricsOpen(false));
+  const metrics = propMetrics !== undefined ? propMetrics : storeMetrics;
+  const health = propHealth !== undefined ? propHealth : storeHealth;
   return (
     <AnimatePresence>
       {isOpen && (

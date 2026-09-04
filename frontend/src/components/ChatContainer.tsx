@@ -7,11 +7,12 @@ import confetti from "canvas-confetti";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { ChatMessage, ActionButton } from "../lib/types";
+import { useChatStore } from "../stores/useChatStore";
 
 interface ChatContainerProps {
-  messages: ChatMessage[];
-  isLoading: boolean;
-  onActionButtonClick: (value: string) => void;
+  messages?: ChatMessage[];
+  isLoading?: boolean;
+  onActionButtonClick?: (value: string) => void;
 }
 
 // Typewriter Subcomponent for smooth progressive word revealing
@@ -166,10 +167,18 @@ const TypewriterMessage: React.FC<{
 };
 
 export const ChatContainer: React.FC<ChatContainerProps> = ({
-  messages,
-  isLoading,
-  onActionButtonClick,
+  messages: propMessages,
+  isLoading: propIsLoading,
+  onActionButtonClick: propOnActionButtonClick,
 }) => {
+  const storeMessages = useChatStore((state) => state.messages);
+  const storeIsLoading = useChatStore((state) => state.isLoading);
+  const sendMessage = useChatStore((state) => state.sendMessage);
+
+  const messages = propMessages !== undefined ? propMessages : storeMessages;
+  const isLoading = propIsLoading !== undefined ? propIsLoading : storeIsLoading;
+  const onActionButtonClick = propOnActionButtonClick || sendMessage;
+
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

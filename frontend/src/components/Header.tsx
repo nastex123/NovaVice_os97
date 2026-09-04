@@ -1,24 +1,40 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useChatStore } from "../stores/useChatStore";
+import { useDesktopStore } from "../stores/useDesktopStore";
+import { useSettingsStore } from "../stores/useSettingsStore";
 
 interface HeaderProps {
-  currentMenuLabel: string;
-  onReset: () => void;
-  onNewChat: () => void;
-  onOpenMetrics: () => void;
+  currentMenuLabel?: string;
+  onReset?: () => void;
+  onNewChat?: () => void;
+  onOpenMetrics?: () => void;
   crtEnabled?: boolean;
   onToggleCrt?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
-  currentMenuLabel,
-  onReset,
-  onNewChat,
-  onOpenMetrics,
-  crtEnabled = true,
-  onToggleCrt,
+  currentMenuLabel: propCurrentMenuLabel,
+  onReset: propOnReset,
+  onNewChat: propOnNewChat,
+  onOpenMetrics: propOnOpenMetrics,
+  crtEnabled: propCrtEnabled,
+  onToggleCrt: propOnToggleCrt,
 }) => {
+  const storeCurrentMenuLabel = useChatStore((state) => state.currentMenuLabel);
+  const resetChat = useChatStore((state) => state.resetChat);
+  const newChat = useChatStore((state) => state.newChat);
+  const setIsMetricsOpen = useDesktopStore((state) => state.setIsMetricsOpen);
+  const storeCrtEnabled = useSettingsStore((state) => state.crtEnabled);
+  const toggleCrt = useSettingsStore((state) => state.toggleCrt);
+
+  const currentMenuLabel = propCurrentMenuLabel !== undefined ? propCurrentMenuLabel : storeCurrentMenuLabel;
+  const onReset = propOnReset || resetChat;
+  const onNewChat = propOnNewChat || newChat;
+  const onOpenMetrics = propOnOpenMetrics || (() => setIsMetricsOpen(true));
+  const crtEnabled = propCrtEnabled !== undefined ? propCrtEnabled : storeCrtEnabled;
+  const onToggleCrt = propOnToggleCrt || toggleCrt;
   const [retroTime, setRetroTime] = useState("");
 
   useEffect(() => {

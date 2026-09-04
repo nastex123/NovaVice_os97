@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [2026-09-04 11:27] [Feat/Fase-3-TODO-3.1-Zustand-Centralized-Stores]
+- **Store global centralizado con Zustand y eliminación de prop-drilling (TODO-3.1 / Prop. CRÍTICA):**
+  - Instalado `zustand` en `frontend/package.json`.
+  - Diseñados e implementados 3 stores modulares en `frontend/src/stores/`:
+    - `useChatStore.ts`: Centraliza la lista de mensajes, estado de envío/carga (`isLoading`), ID de sesión persistente, etiqueta de navegación de migas de pan, telemetría y salud del servidor, e implementa acciones para `sendMessage`, `resetChat`, `newChat` y `refreshTelemetry`.
+    - `useDesktopStore.ts`: Administra las ventanas retro OS '97 (`chat_window`, `metrics_window`), capas de profundidad (`highestZIndex`, `bringToFront`), minimización, maximización y toggles de apertura.
+    - `useSettingsStore.ts`: Gestiona configuraciones globales del usuario (filtro óptico CRT `crtEnabled`, audio retro `soundEnabled`, modo accesible `bypassRetroA11y` y tamaño tipográfico `fontSize`).
+  - Refactorizados componentes principales (`ChatContainer.tsx`, `ChatInput.tsx`, `Header.tsx`, `Footer.tsx`, `MetricsModal.tsx`, `page.tsx`) para consumir reactivamente los stores sin prop-drilling y manteniendo retrocompatibilidad.
+  - Verificada compilación de producción limpia con `npm run build` en Next.js 15 App Router.
+
 ### [2026-09-04 10:24] [Feat/Fase-2-TODO-2.17-Faithfulness-CI-Harness]
 - **Harness de evaluación de fidelidad factual en CI con dataset dorado (TODO-2.17 / Prop. RECOMENDADA):**
   - Creado script de evaluación automatizada `scripts/evaluate_rag.py` con dataset institucional de 50 preguntas doradas balanceadas en los 5 pilares institucionales (cursos, precios, horarios, sedes, becas).

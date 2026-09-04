@@ -11,10 +11,10 @@
 | :---: | :--- | :---: | :---: | :---: | :---: | :---: |
 | **Fase 1** | Precisión de Datos y Recuperación RAG | 11 | 11 | 0 | 0 | ✅ Completada (100%) |
 | **Fase 2** | Rendimiento Backend y Resiliencia + Complemento Anti-alucinación | 17 | 17 | 0 | 0 | ✅ Completada (100%) |
-| **Fase 3** | Frontend Moderno, UI Retro & Accesibilidad | 10 | 0 | 0 | 10 | ⏳ Pendiente |
+| **Fase 3** | Frontend Moderno, UI Retro & Accesibilidad | 10 | 1 | 0 | 9 | 🚀 En Progreso (10%) |
 | **Fase 4** | Testing Automatizado, QA & Tooling DX | 8 | 0 | 0 | 8 | ⏳ Pendiente |
-| **Fase 5** | Horizontes Futuros y Despliegues Especializados | 11 | 0 | 11 | ⏳ Pendiente |
-| **TOTAL** | **Propuestas de Mejora Técnica** | **57** | **28** | **0** | **29** | **49.1%** |
+| **Fase 5** | Horizontes Futuros y Despliegues Especializados | 11 | 0 | 0 | 11 | ⏳ Pendiente |
+| **TOTAL** | **Propuestas de Mejora Técnica** | **57** | **29** | **0** | **28** | **50.9%** |
 
 ---
 
@@ -138,10 +138,10 @@
 ## 🔵 FASE 3: Frontend Moderno, UI Retro y Accesibilidad (10 Tareas)
 > **Objetivo:** Eliminar prop-drilling con Zustand, decodificar SSE progresivo, acelerar el filtro CRT con WebGL/GPU (60 FPS) y garantizar accesibilidad WCAG AAA.
 
-- [ ] **TODO-3.1 [Prop. 25 - CRÍTICO] Store global centralizado con Zustand:**
-  - [ ] Instalar `zustand` en `frontend/`.
-  - [ ] Crear stores modulares: `useChatStore` (mensajes, estado de envío), `useDesktopStore` (ventanas, z-index), `useSettingsStore` (CRT, accesibilidad).
-  - [ ] Refactorizar componentes para eliminar prop-drilling en `ChatContainer.tsx` y `Desktop.tsx`.
+- [x] **TODO-3.1 [Prop. 25 - CRÍTICO] Store global centralizado con Zustand:**
+  - [x] Instalar `zustand` en `frontend/`.
+  - [x] Crear stores modulares: `useChatStore` (mensajes, estado de envío), `useDesktopStore` (ventanas, z-index), `useSettingsStore` (CRT, accesibilidad).
+  - [x] Refactorizar componentes para eliminar prop-drilling en `ChatContainer.tsx` y `Desktop.tsx`.
 - [ ] **TODO-3.2 [Prop. 26 - CRÍTICO] Consumo de streams SSE con decodificador progresivo UTF-8:**
   - [ ] Crear hook `useChatStream.ts` en el frontend utilizando `ReadableStreamDefaultReader` y `TextDecoder`.
   - [ ] Mostrar el texto entrante progresivamente con cursor parpadeante retro vintage.

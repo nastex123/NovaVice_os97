@@ -2,13 +2,23 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { Send, Mic, MicOff } from "lucide-react";
+import { useChatStore } from "../stores/useChatStore";
 
 interface ChatInputProps {
-  onSendMessage: (text: string) => void;
-  isLoading: boolean;
+  onSendMessage?: (text: string) => void;
+  isLoading?: boolean;
 }
 
-export const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, isLoading }) => {
+export const ChatInput: React.FC<ChatInputProps> = ({
+  onSendMessage: propOnSendMessage,
+  isLoading: propIsLoading,
+}) => {
+  const storeSendMessage = useChatStore((state) => state.sendMessage);
+  const storeIsLoading = useChatStore((state) => state.isLoading);
+
+  const onSendMessage = propOnSendMessage || storeSendMessage;
+  const isLoading = propIsLoading !== undefined ? propIsLoading : storeIsLoading;
+
   const [input, setInput] = useState("");
   const [isRecording, setIsRecording] = useState(false);
   const recognitionRef = useRef<any>(null);

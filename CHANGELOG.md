@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [2026-09-04 10:12] [Feat/Fase-2-TODO-2.10-Pydantic-Settings-Config]
+- **Validación tipada centralizada con `pydantic-settings` (TODO-2.10 / Prop. 46):**
+  - Creado `backend/src/core/config.py` unificando `AppSettings` y `app_settings` con `BaseSettings`, `SettingsConfigDict` e integración transparente de variables de entorno y defaults de producción.
+
 ### [2026-09-04 10:11] [Feat/Fase-2-TODO-2.9-Docker-Compose-MultiStage]
 - **Configuración Docker Compose multi-stage y producción lista (TODO-2.9 / Prop. 45):**
   - Creado `Dockerfile.backend` (Python 3.12-slim multi-stage) con compilación aislada de dependencias, healthcheck automático contra `/api/v1/health` y ejecución no privilegiada.

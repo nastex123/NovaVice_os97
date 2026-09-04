@@ -25,7 +25,7 @@ class FaithfulnessVerifier:
         if not sentences:
             return 1.0, True
 
-        context_full = " ".join(c.get("text", "").lower() for c in context_chunks)
+        context_full = " ".join((c.get("text", "") if isinstance(c, dict) else str(c)).lower() for c in context_chunks)
 
         supported_count = 0
         for sent in sentences:

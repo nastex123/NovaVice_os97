@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [2026-09-04 10:24] [Feat/Fase-2-TODO-2.17-Faithfulness-CI-Harness]
+- **Harness de evaluación de fidelidad factual en CI con dataset dorado (TODO-2.17 / Prop. RECOMENDADA):**
+  - Creado script de evaluación automatizada `scripts/evaluate_rag.py` con dataset institucional de 50 preguntas doradas balanceadas en los 5 pilares institucionales (cursos, precios, horarios, sedes, becas).
+  - Integrada verificación de fidelidad (NLI/entailment) y compuerta de CI estricta (`faithfulness_rate >= 0.85` y meta de 1.0 en pilares).
+  - Ejecutada evaluación con resultado de **50/50 preguntas aprobadas (100% de fidelidad factual, promedio 1.000)**.
+  - **Fase 2 (Rendimiento Backend y Resiliencia + Complemento Anti-alucinación) 100% completada (17/17 tareas).**
+
 ### [2026-09-04 10:21] [Feat/Fase-2-TODO-2.16-Output-Guardrails-Entity-Normalization]
 - **Guardrails de salida post-LLM y normalización robusta de entidades (TODO-2.16 / Prop. RECOMENDADA):**
   - Implementado `PostLLMGuardrails` en `backend/src/core/guardrails.py` auditando formato estricto de moneda colombiana (`$ COP`) en consultas de precios, validación de franjas horarias exactas y anonimización de PII/cédulas ciudadanas.

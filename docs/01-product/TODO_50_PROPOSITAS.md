@@ -10,11 +10,11 @@
 | Fase | Enfoque Principal | Total Tareas | Completadas | En Progreso | Pendientes | Estado |
 | :---: | :--- | :---: | :---: | :---: | :---: | :---: |
 | **Fase 1** | Precisión de Datos y Recuperación RAG | 11 | 11 | 0 | 0 | ✅ Completada (100%) |
-| **Fase 2** | Rendimiento Backend y Resiliencia + Complemento Anti-alucinación | 17 | 16 | 0 | 1 | 🟡 En Progreso (94.1%) |
+| **Fase 2** | Rendimiento Backend y Resiliencia + Complemento Anti-alucinación | 17 | 17 | 0 | 0 | ✅ Completada (100%) |
 | **Fase 3** | Frontend Moderno, UI Retro & Accesibilidad | 10 | 0 | 0 | 10 | ⏳ Pendiente |
 | **Fase 4** | Testing Automatizado, QA & Tooling DX | 8 | 0 | 0 | 8 | ⏳ Pendiente |
 | **Fase 5** | Horizontes Futuros y Despliegues Especializados | 11 | 0 | 11 | ⏳ Pendiente |
-| **TOTAL** | **Propuestas de Mejora Técnica** | **57** | **27** | **0** | **30** | **47.4%** |
+| **TOTAL** | **Propuestas de Mejora Técnica** | **57** | **28** | **0** | **29** | **49.1%** |
 
 ---
 
@@ -129,9 +129,9 @@
 - [x] **TODO-2.16 [RECOMENDADO] Guardrails de salida + normalización robusta de entidades:**
   - [x] Extender `backend/src/core/guardrails.py` con validación post-LLM (`guardrails-ai`): exigir símbolo `$ COP` en precios y formato horario exacto; bloquear respuesta si falta.
   - [x] Integrar `presidio-analyzer` para PII, `rapidfuzz` para typos y `spacy es_core_news_lg` para extracción de sede/horario/monto en `backend/src/rag/bm25.py`; complementa TODO-1.7.
-- [ ] **TODO-2.17 [RECOMENDADO] Harness de evaluación de fidelidad en CI:**
-  - [ ] Ampliar `scripts/evaluate_rag.py` con `ragas` (`faithfulness`, `answer_relevancy`, `context_precision`) y `langfuse`/`arize-phoenix` para observabilidad; dataset dorado de 50 preguntas oficiales.
-  - [ ] Exigir `faithfulness=1.0` en preguntas pilar como gate de CI; enlaza con TODO-4.1 sin duplicarlo.
+- [x] **TODO-2.17 [RECOMENDADO] Harness de evaluación de fidelidad en CI:**
+  - [x] Ampliar `scripts/evaluate_rag.py` con `ragas` (`faithfulness`, `answer_relevancy`, `context_precision`) y `langfuse`/`arize-phoenix` para observabilidad; dataset dorado de 50 preguntas oficiales.
+  - [x] Exigir `faithfulness=1.0` en preguntas pilar como gate de CI; enlaza con TODO-4.1 sin duplicarlo.
 
 ---
 

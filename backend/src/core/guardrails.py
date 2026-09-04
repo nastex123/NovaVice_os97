@@ -73,8 +73,14 @@ class PostLLMGuardrails:
                 cleaned_text += "\n\n*(Nota: Franjas disponibles de 6:00 a 8:00 a.m. y 6:30 a 8:30 p.m. de lunes a viernes)*"
 
         # 3. PII Redaction / Guard: Mask any accidental national ID or sensitive credit card patterns
-        # Colombian CC pattern: 7-10 digit continuous sequences not preceded by $ or phone code
-        cleaned_text = re.sub(r"\b(?<!\+57\s?)(?<!\$)(?<!\d)[1-9]\d{6,9}(?!\d)\b", "[DOCUMENTO_VERIFICADO]", cleaned_text)
+        # Colombian CC pattern: 7-10 digit continuous sequences
+        def _mask_pii(match):
+            val = match.group(0)
+            if len(val) >= 7 and not val.startswith("300") and not val.startswith("57"):
+                return "[DOCUMENTO_VERIFICADO]"
+            return val
+
+        cleaned_text = re.sub(r"\b\d{7,10}\b", _mask_pii, cleaned_text)
 
         is_compliant = len(violations) == 0
         return is_compliant, cleaned_text, violations

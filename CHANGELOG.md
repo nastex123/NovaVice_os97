@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [2026-09-04 10:05] [Feat/Fase-2-TODO-2.3-Circuit-Breaker-Resilience]
+- **Circuit Breaker y Backoff Exponencial para proveedores LLM (TODO-2.3 / Prop. 13):**
+  - Creado módulo `backend/src/core/resilience.py` con implementación formal de `CircuitBreaker` (estados `CLOSED`, `OPEN`, `HALF_OPEN`) y timeouts dinámicos con factor de retroceso exponencial (`backoff_factor=2.0`).
+  - Integrada protección en `backend/src/core/opencode_client.py` con `opencode_circuit` singleton para evitar llamadas bloqueantes al daemon local cuando experimente fallos consecutivos (>3), conmutando con bypass de baja latencia hacia `AGYAdvisorClient` o fallback grounded.
+  - Creada suite unitaria en `backend/tests/test_resilience.py` validando transiciones de estado, threshold de fallos, cadencia de enfriamiento e ingreso a half-open.
+
 ### [2026-09-04 10:04] [Feat/Fase-2-TODO-2.2-Connection-Pooling]
 - **Connection pooling HTTP persistente (`httpx.AsyncClient` / `httpx.Client`) (TODO-2.2 / Prop. 12):**
   - Refactorizado `OpenCodeAdvisorClient` en `backend/src/core/opencode_client.py` implementando singletons para `httpx.AsyncClient` y `httpx.Client` con límites de keep-alive (`max_keepalive_connections=20`, `keepalive_expiry=120.0s`).

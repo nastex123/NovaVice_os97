@@ -115,44 +115,51 @@ class OpenCodeAdvisorClient:
         start_t = time.time()
         reasoning_prompt = build_advisor_reasoning_prompt(query, context_chunks)
 
-        # 1. Query OpenCode Server
-        sid = await self.create_fresh_session(app_session_id)
-        if sid:
-            try:
-                client = self._get_http_client()
-                post_payload = {
-                    "parts": [
-                        {
-                            "type": "text",
-                            "text": reasoning_prompt
-                        }
-                    ]
-                }
-                resp = await client.post(
-                    f"{self.base_url}/session/{sid}/message",
-                    json=post_payload
-                )
+        # 1. Query OpenCode Server (guarded by CircuitBreaker)
+        from src.core.resilience import opencode_circuit
+        if opencode_circuit.can_attempt():
+            sid = await self.create_fresh_session(app_session_id)
+            if sid:
+                try:
+                    client = self._get_http_client()
+                    post_payload = {
+                        "parts": [
+                            {
+                                "type": "text",
+                                "text": reasoning_prompt
+                            }
+                        ]
+                    }
+                    resp = await client.post(
+                        f"{self.base_url}/session/{sid}/message",
+                        json=post_payload
+                    )
 
-                if resp.status_code == 200:
-                    data = resp.json()
-                    parts = data.get("parts", [])
-                    extracted_texts = [p.get("text", "") for p in parts if p.get("type") == "text" and p.get("text")]
-                    full_text = "\n".join(extracted_texts).strip()
+                    if resp.status_code == 200:
+                        data = resp.json()
+                        parts = data.get("parts", [])
+                        extracted_texts = [p.get("text", "") for p in parts if p.get("type") == "text" and p.get("text")]
+                        full_text = "\n".join(extracted_texts).strip()
 
-                    if full_text and len(full_text) > 30:
-                        elapsed = round((time.time() - start_t) * 1000, 1)
-                        return {
-                            "success": True,
-                            "text": full_text,
-                            "source": "opencode_advisor",
-                            "engine": "opencode",
-                            "opencode_session_id": sid,
-                            "latency_ms": elapsed
-                        }
-            except Exception:
-                pass
+                        if full_text and len(full_text) > 30:
+                            opencode_circuit.record_success()
+                            elapsed = round((time.time() - start_t) * 1000, 1)
+                            return {
+                                "success": True,
+                                "text": full_text,
+                                "source": "opencode_advisor",
+                                "engine": "opencode",
+                                "opencode_session_id": sid,
+                                "latency_ms": elapsed
+                            }
+                    else:
+                        opencode_circuit.record_failure()
+                except Exception:
+                    opencode_circuit.record_failure()
+            else:
+                opencode_circuit.record_failure()
 
-        # 2. Secondary Bridge: Check AGY if OpenCode daemon is offline
+        # 2. Secondary Bridge: Failover to AGY if OpenCode daemon circuit is open or failed
         try:
             from src.core.agy_client import agy_advisor
             if agy_advisor.is_cli_available():

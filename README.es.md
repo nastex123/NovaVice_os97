@@ -1,13 +1,15 @@
-# 🌴 Nova Idiomas Colombia — Asistente de Admisiones "Nova OS '97" (v2.6.0)
+# 🌴 Nova Idiomas Colombia — Asistente de Admisiones "Nova OS '97" (v2.7.0)
 
 <div align="center">
 
 [![Language: English](https://img.shields.io/badge/Language-English-blue.svg)](README.md)
 [![Language: Español](https://img.shields.io/badge/Idioma-Español-green.svg)](README.es.md)
-[![Tests: 27/27 Passed](https://img.shields.io/badge/Tests-27%2F27%20Passed-brightgreen.svg)](backend/tests/)
+[![Tests: 55/55 Passed](https://img.shields.io/badge/Tests-55%2F55%20Passed-brightgreen.svg)](backend/tests/)
+[![Fidelidad Factual: 50/50 (100%)](https://img.shields.io/badge/Fidelidad-50%2F50%20(100%25)-brightgreen.svg)](scripts/evaluate_rag.py)
 [![Next.js 15](https://img.shields.io/badge/Frontend-Next.js%2015-black.svg)](frontend/)
 [![FastAPI](https://img.shields.io/badge/Backend-FastAPI%200.115-009688.svg)](backend/)
 [![ChromaDB](https://img.shields.io/badge/Vector%20Store-ChromaDB-orange.svg)](backend/data/chroma_db/)
+[![Docker Compose](https://img.shields.io/badge/Docker-Multi--stage%20Listo-blue.svg)](docker-compose.yml)
 
 </div>
 

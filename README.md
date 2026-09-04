@@ -1,14 +1,16 @@
-# 🌴 Nova Idiomas Colombia — "Nova OS '97" Admissions Assistant (v2.6.0)
+# 🌴 Nova Idiomas Colombia — "Nova OS '97" Admissions Assistant (v2.7.0)
 
 <div align="center">
 
 [![Language: English](https://img.shields.io/badge/Language-English-blue.svg)](README.md)
 [![Language: Español](https://img.shields.io/badge/Language-Español-green.svg)](EXPLICACION_TECNICA.md)
 [![Tests: 55/55 Passed](https://img.shields.io/badge/Tests-55%2F55%20Passed-brightgreen.svg)](backend/tests/)
+[![Faithfulness: 50/50 (100%)](https://img.shields.io/badge/Faithfulness-50%2F50%20(100%25)-brightgreen.svg)](scripts/evaluate_rag.py)
 [![Benchmark: 80/80 Passed](https://img.shields.io/badge/Benchmark-80%2F80%20(100%25)-brightgreen.svg)](scripts/test_variants.py)
 [![Next.js 15](https://img.shields.io/badge/Frontend-Next.js%2015-black.svg)](frontend/)
 [![FastAPI](https://img.shields.io/badge/Backend-FastAPI%200.115-009688.svg)](backend/)
 [![ChromaDB](https://img.shields.io/badge/Vector%20Store-ChromaDB-orange.svg)](backend/data/chroma_db/)
+[![Docker Compose](https://img.shields.io/badge/Docker-Multi--stage%20Ready-blue.svg)](docker-compose.yml)
 
 </div>
 
@@ -100,11 +102,13 @@ synapse-admissions-ai/ (NovaVice_os97)
 ┌────────────────────────────────────────────────────────────────────────┐
 │                   API GATEWAY & ROUTING (FASTAPI BACKEND)              │
 │                                                                        │
-│   FastAPI Core Engine (:8000) + Pydantic v2 Models                     │
-│   ├── POST /api/v1/chat       (Conversational query & menu navigation) │
-│   ├── GET  /api/v1/health     (Health status, indexed docs, advisor)   │
-│   ├── GET  /api/v1/metrics    (Live telemetry, cache rates & tokens)   │
-│   └── POST /api/v1/escalate   (Human escalation ticket creation)       │
+│   FastAPI Core Engine (:8000) + Pydantic v2 Models + Correlation ID    │
+│   ├── POST /api/v1/chat         (Conversational query & menu navigation)│
+│   ├── GET  /api/v1/chat/stream  (Real-time SSE token-by-token stream)   │
+│   ├── GET  /api/v1/health       (Health status, indexed docs, advisor)  │
+│   ├── GET  /api/v1/metrics      (Live telemetry, faithfulness & tokens) │
+│   ├── POST /api/v1/escalate     (Transactional SQLite human ticket)     │
+│   └── POST /api/v1/admin/vacuum (ChromaDB index compacting routine)     │
 └───────────────────────────────────┬────────────────────────────────────┘
                                     │
                                     ▼

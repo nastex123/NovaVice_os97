@@ -1,9 +1,9 @@
-# System Architecture (Version 2.6.0)
+# System Architecture (Version 2.7.0 - Resilience & Performance)
 
 ## 1. End-to-End Multi-Tier Architectural Diagram
 
 ```text
-                               INBOUND CLIENT TIERS
+                                INBOUND CLIENT TIERS
         +──────────────────────────────────────+──────────────────────────────+
         |       Next.js 15 Web App (:3000)     |         Telegram Bot         |
         |   (PixiJS WebGL + ReactMarkdown)     |     (Async Webhook/Poll)     |
@@ -11,13 +11,14 @@
                            │ (Next.js Reverse Proxy)          │
                            v                                  v
                   HTTP /api/v1/chat                   Webhook Handler
-                  HTTP /api/v1/chat/stream
+                  HTTP /api/v1/chat/stream (SSE)
                            │                                  │
                            +─────────────────┬────────────────+
                                              │
                                              v
 ┌────────────────────────────────────────────────────────────────────────────┐
 │                         FastAPI Application Core (:8000)                   │
+│               (ASGI Middleware with X-Request-ID Correlation)              │
 │                                                                            │
 │  ┌──────────────────────────────────────────────────────────────────────┐  │
 │  │ Block C: Pre-Flight Guardrails & Prompt Injection Sanitizer          │  │
@@ -35,6 +36,8 @@
 │          v                                                      │ RAG Flow │
 │  ┌──────────────────────────────────────────────┐               │          │
 │  │ Python Intermediary (opencode_client.py)    │               │          │
+│  │ - Persistent httpx.AsyncClient Pooling       │               │          │
+│  │ - CircuitBreaker with Exponential Backoff    │               │          │
 │  │ - Multi-Document High-Density Context Feed   │               │          │
 │  │ - 45s Deep Reasoning Window (Chain-of-Thgt)  │               │          │
 │  │ - Empathetic Markdown Synthesis & Persona    │               │          │
@@ -53,32 +56,34 @@
 │          │                          │ Cache Miss                        │   │
 │          │                          v                                   │   │
 │          │      ┌──────────────────────────────────────────────────┐    │   │
-│          │      │ Block A: Hybrid Retrieval & Ranking Subsystem    │    │   │
-│          │      │ - 83 Docs (245 Chunks) + 12_04 becas→descuentos  │    │   │
-│          │      │ - Dense Chroma + BM25 (k1 1.5 b 0.75) + Unicode  │    │   │
-│          │      │ - RRF k=60 + boost por intent (1.4) + centroid   │    │   │
-│          │      │ - Auto-fit + query expansion (precio↔tarifa)     │    │   │
+│          │      │ Block A: Hybrid Retrieval, Hard Mask & Reranker  │    │   │
+│          │      │ - Hard Domain Masking (100% cross-pillar veto)   │    │   │
+│          │      │ - 83 Docs + Dense ChromaDB + Okapi BM25 index    │    │   │
+│          │      │ - Candidate expansion to top-20 + FlashRank ONNX │    │   │
+│          │      │ - Pre-LLM Context Domain Validator               │    │   │
 │          │      └───────────────────┬──────────────────────────────┘    │   │
-│          │                          │ Top 5 Ranked Chunks               │   │
+│          │                          │ Top 5 Reranked Chunks             │   │
 │          │                          v                                   │   │
 │          │      ┌──────────────────────────────────────────────────┐    │   │
-│          │      │ Relevance Threshold (0.35 pilar vs 0.50 heavy)   │    │   │
-│          │      │ Pilar: horario/precio/curso/modalidad/sede/beca │    │   │
-│          │      │ → descuento nunca escala (heavy only 2 fases)   │    │   │
+│          │      │ Relevance & Post-LLM Faithfulness NLI Gate       │    │   │
+│          │      │ - Faithfulness threshold >= 0.80 (NLI entailment)│    │   │
+│          │      │ - Self-consistency N=3 in medium confidence      │    │   │
+│          │      │ - PostLLM Guardrails ($ COP, time formats, PII)  │    │   │
 │          │      └───────────┬──────────────────────────┬───────────┘    │   │
 │          │                  │ Pass                     │ Fail (<0.50)   │   │
 │          │                  v                          v                │   │
 │          │      ┌───────────────────────┐  ┌───────────────────────┐    │   │
 │          │      │ Block B: Synthesis    │  │ Block D: Escalation   │    │   │
-│          │      │ Prompt & Gemini / RAG │  │ Dispatcher & Ticket   │    │   │
+│          │      │ Prompt (Temp=0.0) &   │  │ Dispatcher & SQLite   │    │   │
+│          │      │ Structured Citations  │  │ WAL Ticket Store      │    │   │
 │          │      └───────────┬───────────┘  └───────────┬───────────┘    │   │
 │          │                  │                          │                │   │
 │          +──────────────────┼──────────────────────────┼────────────────┘   │
 │                             │                          │                    │
 │                             v                          v                    │
 │                  ┌──────────────────────┐   ┌───────────────────────┐       │
-│                  │ JSON Response & Meta │   │ Human Handoff Ticket  │       │
-│                  │ (Citations, Latency) │   │ (escalations.json)    │       │
+│                  │ JSON Response & Meta │   │ SQLite Ticket (WAL)   │       │
+│                  │ (Citations, Latency) │   │ (escalations.db)      │       │
 │                  └──────────────────────┘   └───────────────────────┘       │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
@@ -96,8 +101,8 @@
 ### 2.2 Ingestion & Indexing Pipeline (`src/rag/ingestion.py:32`)
 - **Source Directory:** `data/documents/` (83 docs, 245 chunks, 20 clusters + `12_04_becas_descuentos_aclaratoria.md` canónico).
 - **Chunking Engine:** Markdown section splitter (`##`, `###`) 500/100 (600/150 para tablas precios/horarios protegido Fase B14).
-- **Vector Store:** ChromaDB `all-MiniLM-L6-v2` + fallback TF-IDF `embed_query()` para cache semántica; centroid por pilar (5) Fase B16.
-- **Lexical Index:** Pure Python BM25 `k1 1.5 b 0.75` + Unicode NFD + STOP 62 + expansión query Fase B17.
+- **Vector Store:** ChromaDB `all-MiniLM-L6-v2` / `BAAI/bge` + fallback TF-IDF `embed_query()` para cache semántica; centroid por pilar (5) Fase B16. Rutina `vacuum()` y SnapshotManager para rollback seguro.
+- **Lexical Index:** Pure Python BM25 `k1 1.5 b 0.75` + Unicode NFD + STOP 62 + expansión query + lemas canónicos de sedes colombianas.
 
 ### 2.3 Guided Navigation State Machine (`src/core/navigation.py:163,330`)
 - **Root Menu:** 4 pilares (1 Cursos 1.1-1.6, 2 Horarios 2.1-2.6, 3 Precios 3.1-3.5, 4 Sedes 4.1-4.6) + 80 synonyms (horario/precio/beca→descuento/curso/modalidad/sede) + typo + intent embedding cosine 0.82 + multi-intent split.
@@ -105,6 +110,11 @@
 - **Heavy Only:** `0` return, `9` asesor solo very heavy (lista negra `visa/beca 100%/Australia`).
 
 ### 2.4 OpenCode Advisor Intermediary (`src/core/opencode_client.py`)
-- **REST Client:** High-performance `httpx.AsyncClient` with connection pooling.
-- **Context Injection:** Injects top 5 complete retrieved chunks.
-- **Reasoning Timeout:** 45.0-second window allowing complete Chain-of-Thought execution.
+- **REST Client:** High-performance `httpx.AsyncClient` con persistent connection pooling.
+- **Resilience Layer:** Circuit Breaker pattern con backoff exponencial (`src/core/resilience.py`).
+- **Context Injection:** Inyecta top 5 fragmentos enriquecidos recuperados.
+- **Reasoning Timeout:** Ventana de 45.0 segundos permitiendo ejecución completa de Chain-of-Thought.
+
+### 2.5 Persistencia Relacional y Registro de Escalaciones (`src/data/sqlite_tickets.py`)
+- **Motor de Base de Datos:** SQLite 3 con Write-Ahead Logging (`PRAGMA journal_mode=WAL;`).
+- **Integridad Transaccional:** Cumplimiento ACID completo, lecturas y escrituras no bloqueantes concurrentes y migración histórica desde `escalations.json`.

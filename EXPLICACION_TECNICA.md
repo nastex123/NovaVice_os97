@@ -14,22 +14,27 @@
 | Parámetro | Detalle Técnico | Ubicación / Implementación |
 | :--- | :--- | :--- |
 | **Nombre del Proyecto** | Synapse Admissions AI / Nova OS '97 | Monorepo raíz (`NovaVice_os97`) |
-| **Versión del Sistema** | `2.6.0` (Producción / Local-First / Dual-Engine) | [`backend/src/api/routes.py:23`](backend/src/api/routes.py#L23) |
+| **Versión del Sistema** | `2.7.0` (Producción / Local-First / Dual-Engine / Resiliente) | [`backend/src/api/routes.py:23`](backend/src/api/routes.py#L23) |
 | **Dominio Institucional** | Academia Oficial Nova Idiomas Colombia (Bogotá, Medellín, Cali y Campus Virtual) | [`backend/data/documents/`](backend/data/documents/) |
-| **Backend Core** | FastAPI (`Python 3.12+`), Pydantic v2, Uvicorn ASGI Server | [`backend/src/main.py`](backend/src/main.py), [`backend/src/api/`](backend/src/api/) |
-| **Almacenamiento Vectorial** | ChromaDB Persistent (Colección `idiomas_knowledge_base`) | [`backend/src/rag/vector_store.py:15`](backend/src/rag/vector_store.py#L15) |
-| **Modelo de Embeddings** | `all-MiniLM-L6-v2` ejecutado en ONNX Runtime / TF-IDF Sparse fallback | [`backend/src/rag/vector_store.py:25`](backend/src/rag/vector_store.py#L25) |
-| **Recuperador Léxico** | Okapi BM25 puro en Python con *stemming* morfológico en español | [`backend/src/rag/bm25.py:15`](backend/src/rag/bm25.py#L15) |
-| **Fusión de Ranking** | Reciprocal Rank Fusion (RRF, factor de suavizado $k=60$) | [`backend/src/rag/hybrid_retriever.py:110`](backend/src/rag/hybrid_retriever.py#L110) |
+| **Backend Core** | FastAPI (`Python 3.12+`), Pydantic v2, ASGI Middleware Correlation ID, Uvicorn | [`backend/src/main.py`](backend/src/main.py), [`backend/src/api/`](backend/src/api/) |
+| **Almacenamiento Vectorial** | ChromaDB Persistent (Colección `idiomas_knowledge_base`) + Snapshots & Vacuum | [`backend/src/rag/vector_store.py:15`](backend/src/rag/vector_store.py#L15) |
+| **Modelo de Embeddings** | `all-MiniLM-L6-v2` ONNX / `fastembed` BGE multilingüe / TF-IDF Sparse fallback | [`backend/src/rag/vector_store.py:25`](backend/src/rag/vector_store.py#L25) |
+| **Recuperador Léxico** | Okapi BM25 puro en Python con *stemming* y lemas canónicos de sedes | [`backend/src/rag/bm25.py:15`](backend/src/rag/bm25.py#L15) |
+| **Fusión de Ranking y Reranking** | RRF ($k=60$) + Hard Domain Masking + FlashRank Cross-Encoder top-20 a top-5 | [`backend/src/rag/hybrid_retriever.py`](backend/src/rag/hybrid_retriever.py), [`backend/src/rag/reranker.py`](backend/src/rag/reranker.py) |
+| **Persistencia de Tickets** | SQLite Transaccional con modo WAL (`escalations.db`) | [`backend/src/data/sqlite_tickets.py`](backend/src/data/sqlite_tickets.py) |
 | **Arquitectura de Asesoría** | Desacoplamiento Dual: **OpenCode Server (:4096)** vs **AGY (Google Antigravity CLI)** | [`backend/src/core/opencode_client.py`](backend/src/core/opencode_client.py), [`backend/src/core/agy_client.py`](backend/src/core/agy_client.py) |
-| **Núcleo de Razonamiento** | Módulo Unificado de Prompts y Contingencia Multi-Pilar | [`backend/src/core/advisor_common.py`](backend/src/core/advisor_common.py) |
-| **Enrutador de Intenciones** | Clasificador Vectorial Semántico Dual (Macro-Pilares y Micro-Intenciones) | [`backend/src/core/intent_router.py`](backend/src/core/intent_router.py) |
+| **Resiliencia & Conectividad** | Circuit Breaker con backoff exponencial + Persistent HTTP Pooling | [`backend/src/core/resilience.py`](backend/src/core/resilience.py) |
+| **Núcleo de Razonamiento** | Módulo Unificado de Prompts, Streaming SSE y Modo Extractivo Estricto (Temp 0.0) | [`backend/src/core/advisor_common.py`](backend/src/core/advisor_common.py), [`backend/src/rag/prompt_templates.py`](backend/src/rag/prompt_templates.py) |
+| **Enrutador de Intenciones** | Clasificador Vectorial Semántico Dual y Hard Domain Masking (100% veto cruzado) | [`backend/src/core/intent_router.py`](backend/src/core/intent_router.py) |
+| **Verificación Factual** | Verificador NLI Post-LLM (Score >= 0.80) + Citas Estructuradas en 2 Pasadas | [`backend/src/core/faithfulness.py`](backend/src/core/faithfulness.py), [`backend/src/rag/structured_output.py`](backend/src/rag/structured_output.py) |
 | **Memoria Conversacional** | Memoria Episódica con Extracción de Atributos del Aspirante y Resumen Breve | [`backend/src/core/memory.py`](backend/src/core/memory.py) |
 | **Frontend UI/UX** | Next.js 15 (App Router), React 19, TypeScript, Tailwind CSS, Retro Macintosh '97 | [`frontend/src/app/`](frontend/src/app/), [`frontend/src/components/`](frontend/src/components/) |
 | **Filtro Óptico Ergonomía** | CRT Anti-Glare & Warm Amber Phosphor con interruptor interactivo ON/OFF | [`frontend/src/app/globals.css:120`](frontend/src/app/globals.css#L120) |
 | **Fondo Animado GPU** | Canvas Pixel-Art 60 FPS: 8 palmeras balanceantes, 18 nubes bidireccionales, gaviotas y hierba | [`frontend/src/components/AnimatedBackground.tsx`](frontend/src/components/AnimatedBackground.tsx) |
 | **Batería de Pruebas** | **55/55 Tests Unitarios y E2E Aprobados en Pytest** | [`backend/tests/`](backend/tests/) |
+| **Evaluación CI Dataset Dorado** | **50/50 Consultas Fieles (100.0% Fidelidad Factual, Promedio 1.000)** | [`scripts/evaluate_rag.py`](scripts/evaluate_rag.py) |
 | **Benchmark Lingüístico** | **80/80 Variantes Aprobadas (100.0%) con latencia media de 26.5 ms** | [`scripts/test_variants.py`](scripts/test_variants.py) |
+| **Contenerización** | Docker Compose Multi-Stage (Backend Python 3.12 + Frontend Next.js 20 Standalone) | [`docker-compose.yml`](docker-compose.yml) |
 
 ---
 

@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [2026-09-04 10:14] [Feat/Fase-2-TODO-2.12-Structured-Citations-Verification]
+- **Output estructurado con citas obligatorias y doble verificación (TODO-2.12 / Prop. CRÍTICA):**
+  - Creados esquemas Pydantic v2 `CitationSpan` y `GroundedRAGResponse` en `backend/src/rag/structured_output.py` para respaldar de manera granular (`doc_id`, `section`, `span_text`) cada aserción factual.
+  - Implementado validador determinista/LLM-as-judge de dos pasadas `verify_citations_strictly` que audita que cada fragmento citado exista textualmente dentro de los chunks recuperados, forzando `abstain=True` ante cualquier disparidad o cita vacía.
+
 ### [2026-09-04 10:13] [Feat/Fase-2-TODO-2.11-Hard-Domain-Mask-Pipeline]
 - **Pipeline de Enrutamiento de Intenciones en Cascada y Erradicación de Cruces entre Pilares (TODO-2.11 / Prop. CRÍTICA):**
   - Implementado Hard Domain Masking en `backend/src/rag/hybrid_retriever.py` definiendo `PILLAR_STRICT_CLUSTERS` y `PILLAR_FORBIDDEN_CLUSTERS` para vetar de forma estricta (100%) cualquier chunk fuera del dominio objetivo cuando la consulta pertenece a un pilar unívoco.

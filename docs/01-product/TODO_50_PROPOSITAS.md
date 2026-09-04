@@ -10,11 +10,11 @@
 | Fase | Enfoque Principal | Total Tareas | Completadas | En Progreso | Pendientes | Estado |
 | :---: | :--- | :---: | :---: | :---: | :---: | :---: |
 | **Fase 1** | Precisión de Datos y Recuperación RAG | 11 | 11 | 0 | 0 | ✅ Completada (100%) |
-| **Fase 2** | Rendimiento Backend y Resiliencia + Complemento Anti-alucinación | 17 | 11 | 0 | 6 | 🟡 En Progreso (64.7%) |
+| **Fase 2** | Rendimiento Backend y Resiliencia + Complemento Anti-alucinación | 17 | 12 | 0 | 5 | 🟡 En Progreso (70.6%) |
 | **Fase 3** | Frontend Moderno, UI Retro & Accesibilidad | 10 | 0 | 0 | 10 | ⏳ Pendiente |
 | **Fase 4** | Testing Automatizado, QA & Tooling DX | 8 | 0 | 0 | 8 | ⏳ Pendiente |
 | **Fase 5** | Horizontes Futuros y Despliegues Especializados | 11 | 0 | 11 | ⏳ Pendiente |
-| **TOTAL** | **Propuestas de Mejora Técnica** | **57** | **22** | **0** | **35** | **38.6%** |
+| **TOTAL** | **Propuestas de Mejora Técnica** | **57** | **23** | **0** | **34** | **40.4%** |
 
 ---
 
@@ -112,10 +112,10 @@
       - *"Cuáles son los cursos disponibles"* $\to$ PASS: cursos/idiomas/MCER \| FAIL: sedes/direcciones.
       - *"Cuánto cuesta inglés B2"* $\to$ PASS: precios/COP/financiación \| FAIL: horarios/sedes.
       - *"Qué sedes tienen"* $\to$ PASS: Bogotá/Medellín/Cali \| FAIL: precios/cursos.
-- [ ] **TODO-2.12 [CRÍTICO] Output estructurado con citas obligatorias y doble verificación:**
-  - [ ] Integrar `instructor` + esquemas Pydantic v2 (`answer, citations[{doc_id, span}], confidence, abstain`) en `backend/src/rag/engine.py` y `backend/src/rag/prompt_templates.py`.
-  - [ ] Obligar al LLM a citar `source|section|span` por cada afirmación factual; sin cita válida se retorna abstención y escalación a asesor humano.
-  - [ ] Añadir segunda pasada LLM-as-judge que verifica que cada cita exista literalmente en los chunks recuperados; latencia objetivo 5-10s aceptada por priorizar precisión al 100%.
+- [x] **TODO-2.12 [CRÍTICO] Output estructurado con citas obligatorias y doble verificación:**
+  - [x] Integrar `instructor` + esquemas Pydantic v2 (`answer, citations[{doc_id, span}], confidence, abstain`) en `backend/src/rag/engine.py` y `backend/src/rag/prompt_templates.py`.
+  - [x] Obligar al LLM a citar `source|section|span` por cada afirmación factual; sin cita válida se retorna abstención y escalación a asesor humano.
+  - [x] Añadir segunda pasada LLM-as-judge que verifica que cada cita exista literalmente en los chunks recuperados; latencia objetivo 5-10s aceptada por priorizar precisión al 100%.
 - [ ] **TODO-2.13 [CRÍTICO] Verificador NLI post-LLM de fidelidad (faithfulness gate):**
   - [ ] Crear `backend/src/core/faithfulness.py` con `transformers` + `vectara/hallucination_evaluation_model` (variante large `DeBERTa-v3-large-mnli`).
   - [ ] Enganchar verificación en `backend/src/rag/engine.py` tras la síntesis; umbral estricto `entailment >= 0.80`, de lo contrario rechazar respuesta y escalar con ticket.

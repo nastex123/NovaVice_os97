@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [2026-09-04 11:35] [Feat/Fase-3-TODO-3.3-Chat-Messages-Virtualization]
+- **Virtualización de mensajes del chat con `@tanstack/react-virtual` (TODO-3.3 / Prop. RECOMENDADA):**
+  - Instalada dependencia `@tanstack/react-virtual` en `frontend/package.json`.
+  - Extraído subcomponente modular `MessageItem` en `frontend/src/components/ChatContainer.tsx`.
+  - Configurado `useVirtualizer` dinámico conectado a `parentRef` para renderizar ventanas virtuales de elementos solo cuando la conversación supera 30 mensajes (`isVirtualized = messages.length > 30`).
+  - Preservado auto-scroll hacia el fondo (`scrollTo(scrollHeight)`) en el contenedor virtualizado y `bottomRef.scrollIntoView` en modo normal.
+  - Verificada compilación de producción limpia con `npm run build` en Next.js 15.
+
 ### [2026-09-04 11:31] [Feat/Fase-3-TODO-3.2-SSE-Stream-Progressive-Decoder]
 - **Consumo de streams SSE con decodificador progresivo UTF-8 y cursor retro vintage (TODO-3.2 / Prop. CRÍTICA):**
   - Implementada función `streamChatMessage` en `frontend/src/lib/api.ts` consumiendo el endpoint `/api/v1/chat/stream` mediante `ReadableStreamDefaultReader` y `TextDecoder("utf-8")` con buffer para líneas `data: {...}`.

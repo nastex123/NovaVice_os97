@@ -11,10 +11,10 @@
 | :---: | :--- | :---: | :---: | :---: | :---: | :---: |
 | **Fase 1** | Precisión de Datos y Recuperación RAG | 11 | 11 | 0 | 0 | ✅ Completada (100%) |
 | **Fase 2** | Rendimiento Backend y Resiliencia + Complemento Anti-alucinación | 17 | 17 | 0 | 0 | ✅ Completada (100%) |
-| **Fase 3** | Frontend Moderno, UI Retro & Accesibilidad | 10 | 2 | 0 | 8 | 🚀 En Progreso (20%) |
+| **Fase 3** | Frontend Moderno, UI Retro & Accesibilidad | 10 | 3 | 0 | 7 | 🚀 En Progreso (30%) |
 | **Fase 4** | Testing Automatizado, QA & Tooling DX | 8 | 0 | 0 | 8 | ⏳ Pendiente |
 | **Fase 5** | Horizontes Futuros y Despliegues Especializados | 11 | 0 | 0 | 11 | ⏳ Pendiente |
-| **TOTAL** | **Propuestas de Mejora Técnica** | **57** | **30** | **0** | **27** | **52.6%** |
+| **TOTAL** | **Propuestas de Mejora Técnica** | **57** | **31** | **0** | **26** | **54.4%** |
 
 ---
 
@@ -145,9 +145,9 @@
 - [x] **TODO-3.2 [Prop. 26 - CRÍTICO] Consumo de streams SSE con decodificador progresivo UTF-8:**
   - [x] Crear hook `useChatStream.ts` en el frontend utilizando `ReadableStreamDefaultReader` y `TextDecoder`.
   - [x] Mostrar el texto entrante progresivamente con cursor parpadeante retro vintage.
-- [ ] **TODO-3.3 [Prop. 27 - RECOMENDADO] Virtualización de mensajes del chat (`@tanstack/react-virtual`):**
-  - [ ] Implementar lista virtualizada en el contenedor de mensajes para chats con más de 50 intervenciones.
-  - [ ] Mantener el auto-scroll hacia el fondo cuando se generen nuevos tokens en streaming.
+- [x] **TODO-3.3 [Prop. 27 - RECOMENDADO] Virtualización de mensajes del chat (`@tanstack/react-virtual`):**
+  - [x] Implementar lista virtualizada en el contenedor de mensajes para chats con más de 50 intervenciones.
+  - [x] Mantener el auto-scroll hacia el fondo cuando se generen nuevos tokens en streaming.
 - [ ] **TODO-3.4 [Prop. 28 - RECOMENDADO] Persistencia de sesiones en `IndexedDB`:**
   - [ ] Implementar almacenamiento asíncrono con `idb-keyval` para historial de chat y preferencias del usuario.
 - [ ] **TODO-3.5 [Prop. 29 - RECOMENDADO] Optimización de Server Components (RSC) vs Client Components:**

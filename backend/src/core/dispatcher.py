@@ -64,7 +64,13 @@ class EscalationDispatcher:
             "top3_candidate_chunks": clean_chunks
         }
 
-        # Persist to JSON log
+        # Persist to SQLite with WAL mode & fallback JSON
+        try:
+            from src.data.sqlite_tickets import sqlite_ticket_repo
+            sqlite_ticket_repo.save_ticket(ticket)
+        except Exception:
+            pass
+
         try:
             with open(self.log_path, "r", encoding="utf-8") as f:
                 tickets = json.load(f)

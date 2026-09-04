@@ -78,6 +78,14 @@ async def get_prometheus_metrics():
 
 @api_router.get("/escalations")
 async def get_escalation_tickets():
+    try:
+        from src.data.sqlite_tickets import sqlite_ticket_repo
+        tickets = sqlite_ticket_repo.get_all_tickets(limit=200)
+        if tickets:
+            return tickets
+    except Exception:
+        pass
+
     log_file = settings.escalations_log_path
     if not log_file.exists():
         return []

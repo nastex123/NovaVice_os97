@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [2026-09-04 10:07] [Feat/Fase-2-TODO-2.5-SQLite-WAL-Tickets]
+- **Migración de `escalations.json` a SQLite transaccional con WAL (TODO-2.5 / Prop. 15):**
+  - Creado repositorio `backend/src/data/sqlite_tickets.py` con esquema de tabla `escalation_tickets`, índices sobre fecha y estado, y configuración de concurrencia cero bloqueos (`PRAGMA journal_mode=WAL; PRAGMA synchronous=NORMAL;`).
+  - Actualizado `EscalationDispatcher` en `backend/src/core/dispatcher.py` para almacenar concurrentemente en base de datos SQLite y mantener réplica de respaldo JSON.
+  - Actualizado endpoint `/api/v1/escalations` en `backend/src/api/routes.py` para consultar directamente el repositorio SQLite con fallback hacia el archivo histórico.
+  - Ejecutada migración automática exitosa de los 133 tickets históricos de admisiones hacia `backend/data/escalations.db`.
+
 ### [2026-09-04 10:06] [Feat/Fase-2-TODO-2.4-Correlation-ID-Middleware]
 - **Middleware ASGI con Correlation ID (`X-Request-ID`) (TODO-2.4 / Prop. 14):**
   - Implementado middleware HTTP en `backend/src/main.py` que genera automáticamente identificadores UUIDv4 para cada solicitud o preserva los IDs entrantes en `X-Request-ID`.

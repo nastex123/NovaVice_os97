@@ -10,11 +10,11 @@
 | Fase | Enfoque Principal | Total Tareas | Completadas | En Progreso | Pendientes | Estado |
 | :---: | :--- | :---: | :---: | :---: | :---: | :---: |
 | **Fase 1** | Precisión de Datos y Recuperación RAG | 11 | 11 | 0 | 0 | ✅ Completada (100%) |
-| **Fase 2** | Rendimiento Backend y Resiliencia + Complemento Anti-alucinación | 17 | 4 | 0 | 13 | 🟡 En Progreso (23.5%) |
+| **Fase 2** | Rendimiento Backend y Resiliencia + Complemento Anti-alucinación | 17 | 5 | 0 | 12 | 🟡 En Progreso (29.4%) |
 | **Fase 3** | Frontend Moderno, UI Retro & Accesibilidad | 10 | 0 | 0 | 10 | ⏳ Pendiente |
 | **Fase 4** | Testing Automatizado, QA & Tooling DX | 8 | 0 | 0 | 8 | ⏳ Pendiente |
 | **Fase 5** | Horizontes Futuros y Despliegues Especializados | 11 | 0 | 11 | ⏳ Pendiente |
-| **TOTAL** | **Propuestas de Mejora Técnica** | **57** | **15** | **0** | **42** | **26.3%** |
+| **TOTAL** | **Propuestas de Mejora Técnica** | **57** | **16** | **0** | **41** | **28.1%** |
 
 ---
 
@@ -74,10 +74,10 @@
 - [x] **TODO-2.4 [Prop. 14 - RECOMENDADO] Middleware ASGI con Correlation ID (`X-Request-ID`):**
   - [x] Agregar middleware en `backend/src/main.py` que genere o capture `X-Request-ID`.
   - [x] Propagar el ID en cada log emitido y en el header de respuesta HTTP.
-- [ ] **TODO-2.5 [Prop. 15 - RECOMENDADO] Migración de `escalations.json` a SQLite transaccional con WAL:**
-  - [ ] Crear repositorio `backend/src/data/sqlite_tickets.py` con esquema de tabla `escalation_tickets`.
-  - [ ] Habilitar modo `PRAGMA journal_mode=WAL;` para escrituras atómicas concurrentes libres de bloqueos.
-  - [ ] Migrar tickets existentes de `escalations.json` a la base de datos `escalations.db`.
+- [x] **TODO-2.5 [Prop. 15 - RECOMENDADO] Migración de `escalations.json` a SQLite transaccional con WAL:**
+  - [x] Crear repositorio `backend/src/data/sqlite_tickets.py` con esquema de tabla `escalation_tickets`.
+  - [x] Habilitar modo `PRAGMA journal_mode=WAL;` para escrituras atómicas concurrentes libres de bloqueos.
+  - [x] Migrar tickets existentes de `escalations.json` a la base de datos `escalations.db`.
 - [ ] **TODO-2.6 [Prop. 16 - RECOMENDADO] Validación de esquemas y serializadores nativos Pydantic V2:**
   - [ ] Sustituir conversiones manuales con `json.dumps()` por `model_dump_json()` de Pydantic V2 en todos los modelos API.
 - [ ] **TODO-2.7 [Prop. 20 - CRÍTICO] Rutina de compresión y vacuum periódico de ChromaDB:**

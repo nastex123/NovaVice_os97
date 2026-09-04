@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [2026-09-04 08:06] [Feat/Fase-1-TODO-1.3-a-1.10-Complete]
+- **Implementación completa de tareas pendientes de Fase 1 (TODO-1.3 a TODO-1.10):**
+  - **TODO-1.3 [Prop. 3 - Re-ranking local Cross-Encoder]:** Creado `backend/src/rag/reranker.py` con `FlashRank` (`ms-marco-TinyBERT-L-2-v2` en CPU ONNX). Integrado en `hybrid_retriever.py` sobre candidatos RRF con fallback automático. Tests en `backend/tests/test_reranker.py`.
+  - **TODO-1.4 [Prop. 4 - Deterministic Query Router]:** Creado `backend/src/core/query_router.py` con respuestas exactas en <15ms para Placement Test y canales de WhatsApp/contacto, integrado antes de la síntesis en `backend/src/rag/engine.py`. Tests en `backend/tests/test_query_router.py`.
+  - **TODO-1.5 [Prop. 5 - Metadatos estructurados y filtros booleanos]:** Implementado `_infer_metadata` (`pillar`, `campus`, `has_pricing`) en `backend/src/rag/ingestion.py`. Agregado parámetro `where` a `ChromaVectorStore.query` en `backend/src/rag/vector_store.py`.
+  - **TODO-1.6 [Prop. 6 - Contextual Compression y Sentence Window Retrieval]:** Creado `backend/src/rag/context_compressor.py` para comprimir chunks periféricos conservando ventanas oracionales alrededor de términos de búsqueda antes del prompt del LLM en `backend/src/rag/engine.py`.
+  - **TODO-1.7 [Prop. 7 - Normalizador fonético y lemático]:** Añadido diccionario `LEMMAS` y normalización fonética sin tildes en `backend/src/rag/bm25.py` para sedes y convenios colombianos ("Chicó", "Laureles", "Comfama", "Colsubsidio", "Daviplata", "Nequi").
+  - **TODO-1.8 [Prop. 19 - Caché semántico LRU multicapa]:** Actualizado `backend/src/core/cache.py` con `OrderedDict`, límite `max_entries=1000` y política de desalojo LRU con `move_to_end`.
+  - **TODO-1.9 [Prop. 21 - Optimización HNSW en ChromaDB]:** Calibrados parámetros `M=16`, `construction_ef=64`, `search_ef=32` y distancia coseno en `backend/src/rag/vector_store.py`.
+  - **TODO-1.10 [Prop. 23 - Persistencia en disco de BM25 con hash SHA-256]:** Añadidos métodos `save` y `load` en `backend/src/rag/bm25.py` almacenando `bm25_index.pkl` en `backend/data/chroma_db/`. Sincronizado en `backend/src/rag/ingestion.py` para recargar el índice si el hash de documentos coincide.
+  - **Suite de Pruebas:** 20/20 tests aprobados en `backend/tests/` (test_reranker, test_query_router, test_phase1_improvements, test_hybrid_search, test_ingestion).
+
+### [2026-09-04 12:00] [Docs/TODO-2.12-2.17-Fase2-Complemento-Anti-Alucinacion]
+- **Complemento aditivo de Fase 2 con 6 tareas anti-alucinación (TODO-2.12 a TODO-2.17) en [`docs/01-product/TODO_50_PROPOSITAS.md`](docs/01-product/TODO_50_PROPOSITAS.md):**
+  - **TODO-2.12:** Output estructurado con citas obligatorias (`instructor` + Pydantic v2) y doble verificación LLM-as-judge en `engine.py` y `prompt_templates.py`.
+  - **TODO-2.13:** Verificador NLI post-LLM (`transformers` + `vectara/hallucination_evaluation_model`, `DeBERTa-v3-large-mnli`, umbral 0.80) en nuevo `core/faithfulness.py`.
+  - **TODO-2.14:** Temperatura 0.0 + modo extractivo + self-consistency N=3 en `config.py`.
+  - **TODO-2.15:** Embeddings `fastembed bge-m3` en `vector_store.py` y reranker `bge-reranker-v2-m3` en `rag/reranker.py` (top-20 hacia top-5).
+  - **TODO-2.16:** Guardrails de salida (`guardrails-ai`, `presidio`) + normalización (`rapidfuzz`, `spacy es_core_news_lg`) en `guardrails.py` y `bm25.py`.
+  - **TODO-2.17:** Harness `ragas` + `langfuse` con dataset de 50 preguntas y gate `faithfulness=1.0` en CI.
+  - Tablero actualizado: Fase 2 11 hacia 17 tareas, total 51 hacia 57. No se modificó ni eliminó ninguna tarea existente (TODO-2.1 a TODO-2.11 intactas).
+- Motivo: priorizar precisión al 100% sobre latencia (ventana 5-10s aceptada por el usuario) y erradicar alucinaciones en precios COP, horarios y sedes.
+
 ### [2026-09-04 07:28] [Docs/TODO-2.11-Cascaded-Intent-Routing-Pipeline]
 - **Incorporación de TODO-2.11 al Tablero Maestro de la Fase 2 (Rendimiento y Resiliencia):**
   - **Especificación de Tarea ([`docs/01-product/TODO_50_PROPOSITAS.md`](docs/01-product/TODO_50_PROPOSITAS.md)):** Agregada formalmente la tarea **TODO-2.11 [CRÍTICO] Pipeline de Enrutamiento de Intenciones en Cascada y Erradicación de Cruces entre Pilares** basada en el informe técnico de arquitectura experta:

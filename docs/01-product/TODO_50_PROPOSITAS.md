@@ -9,12 +9,12 @@
 
 | Fase | Enfoque Principal | Total Tareas | Completadas | En Progreso | Pendientes | Estado |
 | :---: | :--- | :---: | :---: | :---: | :---: | :---: |
-| **Fase 1** | Precisión de Datos y Recuperación RAG | 11 | 2 | 0 | 9 | 🚀 En Progreso |
-| **Fase 2** | Rendimiento Backend y Resiliencia | 11 | 0 | 0 | 11 | ⏳ Pendiente |
+| **Fase 1** | Precisión de Datos y Recuperación RAG | 11 | 10 | 0 | 1 | 🚀 Casi Completa (91%) |
+| **Fase 2** | Rendimiento Backend y Resiliencia + Complemento Anti-alucinación | 17 | 0 | 0 | 17 | ⏳ Pendiente |
 | **Fase 3** | Frontend Moderno, UI Retro & Accesibilidad | 10 | 0 | 0 | 10 | ⏳ Pendiente |
 | **Fase 4** | Testing Automatizado, QA & Tooling DX | 8 | 0 | 0 | 8 | ⏳ Pendiente |
-| **Fase 5** | Horizontes Futuros y Despliegues Especializados | 11 | 0 | 0 | 11 | ⏳ Pendiente |
-| **TOTAL** | **Propuestas de Mejora Técnica** | **51** | **2** | **0** | **49** | **3.9%** |
+| **Fase 5** | Horizontes Futuros y Despliegues Especializados | 11 | 0 | 11 | ⏳ Pendiente |
+| **TOTAL** | **Propuestas de Mejora Técnica** | **57** | **10** | **0** | **47** | **17.5%** |
 
 ---
 
@@ -29,31 +29,31 @@
   - [x] Implementar parser semántico de bloques Markdown (`_extract_blocks`) en `backend/src/rag/ingestion.py`.
   - [x] Aislar bloques de tablas de precios COP y cronogramas para tratarlos como unidades atómicas indivisibles con preservación de encabezados.
   - [x] Crear tests unitarios en `backend/tests/test_ingestion.py` validando preservación atómica y partición con cabeceras.
-- [ ] **TODO-1.3 [Prop. 3 - CRÍTICO] Fase de re-ranking local con Cross-Encoder en CPU:**
-  - [ ] Integrar un re-ranker local ultra-liviano (ej. `flashrank` o `bge-reranker-base` con ONNX) en `backend/src/rag/reranker.py`.
-  - [ ] Recibir los top-15 candidatos del retriever híbrido y filtrar a los top-5 más relevantes para el LLM.
-  - [ ] Medir y garantizar latencia del re-ranker <30ms en CPU estándar.
-- [ ] **TODO-1.4 [Prop. 4 - RECOMENDADO] Enrutador semántico de intenciones pre-LLM (Query Router):**
-  - [ ] Definir intenciones deterministas de respuesta fija en `backend/src/core/intent_router.py` (ej. ubicación de sedes, agendamiento de test).
-  - [ ] Responder consultas exactas en <15ms sin invocar el LLM ni el pipeline de síntesis pesada.
-- [ ] **TODO-1.5 [Prop. 5 - RECOMENDADO] Extracción y normalización de metadatos estructurados al indexar:**
-  - [ ] Extraer metadatos de documentos (`campus`, `level`, `program_type`, `pricing_cop`) durante el parsing.
-  - [ ] Habilitar filtros booleanos estructurados (`where={"campus": "chico"}`) en las llamadas a ChromaDB.
-- [ ] **TODO-1.6 [Prop. 6 - RECOMENDADO] Contextual Compression y Sentence Window Retrieval:**
-  - [ ] Implementar indexación a nivel de oración individual para matching semántico de alta granularidad.
-  - [ ] Reconstituir ventana de contexto (oración anterior y posterior) al armar el contexto final inyectado al LLM.
-- [ ] **TODO-1.7 [Prop. 7 - RECOMENDADO] Normalizador fonético y lemático para nombres propios de sedes y convenios:**
-  - [ ] Crear normalizador en `backend/src/rag/bm25.py` con manejo de tildes y variantes para términos como "Chicó", "Laureles", "Comfama".
-  - [ ] Garantizar matching de BM25 ante consultas con typos comunes de usuarios.
-- [ ] **TODO-1.8 [Prop. 19 - CRÍTICO] Caché semántico multicapa en memoria (<5ms):**
-  - [ ] Diseñar LRU Cache semántico en `backend/src/core/cache.py` con similitud de coseno >0.96.
-  - [ ] Guardar respuestas pre-calculadas para preguntas frecuentes de admisiones.
-- [ ] **TODO-1.9 [Prop. 21 - RECOMENDADO] Optimización de parámetros HNSW en ChromaDB:**
-  - [ ] Configurar `M=16` y `efConstruction=64` en `backend/src/rag/vector_store.py`.
-  - [ ] Verificar reducción del uso de memoria RAM de la base vectorial (~35%).
-- [ ] **TODO-1.10 [Prop. 23 - RECOMENDADO] Serialización y persistencia en disco del índice BM25:**
-  - [ ] Implementar guardado y carga binaria del vocabulario de BM25 (`bm25_index.pkl`) en `backend/data/`.
-  - [ ] Agregar validación por hash SHA-256 de los documentos fuente para invalidar el archivo al haber cambios.
+- [x] **TODO-1.3 [Prop. 3 - CRÍTICO] Fase de re-ranking local con Cross-Encoder en CPU:**
+  - [x] Integrar un re-ranker local ultra-liviano (`FlashRank 0.2.10` con `ms-marco-TinyBERT-L-2-v2` ONNX) en `backend/src/rag/reranker.py`.
+  - [x] Recibir candidatos del retriever híbrido y reordenar con scores cruzados hacia top-k.
+  - [x] Fallback automático a orden RRF si FlashRank o el runtime no están disponibles.
+- [x] **TODO-1.4 [Prop. 4 - RECOMENDADO] Enrutador semántico de intenciones pre-LLM (Query Router):**
+  - [x] Definir intenciones deterministas de respuesta fija en `backend/src/core/query_router.py` (placement test online, canales de atención/WhatsApp).
+  - [x] Responder consultas exactas en <15ms sin invocar el LLM ni el pipeline de síntesis pesada en `engine.py`.
+- [x] **TODO-1.5 [Prop. 5 - RECOMENDADO] Extracción y normalización de metadatos estructurados al indexar:**
+  - [x] Extraer metadatos estructurados de documentos (`pillar`, `campus`, `has_pricing`) durante el parsing en `backend/src/rag/ingestion.py`.
+  - [x] Habilitar filtros booleanos estructurados (`where={"pillar": "precios"}`) en las llamadas a ChromaDB en `backend/src/rag/vector_store.py`.
+- [x] **TODO-1.6 [Prop. 6 - RECOMENDADO] Contextual Compression y Sentence Window Retrieval:**
+  - [x] Implementar `ContextualCompressor` en `backend/src/rag/context_compressor.py` para extraer ventanas de oraciones relevantes alrededor de términos de búsqueda.
+  - [x] Aplicar compresión de chunks antes de la inyección en el prompt de síntesis LLM en `backend/src/rag/engine.py`.
+- [x] **TODO-1.7 [Prop. 7 - RECOMENDADO] Normalizador fonético y lemático para nombres propios de sedes y convenios:**
+  - [x] Crear normalizador y diccionario de lemas en `backend/src/rag/bm25.py` con manejo de tildes y variantes para términos como "Chicó", "Laureles", "Comfama", "Colsubsidio", "Daviplata", "Nequi".
+  - [x] Garantizar matching de BM25 ante consultas con typos y formas flexionadas comunes de usuarios.
+- [x] **TODO-1.8 [Prop. 19 - CRÍTICO] Caché semántico multicapa en memoria (<5ms):**
+  - [x] Diseñar estructura LRU en `backend/src/core/cache.py` con `OrderedDict` y límite `max_entries=1000`.
+  - [x] Desalojo automático de entradas más antiguas y refresco por acceso (`move_to_end`).
+- [x] **TODO-1.9 [Prop. 21 - RECOMENDADO] Optimización de parámetros HNSW en ChromaDB:**
+  - [x] Configurar `M=16`, `construction_ef=64` y `search_ef=32` en `backend/src/rag/vector_store.py`.
+  - [x] Reducir overhead de memoria RAM del grafo vectorial y estabilizar latencias de consulta.
+- [x] **TODO-1.10 [Prop. 23 - RECOMENDADO] Serialización y persistencia en disco del índice BM25:**
+  - [x] Implementar guardado y carga binaria del vocabulario de BM25 (`bm25_index.pkl`) en `backend/src/rag/bm25.py`.
+  - [x] Agregar validación por hash SHA-256 de los documentos fuente en `backend/src/rag/ingestion.py` para invalidar el archivo al haber cambios.
 - [ ] **TODO-1.11 [Prop. 43 - RECOMENDADO] Validador sintáctico CI para documentos Markdown:**
   - [ ] Escribir script de test `backend/tests/test_document_integrity.py` que valide sintaxis, columnas y tablas de los 82 documentos.
 
@@ -112,6 +112,26 @@
       - *"Cuáles son los cursos disponibles"* $\to$ PASS: cursos/idiomas/MCER \| FAIL: sedes/direcciones.
       - *"Cuánto cuesta inglés B2"* $\to$ PASS: precios/COP/financiación \| FAIL: horarios/sedes.
       - *"Qué sedes tienen"* $\to$ PASS: Bogotá/Medellín/Cali \| FAIL: precios/cursos.
+- [ ] **TODO-2.12 [CRÍTICO] Output estructurado con citas obligatorias y doble verificación:**
+  - [ ] Integrar `instructor` + esquemas Pydantic v2 (`answer, citations[{doc_id, span}], confidence, abstain`) en `backend/src/rag/engine.py` y `backend/src/rag/prompt_templates.py`.
+  - [ ] Obligar al LLM a citar `source|section|span` por cada afirmación factual; sin cita válida se retorna abstención y escalación a asesor humano.
+  - [ ] Añadir segunda pasada LLM-as-judge que verifica que cada cita exista literalmente en los chunks recuperados; latencia objetivo 5-10s aceptada por priorizar precisión al 100%.
+- [ ] **TODO-2.13 [CRÍTICO] Verificador NLI post-LLM de fidelidad (faithfulness gate):**
+  - [ ] Crear `backend/src/core/faithfulness.py` con `transformers` + `vectara/hallucination_evaluation_model` (variante large `DeBERTa-v3-large-mnli`).
+  - [ ] Enganchar verificación en `backend/src/rag/engine.py` tras la síntesis; umbral estricto `entailment >= 0.80`, de lo contrario rechazar respuesta y escalar con ticket.
+  - [ ] Registrar métrica `faithfulness_score` en `backend/src/core/metrics.py` y exponerla en `/api/v1/metrics`.
+- [ ] **TODO-2.14 [CRÍTICO] Temperatura 0 + modo extractivo + auto-consistencia:**
+  - [ ] Fijar `llm_temperature=0.0` en `backend/src/config.py` y reforzar `SYSTEM_PROMPT` con regla extractiva (solo copiar hechos del contexto oficial).
+  - [ ] Implementar self-consistency N=3 con voto mayoritario cuando la confianza del retriever esté en rango medio (0.35-0.50); priorizar precisión sobre latencia.
+- [ ] **TODO-2.15 [RECOMENDADO] Embeddings multilingües + reranker de alta precisión:**
+  - [ ] Reemplazar fallback TF-IDF con `fastembed` (`BAAI/bge-m3` o `bge-small-es`, ONNX CPU) en `backend/src/rag/vector_store.py`.
+  - [ ] Implementar `backend/src/rag/reranker.py` con `BAAI/bge-reranker-v2-m3` (fallback `flashrank`) sobre top-20 candidatos hacia top-5; complementa TODO-1.3 con configuración de máxima precisión.
+- [ ] **TODO-2.16 [RECOMENDADO] Guardrails de salida + normalización robusta de entidades:**
+  - [ ] Extender `backend/src/core/guardrails.py` con validación post-LLM (`guardrails-ai`): exigir símbolo `$ COP` en precios y formato horario exacto; bloquear respuesta si falta.
+  - [ ] Integrar `presidio-analyzer` para PII, `rapidfuzz` para typos y `spacy es_core_news_lg` para extracción de sede/horario/monto en `backend/src/rag/bm25.py`; complementa TODO-1.7.
+- [ ] **TODO-2.17 [RECOMENDADO] Harness de evaluación de fidelidad en CI:**
+  - [ ] Ampliar `scripts/evaluate_rag.py` con `ragas` (`faithfulness`, `answer_relevancy`, `context_precision`) y `langfuse`/`arize-phoenix` para observabilidad; dataset dorado de 50 preguntas oficiales.
+  - [ ] Exigir `faithfulness=1.0` en preguntas pilar como gate de CI; enlaza con TODO-4.1 sin duplicarlo.
 
 ---
 

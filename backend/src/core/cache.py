@@ -1,15 +1,17 @@
+from collections import OrderedDict
 import hashlib
 import time
-from typing import Dict, Any, Optional, Tuple
+from typing import Dict, Any, Optional, Tuple, List
 
 
 class DualLayerCache:
-    # High-performance in-memory cache supporting exact SHA-256 hashing and semantic similarity.
+    # High-performance in-memory cache supporting exact SHA-256 hashing and semantic similarity with LRU eviction.
 
-    def __init__(self, ttl_seconds: int = 3600):
-        self.exact_cache: Dict[str, Dict[str, Any]] = {}
-        self.semantic_entries: list[Dict[str, Any]] = []
+    def __init__(self, ttl_seconds: int = 3600, max_entries: int = 1000):
+        self.exact_cache: OrderedDict[str, Dict[str, Any]] = OrderedDict()
+        self.semantic_entries: List[Dict[str, Any]] = []
         self.ttl_seconds: int = ttl_seconds
+        self.max_entries: int = max_entries
         self.documents_version_hash: str = ""
 
     def _hash_query(self, query: str) -> str:
@@ -20,10 +22,11 @@ class DualLayerCache:
         now = time.time()
         key = self._hash_query(query)
 
-        # Exact match lookup
+        # Exact match lookup with LRU touch
         if key in self.exact_cache:
             entry = self.exact_cache[key]
             if now - entry["timestamp"] <= self.ttl_seconds:
+                self.exact_cache.move_to_end(key)
                 return entry["payload"]
             del self.exact_cache[key]
 
@@ -32,11 +35,22 @@ class DualLayerCache:
     def set(self, query: str, payload: Dict[str, Any], embedding: Optional[list[float]] = None) -> None:
         now = time.time()
         key = self._hash_query(query)
+
+        # LRU eviction for exact cache
+        if key in self.exact_cache:
+            self.exact_cache.move_to_end(key)
+        elif len(self.exact_cache) >= self.max_entries:
+            self.exact_cache.popitem(last=False)
+
         self.exact_cache[key] = {
             "payload": payload,
             "timestamp": now
         }
+
         if embedding is not None:
+            # Evict oldest semantic entry if over capacity
+            if len(self.semantic_entries) >= self.max_entries:
+                self.semantic_entries.pop(0)
             self.semantic_entries.append({
                 "query": query,
                 "embedding": embedding,

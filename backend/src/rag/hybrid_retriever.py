@@ -4,6 +4,7 @@ from typing import List, Dict, Any, Optional, Tuple
 from src.rag.vector_store import vector_store
 from src.rag.bm25 import bm25_index
 from src.core.intent_router import semantic_intent_router
+from src.rag.reranker import local_reranker
 
 
 # B19: Spanglish and English-Spanish terminology mapping
@@ -364,13 +365,17 @@ class HybridRetriever:
             reverse=True
         )
 
-        final_results = []
-        for doc_id, rrf_score in sorted_candidates[:top_k]:
+        # Gather top candidates for cross-encoder re-ranking (P1 / TODO-1.3)
+        candidate_count = max(top_k * 3, 12)
+        initial_candidates = []
+        for doc_id, rrf_score in sorted_candidates[:candidate_count]:
             if doc_id in doc_map:
                 item = dict(doc_map[doc_id])
                 item["rrf_score"] = round(rrf_score, 5)
-                final_results.append(item)
+                initial_candidates.append(item)
 
+        # Cross-Encoder re-ranking via FlashRank (CPU ONNX)
+        final_results = local_reranker.rerank(clean_query, initial_candidates, top_k=top_k)
         return final_results
 
 

@@ -9,7 +9,9 @@ from src.core.cache import query_cache
 from src.core.metrics import metrics_bus
 from src.core.dispatcher import escalation_dispatcher
 from src.core.memory import applicant_memory
+from src.core.query_router import deterministic_query_router
 from src.rag.hybrid_retriever import hybrid_retriever
+from src.rag.context_compressor import contextual_compressor
 from src.rag.prompt_templates import SYSTEM_PROMPT, build_rag_prompt
 
 
@@ -264,6 +266,14 @@ class PurePythonRAGEngine:
                 "action_buttons": [{"label": "0. Menú Principal", "value": "0"}]
             }
 
+        # 1b. Deterministic Pre-LLM Query Router (P1 / TODO-1.4: <15ms sub-response)
+        det_route = deterministic_query_router.route(effective_query)
+        if det_route:
+            latency = time.time() - start_time
+            metrics_bus.record_query(cached=False, latency=latency)
+            det_route["latency_ms"] = round(latency * 1000, 1)
+            return det_route
+
         # Helper for E45: Ensure source citations are always present even when cached
         def _ensure_cache_citations(res: dict, query_str: str) -> dict:
             if not res.get("source_documents"):
@@ -512,15 +522,16 @@ class PurePythonRAGEngine:
         # 5. Context Assembly & Prompt Construction (E42 preference injection & E43 summary)
         session_data = applicant_memory.get_session(session_id)
         conv_summary = applicant_memory.get_conversation_summary(session_id)
+        compressed_chunks = contextual_compressor.compress_chunks(chunks, effective_query)
         prompt = build_rag_prompt(
-            query,
-            chunks,
+            effective_query,
+            compressed_chunks,
             user_attributes=session_data.get("attributes"),
             conversation_summary=conv_summary
         )
 
         # 6. LLM Synthesis
-        llm_output = await self._call_llm_api(prompt, chunks=chunks)
+        llm_output = await self._call_llm_api(prompt, chunks=compressed_chunks)
         answer_text = llm_output["text"]
 
         # D38b / E44b: Conversational sanitization: never leak raw REST endpoints to the applicant

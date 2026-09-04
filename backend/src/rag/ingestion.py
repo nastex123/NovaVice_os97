@@ -74,6 +74,51 @@ class DocumentIngestionPipeline:
 
         return blocks
 
+    @staticmethod
+    def _infer_metadata(source_name: str, text: str) -> Dict[str, Any]:
+        # P1 / TODO-1.5: Extract and normalize structured metadata during ingestion
+        s_low = source_name.lower()
+        t_low = text.lower()
+
+        # 1. Infer pillar
+        if s_low.startswith("12_") or "beca" in s_low or "convenio" in s_low:
+            pillar = "becas_descuentos"
+        elif s_low.startswith("03_") or s_low.startswith("10_") or "precio" in s_low or "tarifa" in s_low:
+            pillar = "precios"
+        elif s_low.startswith("02_") or s_low.startswith("07_") or s_low.startswith("08_") or "horario" in s_low:
+            pillar = "horarios"
+        elif s_low.startswith("01_") or s_low.startswith("05_") or s_low.startswith("06_") or "curso" in s_low or "idioma" in s_low:
+            pillar = "cursos"
+        elif s_low.startswith("04_") or s_low.startswith("13_") or s_low.startswith("14_") or s_low.startswith("15_") or s_low.startswith("16_") or "sede" in s_low:
+            pillar = "sedes"
+        else:
+            pillar = "general"
+
+        # 2. Infer campus
+        if "chico" in t_low or "chicó" in t_low:
+            campus = "chico"
+        elif "chapinero" in t_low:
+            campus = "chapinero"
+        elif "poblado" in t_low:
+            campus = "poblado"
+        elif "laureles" in t_low:
+            campus = "laureles"
+        elif "granada" in t_low or "cali" in t_low:
+            campus = "granada"
+        elif "virtual" in t_low or "online" in t_low:
+            campus = "virtual"
+        else:
+            campus = "all"
+
+        # 3. Infer financial flag
+        has_pricing = bool(re.search(r"(\$|\bcop\b|\bpesos\b|\btarifa\b|\bcuota\b)", t_low))
+
+        return {
+            "pillar": pillar,
+            "campus": campus,
+            "has_pricing": has_pricing
+        }
+
     def _split_into_chunks(self, text: str, source_name: str) -> List[Dict[str, Any]]:
         # P2 / TODO-1.2: AST-aware semantic chunker that preserves tables as atomic entities
         chunks = []
@@ -92,6 +137,7 @@ class DocumentIngestionPipeline:
             combined_text = "\n\n".join(current_accumulator).strip()
             if len(combined_text) >= 30:
                 chunk_id = hashlib.sha256(f"{source_name}_{len(chunks)}_{combined_text}".encode("utf-8")).hexdigest()[:16]
+                inferred = self._infer_metadata(source_name, combined_text)
                 chunks.append({
                     "id": f"chunk_{chunk_id}",
                     "text": combined_text,
@@ -100,7 +146,8 @@ class DocumentIngestionPipeline:
                         "section": current_section,
                         "char_length": len(combined_text),
                         "has_table": "|" in combined_text,
-                        "is_table_atomic": False
+                        "is_table_atomic": False,
+                        **inferred
                     }
                 })
             current_accumulator = []
@@ -125,6 +172,7 @@ class DocumentIngestionPipeline:
                 # If table fits within table_limit_chars, emit as a single atomic chunk
                 if len(b_text) <= table_limit_chars:
                     t_chunk_id = hashlib.sha256(f"{source_name}_{len(chunks)}_table_{b_text}".encode("utf-8")).hexdigest()[:16]
+                    inferred_tbl = self._infer_metadata(source_name, b_text)
                     chunks.append({
                         "id": f"chunk_{t_chunk_id}",
                         "text": b_text,
@@ -134,7 +182,8 @@ class DocumentIngestionPipeline:
                             "char_length": len(b_text),
                             "has_table": True,
                             "is_table_atomic": True,
-                            "table_rows": len(table_lines)
+                            "table_rows": len(table_lines),
+                            **inferred_tbl
                         }
                     })
                 else:
@@ -150,6 +199,7 @@ class DocumentIngestionPipeline:
                         if group_len + len(row) > table_limit_chars and row_group:
                             sub_table = header_prefix + "\n" + "\n".join(row_group)
                             s_id = hashlib.sha256(f"{source_name}_{len(chunks)}_subtable_{sub_table}".encode("utf-8")).hexdigest()[:16]
+                            inferred_sub = self._infer_metadata(source_name, sub_table)
                             chunks.append({
                                 "id": f"chunk_{s_id}",
                                 "text": sub_table,
@@ -159,7 +209,8 @@ class DocumentIngestionPipeline:
                                     "char_length": len(sub_table),
                                     "has_table": True,
                                     "is_table_atomic": False,
-                                    "table_rows": len(row_group) + len(header_lines)
+                                    "table_rows": len(row_group) + len(header_lines),
+                                    **inferred_sub
                                 }
                             })
                             row_group = []
@@ -171,6 +222,7 @@ class DocumentIngestionPipeline:
                     if row_group:
                         sub_table = header_prefix + "\n" + "\n".join(row_group)
                         s_id = hashlib.sha256(f"{source_name}_{len(chunks)}_subtable_{sub_table}".encode("utf-8")).hexdigest()[:16]
+                        inferred_sub = self._infer_metadata(source_name, sub_table)
                         chunks.append({
                             "id": f"chunk_{s_id}",
                             "text": sub_table,
@@ -180,7 +232,8 @@ class DocumentIngestionPipeline:
                                 "char_length": len(sub_table),
                                 "has_table": True,
                                 "is_table_atomic": False,
-                                "table_rows": len(row_group) + len(header_lines)
+                                "table_rows": len(row_group) + len(header_lines),
+                                **inferred_sub
                             }
                         })
 
@@ -204,6 +257,7 @@ class DocumentIngestionPipeline:
                         chunk_slice = p_text[p_start:p_end].strip()
                         if len(chunk_slice) >= 30:
                             c_id = hashlib.sha256(f"{source_name}_{len(chunks)}_{chunk_slice}".encode("utf-8")).hexdigest()[:16]
+                            inferred_slice = self._infer_metadata(source_name, chunk_slice)
                             chunks.append({
                                 "id": f"chunk_{c_id}",
                                 "text": chunk_slice,
@@ -212,7 +266,8 @@ class DocumentIngestionPipeline:
                                     "section": current_section,
                                     "char_length": len(chunk_slice),
                                     "has_table": False,
-                                    "is_table_atomic": False
+                                    "is_table_atomic": False,
+                                    **inferred_slice
                                 }
                             })
                         if p_end >= p_len:
@@ -244,8 +299,11 @@ class DocumentIngestionPipeline:
         # Index into ChromaDB
         indexed_count = vector_store.add_documents(chunks)
 
-        # Fit pure Python BM25 index
-        bm25_index.fit(chunks)
+        # P1 / TODO-1.10: Fit pure Python BM25 index or load from disk if hash matches
+        bm25_path = settings.chroma_persist_dir / "bm25_index.pkl"
+        if not bm25_index.load(bm25_path, expected_hash=dir_hash):
+            bm25_index.fit(chunks)
+            bm25_index.save(bm25_path, directory_hash=dir_hash)
 
         return {
             "status": "success",

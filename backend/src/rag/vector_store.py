@@ -106,10 +106,16 @@ class ChromaVectorStore:
             try:
                 self.client = chromadb.PersistentClient(path=str(self.persist_dir))
                 self.embedding_fn = embedding_functions.DefaultEmbeddingFunction()
+                # P3 / TODO-1.9: Optimize HNSW parameters (M=16, construction_ef=64, search_ef=32)
                 self.collection = self.client.get_or_create_collection(
                     name=self.collection_name,
                     embedding_function=self.embedding_fn,
-                    metadata={"hnsw:space": "cosine"}
+                    metadata={
+                        "hnsw:space": "cosine",
+                        "hnsw:construction_ef": 64,
+                        "hnsw:M": 16,
+                        "hnsw:search_ef": 32
+                    }
                 )
             except Exception:
                 self.use_chroma = False
@@ -196,14 +202,17 @@ class ChromaVectorStore:
         # Fallback TF-IDF embedding (also works when Chroma is active as semantic layer)
         return self.fallback_engine.embed(query_text)
 
-    def query(self, query_text: str, top_k: int = 3) -> List[Dict[str, Any]]:
+    def query(self, query_text: str, top_k: int = 3, where: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
         if self.use_chroma:
             try:
-                results = self.collection.query(
-                    query_texts=[query_text],
-                    n_results=top_k,
-                    include=["documents", "metadatas", "distances"]
-                )
+                kwargs: Dict[str, Any] = {
+                    "query_texts": [query_text],
+                    "n_results": top_k,
+                    "include": ["documents", "metadatas", "distances"]
+                }
+                if where:
+                    kwargs["where"] = where
+                results = self.collection.query(**kwargs)
                 formatted_results = []
                 if results and results["ids"] and results["ids"][0]:
                     ids = results["ids"][0]

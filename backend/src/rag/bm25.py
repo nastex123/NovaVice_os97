@@ -1,10 +1,13 @@
 import math
 import re
+import pickle
+import unicodedata
+from pathlib import Path
 from typing import List, Dict, Tuple, Optional
 
 
 class PureBM25:
-    # Pure Python BM25 implementation with Spanish and English stop-word filtering and stemming.
+    # Pure Python BM25 implementation with Spanish and English stop-word filtering, stemming and disk persistence.
 
     STOP_WORDS = {
         # English stop-words
@@ -26,7 +29,29 @@ class PureBM25:
         "beca", "becas", "descuento", "descuentos", "precio", "precios",
         "tarifa", "tarifas", "costo", "costos", "horario", "horarios",
         "curso", "cursos", "sede", "sedes", "subsidio", "subsidios",
-        "bono", "bonos", "convenio", "convenios", "matricula", "matriculas"
+        "bono", "bonos", "convenio", "convenios", "matricula", "matriculas",
+        "chico", "chapinero", "poblado", "laureles", "granada", "comfama",
+        "colsubsidio", "compensar", "cafam", "comfandi", "nequi", "daviplata"
+    }
+
+    # P1 / TODO-1.7: Canonical lemma dictionary for Colombian entities & campus names
+    LEMMAS = {
+        "chico": "chico",
+        "chicó": "chico",
+        "chicos": "chico",
+        "chapinero": "chapinero",
+        "chapineros": "chapinero",
+        "laurel": "laureles",
+        "laureles": "laureles",
+        "poblado": "poblado",
+        "granada": "granada",
+        "comfama": "comfama",
+        "colsubsidio": "colsubsidio",
+        "compensar": "compensar",
+        "cafam": "cafam",
+        "comfandi": "comfandi",
+        "daviplata": "daviplata",
+        "nequi": "nequi"
     }
 
     def __init__(self, k1: float = 1.5, b: float = 0.75):
@@ -40,9 +65,18 @@ class PureBM25:
         self.inverted_index: Dict[str, List[Tuple[int, int]]] = {}
         self.doc_ids: List[str] = []
         self.tokenized_corpus: List[List[str]] = []
+        self.directory_hash: str = ""
+
+    def _normalize_token(self, tok: str) -> str:
+        # Strip accents for phonetic stability
+        nfkd = unicodedata.normalize("NFD", tok.lower())
+        stripped = "".join(c for c in nfkd if unicodedata.category(c) != "Mn")
+        return self.LEMMAS.get(stripped, stripped)
 
     def _stem(self, word: str) -> str:
-        w = word.lower()
+        w = self._normalize_token(word)
+        if w in self.LEMMAS.values():
+            return w
         if w.endswith("ciones") and len(w) > 6:
             return w[:-6] + "cion"
         if w.endswith("dades") and len(w) > 5:
@@ -106,6 +140,48 @@ class PureBM25:
 
         ranked = sorted(scores.items(), key=lambda item: item[1], reverse=True)[:top_k]
         return [(self.doc_ids[idx], score) for idx, score in ranked]
+
+    def save(self, filepath: Path, directory_hash: str = "") -> bool:
+        # P1 / TODO-1.10: Serialize inverted index to disk with directory SHA-256 hash
+        try:
+            filepath.parent.mkdir(parents=True, exist_ok=True)
+            self.directory_hash = directory_hash
+            state = {
+                "k1": self.k1,
+                "b": self.b,
+                "corpus_size": self.corpus_size,
+                "avg_doc_len": self.avg_doc_len,
+                "doc_lengths": self.doc_lengths,
+                "inverted_index": self.inverted_index,
+                "doc_ids": self.doc_ids,
+                "directory_hash": self.directory_hash
+            }
+            with open(filepath, "wb") as f:
+                pickle.dump(state, f, protocol=pickle.HIGHEST_PROTOCOL)
+            return True
+        except Exception:
+            return False
+
+    def load(self, filepath: Path, expected_hash: str = "") -> bool:
+        # P1 / TODO-1.10: Load serialized index from disk validating directory hash
+        if not filepath.exists():
+            return False
+        try:
+            with open(filepath, "rb") as f:
+                state = pickle.load(f)
+            if expected_hash and state.get("directory_hash") != expected_hash:
+                return False  # Invalidated by changed documents
+            self.k1 = state["k1"]
+            self.b = state["b"]
+            self.corpus_size = state["corpus_size"]
+            self.avg_doc_len = state["avg_doc_len"]
+            self.doc_lengths = state["doc_lengths"]
+            self.inverted_index = state["inverted_index"]
+            self.doc_ids = state["doc_ids"]
+            self.directory_hash = state.get("directory_hash", "")
+            return True
+        except Exception:
+            return False
 
 
 bm25_index = PureBM25()

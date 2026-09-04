@@ -10,11 +10,11 @@
 | Fase | Enfoque Principal | Total Tareas | Completadas | En Progreso | Pendientes | Estado |
 | :---: | :--- | :---: | :---: | :---: | :---: | :---: |
 | **Fase 1** | Precisión de Datos y Recuperación RAG | 11 | 11 | 0 | 0 | ✅ Completada (100%) |
-| **Fase 2** | Rendimiento Backend y Resiliencia + Complemento Anti-alucinación | 17 | 14 | 0 | 3 | 🟡 En Progreso (82.4%) |
+| **Fase 2** | Rendimiento Backend y Resiliencia + Complemento Anti-alucinación | 17 | 15 | 0 | 2 | 🟡 En Progreso (88.2%) |
 | **Fase 3** | Frontend Moderno, UI Retro & Accesibilidad | 10 | 0 | 0 | 10 | ⏳ Pendiente |
 | **Fase 4** | Testing Automatizado, QA & Tooling DX | 8 | 0 | 0 | 8 | ⏳ Pendiente |
 | **Fase 5** | Horizontes Futuros y Despliegues Especializados | 11 | 0 | 11 | ⏳ Pendiente |
-| **TOTAL** | **Propuestas de Mejora Técnica** | **57** | **25** | **0** | **32** | **43.9%** |
+| **TOTAL** | **Propuestas de Mejora Técnica** | **57** | **26** | **0** | **31** | **45.6%** |
 
 ---
 
@@ -123,9 +123,9 @@
 - [x] **TODO-2.14 [CRÍTICO] Temperatura 0 + modo extractivo + auto-consistencia:**
   - [x] Fijar `llm_temperature=0.0` en `backend/src/config.py` y reforzar `SYSTEM_PROMPT` con regla extractiva (solo copiar hechos del contexto oficial).
   - [x] Implementar self-consistency N=3 con voto mayoritario cuando la confianza del retriever esté en rango medio (0.35-0.50); priorizar precisión sobre latencia.
-- [ ] **TODO-2.15 [RECOMENDADO] Embeddings multilingües + reranker de alta precisión:**
-  - [ ] Reemplazar fallback TF-IDF con `fastembed` (`BAAI/bge-m3` o `bge-small-es`, ONNX CPU) en `backend/src/rag/vector_store.py`.
-  - [ ] Implementar `backend/src/rag/reranker.py` con `BAAI/bge-reranker-v2-m3` (fallback `flashrank`) sobre top-20 candidatos hacia top-5; complementa TODO-1.3 con configuración de máxima precisión.
+- [x] **TODO-2.15 [RECOMENDADO] Embeddings multilingües + reranker de alta precisión:**
+  - [x] Reemplazar fallback TF-IDF con `fastembed` (`BAAI/bge-m3` o `bge-small-es`, ONNX CPU) en `backend/src/rag/vector_store.py`.
+  - [x] Implementar `backend/src/rag/reranker.py` con `BAAI/bge-reranker-v2-m3` (fallback `flashrank`) sobre top-20 candidatos hacia top-5; complementa TODO-1.3 con configuración de máxima precisión.
 - [ ] **TODO-2.16 [RECOMENDADO] Guardrails de salida + normalización robusta de entidades:**
   - [ ] Extender `backend/src/core/guardrails.py` con validación post-LLM (`guardrails-ai`): exigir símbolo `$ COP` en precios y formato horario exacto; bloquear respuesta si falta.
   - [ ] Integrar `presidio-analyzer` para PII, `rapidfuzz` para typos y `spacy es_core_news_lg` para extracción de sede/horario/monto en `backend/src/rag/bm25.py`; complementa TODO-1.7.

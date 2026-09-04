@@ -382,8 +382,8 @@ class HybridRetriever:
             reverse=True
         )
 
-        # Gather top candidates for cross-encoder re-ranking (P1 / TODO-1.3)
-        candidate_count = max(top_k * 3, 12)
+        # Gather top-20 candidates for cross-encoder re-ranking (P1 / TODO-1.3 & TODO-2.15)
+        candidate_count = max(top_k * 4, 20)
         initial_candidates = []
         for doc_id, rrf_score in sorted_candidates[:candidate_count]:
             if doc_id in doc_map:

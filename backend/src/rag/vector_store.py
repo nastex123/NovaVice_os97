@@ -12,6 +12,12 @@ try:
 except ImportError:
     HAS_CHROMADB = False
 
+try:
+    from fastembed import TextEmbedding
+    HAS_FASTEMBED = True
+except ImportError:
+    HAS_FASTEMBED = False
+
 
 class PurePythonEmbeddingEngine:
     # Pure Python TF-IDF embedding engine with Spanish and English stemming.
@@ -105,6 +111,15 @@ class ChromaVectorStore:
         if self.use_chroma:
             try:
                 self.client = chromadb.PersistentClient(path=str(self.persist_dir))
+                # High-precision Multilingual embedding or Default embedding function (TODO-2.15)
+                if HAS_FASTEMBED:
+                    try:
+                        self.fastembed_model = TextEmbedding(model_name="BAAI/bge-small-en-v1.5")
+                    except Exception:
+                        self.fastembed_model = None
+                else:
+                    self.fastembed_model = None
+
                 self.embedding_fn = embedding_functions.DefaultEmbeddingFunction()
                 # P3 / TODO-1.9: Optimize HNSW parameters (M=16, construction_ef=64, search_ef=32)
                 self.collection = self.client.get_or_create_collection(

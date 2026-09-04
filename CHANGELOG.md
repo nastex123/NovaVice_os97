@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [2026-09-04 10:20] [Feat/Fase-2-TODO-2.15-Multilingual-Embeddings-Reranker]
+- **Embeddings multilingües y re-ranking de alta precisión top-20 a top-5 (TODO-2.15 / Prop. RECOMENDADA):**
+  - Implementada integración en `backend/src/rag/vector_store.py` para soporte de embeddings multilingües (`BAAI/bge` con `fastembed` ONNX) manteniendo fallback determinista.
+  - Ampliado pool de candidatos en `backend/src/rag/hybrid_retriever.py` a top-20 (`max(top_k * 4, 20)`) previo al paso por el cross-encoder.
+  - Actualizado `backend/src/rag/reranker.py` con configuración multi-modelo (`BAAI/bge-reranker-large` / `ms-marco-TinyBERT-L-2-v2` vía FlashRank ONNX) para reordenamiento de máxima precisión hacia top-5.
+
 ### [2026-09-04 10:19] [Feat/Fase-2-TODO-2.14-Extractive-Mode-Self-Consistency]
 - **Temperatura 0.0, modo extractivo estricto y auto-consistencia N=3 (TODO-2.14 / Prop. CRÍTICA):**
   - Fijada `llm_temperature = 0.0` en `backend/src/config.py` para erradicar variabilidad estocástica en respuestas oficiales.

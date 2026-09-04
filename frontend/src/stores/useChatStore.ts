@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { get as idbGet, set as idbSet, del as idbDel } from "idb-keyval";
 import { ChatMessage, TelemetryMetrics, ServerHealth } from "../lib/types";
 import { sendChatMessage, streamChatMessage, fetchTelemetryMetrics, fetchServerHealth } from "../lib/api";
 
@@ -28,6 +29,9 @@ Soy tu asistente virtual de admisiones, programas y servicios académicos. Puede
   ],
 };
 
+const IDB_SESSION_KEY = "nova_admissions_session_id";
+const IDB_MESSAGES_KEY = "nova_admissions_chat_messages";
+
 interface ChatState {
   messages: ChatMessage[];
   isLoading: boolean;
@@ -36,8 +40,10 @@ interface ChatState {
   metrics: TelemetryMetrics | null;
   health: ServerHealth | null;
   streamMode: boolean;
+  isHydrated: boolean;
 
   // Actions
+  initFromStorage: () => Promise<void>;
   setMessages: (messages: ChatMessage[] | ((prev: ChatMessage[]) => ChatMessage[])) => void;
   setIsLoading: (loading: boolean) => void;
   setSessionId: (id: string) => void;
@@ -60,14 +66,49 @@ export const useChatStore = create<ChatState>((set, get) => ({
   metrics: null,
   health: null,
   streamMode: true,
+  isHydrated: false,
 
-  setMessages: (messagesOrFn) =>
-    set((state) => ({
-      messages: typeof messagesOrFn === "function" ? messagesOrFn(state.messages) : messagesOrFn,
-    })),
+  initFromStorage: async () => {
+    if (typeof window === "undefined") return;
+    try {
+      const [savedSession, savedMessages] = await Promise.all([
+        idbGet<string>(IDB_SESSION_KEY),
+        idbGet<ChatMessage[]>(IDB_MESSAGES_KEY),
+      ]);
+
+      let session = savedSession;
+      if (!session) {
+        session = localStorage.getItem("nova_idiomas_session") || "sess_idiomas_" + Math.random().toString(36).substring(2, 9);
+        await idbSet(IDB_SESSION_KEY, session);
+      }
+
+      set({
+        sessionId: session,
+        messages: savedMessages && savedMessages.length > 0 ? savedMessages : [INITIAL_WELCOME_MESSAGE],
+        isHydrated: true,
+      });
+    } catch {
+      set({ isHydrated: true });
+    }
+  },
+
+  setMessages: (messagesOrFn) => {
+    set((state) => {
+      const nextMessages = typeof messagesOrFn === "function" ? messagesOrFn(state.messages) : messagesOrFn;
+      if (typeof window !== "undefined") {
+        idbSet(IDB_MESSAGES_KEY, nextMessages).catch(() => {});
+      }
+      return { messages: nextMessages };
+    });
+  },
 
   setIsLoading: (isLoading) => set({ isLoading }),
-  setSessionId: (sessionId) => set({ sessionId }),
+  setSessionId: (sessionId) => {
+    if (typeof window !== "undefined") {
+      idbSet(IDB_SESSION_KEY, sessionId).catch(() => {});
+    }
+    set({ sessionId });
+  },
   setCurrentMenuLabel: (currentMenuLabel) => set({ currentMenuLabel }),
   setMetrics: (metrics) => set({ metrics }),
   setHealth: (health) => set({ health }),
@@ -267,6 +308,8 @@ export const useChatStore = create<ChatState>((set, get) => ({
     const newSession = "sess_idiomas_" + Math.random().toString(36).substring(2, 9);
     if (typeof window !== "undefined") {
       localStorage.setItem("nova_idiomas_session", newSession);
+      idbSet(IDB_SESSION_KEY, newSession).catch(() => {});
+      idbSet(IDB_MESSAGES_KEY, [INITIAL_WELCOME_MESSAGE]).catch(() => {});
     }
     set({
       sessionId: newSession,

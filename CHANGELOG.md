@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [2026-09-04 11:37] [Feat/Fase-3-TODO-3.4-IndexedDB-Session-Persistence]
+- **Persistencia asíncrona de sesiones y preferencias en `IndexedDB` con `idb-keyval` (TODO-3.4 / Prop. RECOMENDADA):**
+  - Instalada dependencia `idb-keyval` en `frontend/package.json`.
+  - Integrada persistencia asíncrona en `frontend/src/stores/useChatStore.ts` almacenando `sessionId` y array de mensajes (`ChatMessage[]`), con función de hidratación `initFromStorage()`.
+  - Integrada persistencia de preferencias de usuario en `frontend/src/stores/useSettingsStore.ts` (`crtEnabled`, `soundEnabled`, `bypassRetroA11y`, `fontSize`).
+  - Actualizado `frontend/src/app/page.tsx` para invocar automáticamente la hidratación de ambos almacenes en el ciclo de vida del cliente.
+  - Verificada compilación de producción limpia con `npm run build` en Next.js 15.
+
 ### [2026-09-04 11:35] [Feat/Fase-3-TODO-3.3-Chat-Messages-Virtualization]
 - **Virtualización de mensajes del chat con `@tanstack/react-virtual` (TODO-3.3 / Prop. RECOMENDADA):**
   - Instalada dependencia `@tanstack/react-virtual` en `frontend/package.json`.

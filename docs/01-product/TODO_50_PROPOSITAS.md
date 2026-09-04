@@ -11,10 +11,10 @@
 | :---: | :--- | :---: | :---: | :---: | :---: | :---: |
 | **Fase 1** | Precisión de Datos y Recuperación RAG | 11 | 11 | 0 | 0 | ✅ Completada (100%) |
 | **Fase 2** | Rendimiento Backend y Resiliencia + Complemento Anti-alucinación | 17 | 17 | 0 | 0 | ✅ Completada (100%) |
-| **Fase 3** | Frontend Moderno, UI Retro & Accesibilidad | 10 | 3 | 0 | 7 | 🚀 En Progreso (30%) |
+| **Fase 3** | Frontend Moderno, UI Retro & Accesibilidad | 10 | 4 | 0 | 6 | 🚀 En Progreso (40%) |
 | **Fase 4** | Testing Automatizado, QA & Tooling DX | 8 | 0 | 0 | 8 | ⏳ Pendiente |
 | **Fase 5** | Horizontes Futuros y Despliegues Especializados | 11 | 0 | 0 | 11 | ⏳ Pendiente |
-| **TOTAL** | **Propuestas de Mejora Técnica** | **57** | **31** | **0** | **26** | **54.4%** |
+| **TOTAL** | **Propuestas de Mejora Técnica** | **57** | **32** | **0** | **25** | **56.1%** |
 
 ---
 
@@ -148,8 +148,8 @@
 - [x] **TODO-3.3 [Prop. 27 - RECOMENDADO] Virtualización de mensajes del chat (`@tanstack/react-virtual`):**
   - [x] Implementar lista virtualizada en el contenedor de mensajes para chats con más de 50 intervenciones.
   - [x] Mantener el auto-scroll hacia el fondo cuando se generen nuevos tokens en streaming.
-- [ ] **TODO-3.4 [Prop. 28 - RECOMENDADO] Persistencia de sesiones en `IndexedDB`:**
-  - [ ] Implementar almacenamiento asíncrono con `idb-keyval` para historial de chat y preferencias del usuario.
+- [x] **TODO-3.4 [Prop. 28 - RECOMENDADO] Persistencia de sesiones en `IndexedDB`:**
+  - [x] Implementar almacenamiento asíncrono con `idb-keyval` para historial de chat y preferencias del usuario.
 - [ ] **TODO-3.5 [Prop. 29 - RECOMENDADO] Optimización de Server Components (RSC) vs Client Components:**
   - [ ] Separar la cáscara estática del escritorio retro en Server Components de Next.js 15.
   - [ ] Mantener la directiva `'use client'` únicamente en los nodos interactivos.

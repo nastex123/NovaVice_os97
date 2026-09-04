@@ -20,23 +20,21 @@ export default function Home() {
   const resetChat = useChatStore((state) => state.resetChat);
   const newChat = useChatStore((state) => state.newChat);
 
+  const initChatStorage = useChatStore((state) => state.initFromStorage);
+  const initSettingsStorage = useSettingsStore((state) => state.initFromStorage);
   const setIsMetricsOpen = useDesktopStore((state) => state.setIsMetricsOpen);
   const crtEnabled = useSettingsStore((state) => state.crtEnabled);
 
-  // Initialize persistent session
+  // Initialize persistent session & hydrate from IndexedDB
   useEffect(() => {
-    let storedSession = localStorage.getItem("nova_idiomas_session");
-    if (!storedSession) {
-      storedSession = "sess_idiomas_" + Math.random().toString(36).substring(2, 9);
-      localStorage.setItem("nova_idiomas_session", storedSession);
-    }
-    setSessionId(storedSession);
+    initChatStorage();
+    initSettingsStorage();
 
     // Initial Telemetry Fetch & Periodic Polling
     refreshTelemetry();
     const interval = setInterval(refreshTelemetry, 5000);
     return () => clearInterval(interval);
-  }, [setSessionId, refreshTelemetry]);
+  }, [initChatStorage, initSettingsStorage, refreshTelemetry]);
 
   // C29: Re-engage timer at 60s of inactivity
   useEffect(() => {

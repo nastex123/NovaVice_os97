@@ -20,7 +20,9 @@ class Settings(BaseSettings):
     # Vector Storage and Retrieval
     chroma_collection_name: str = "idiomas_knowledge_base"
     similarity_threshold: float = 0.50
+    similarity_threshold_pilar: float = 0.35
     top_k_results: int = 3
+    # Heavy-only escalation: only escalate if very heavy and user confirms Sí
 
     # Advisor Engine Selection (OpenCode vs AGY / Antigravity)
     advisor_backend: str = "opencode"  # "opencode" or "agy"
@@ -32,7 +34,7 @@ class Settings(BaseSettings):
     # AGY (Google Antigravity) Integration
     agy_enabled: bool = True
     agy_model: str = "gemini-3.7-flash"
-    agy_reasoning_effort: str = "low"
+    agy_reasoning_effort: str = "high"
 
     # LLM and Provider Configuration
     llm_provider: str = "opencode"
@@ -45,10 +47,6 @@ class Settings(BaseSettings):
     admissions_office_email: str = "admisiones@novaidiomas.edu.co"
     support_office_email: str = "soporte@novaidiomas.edu.co"
     escalation_webhook_url: str = ""
-
-    # Telegram Bot Integration
-    telegram_bot_token: str = ""
-    telegram_enabled: bool = False
 
     # Cache Invalidation and Expiry
     cache_ttl_seconds: int = 3600

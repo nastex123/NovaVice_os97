@@ -2,7 +2,7 @@
 
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Gauge, X, Activity, TrendingUp, HelpCircle, DollarSign, Database, Clock, ShieldCheck } from "lucide-react";
+import { Activity, TrendingUp, HelpCircle, DollarSign } from "lucide-react";
 import { TelemetryMetrics, ServerHealth } from "../lib/types";
 
 interface MetricsModalProps {
@@ -130,6 +130,40 @@ export const MetricsModal: React.FC<MetricsModalProps> = ({
                     <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />
                     PUERTO 8000
                   </span>
+                </div>
+              </div>
+
+              {/* E48: Distribución de Consultas por Pilar de Admisiones */}
+              <div className="p-3 bg-white border-2 border-black shadow-retro-sm space-y-2">
+                <div className="flex items-center justify-between text-[11px] font-bold font-mono border-b border-black pb-1">
+                  <span>🏛️ DISTRIBUCIÓN POR PILAR (E48)</span>
+                  <span className="text-[10px] text-slate-500">TOTAL: {metrics?.total_queries_processed ?? 0}</span>
+                </div>
+                <div className="space-y-1.5 text-[10px] font-mono">
+                  {Object.entries({
+                    "1. Cursos & Niveles": metrics?.pillar_distribution?.cursos ?? 0,
+                    "2. Horarios & Modalidades": metrics?.pillar_distribution?.horarios ?? 0,
+                    "3. Precios & Financiación": metrics?.pillar_distribution?.precios ?? 0,
+                    "4. Admisiones & Sedes": metrics?.pillar_distribution?.sedes ?? 0,
+                    "5. Becas & Descuentos": metrics?.pillar_distribution?.becas ?? 0,
+                  }).map(([label, count]) => {
+                    const total = Math.max(metrics?.total_queries_processed ?? 1, 1);
+                    const pct = Math.round((count / total) * 100);
+                    return (
+                      <div key={label} className="space-y-0.5">
+                        <div className="flex justify-between text-slate-700">
+                          <span>{label}</span>
+                          <span className="font-bold">{count} ({pct}%)</span>
+                        </div>
+                        <div className="w-full bg-slate-200 h-1.5 border border-black overflow-hidden">
+                          <div
+                            className="bg-vicePink h-full transition-all duration-300"
+                            style={{ width: `${Math.min(pct, 100)}%` }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 

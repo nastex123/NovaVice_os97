@@ -8,7 +8,6 @@
 ├── README.md
 ├── requirements.txt
 ├── .env.example
-├── Dockerfile
 ├── installer.py                    # Cross-platform interactive installer (OS detector & dependencies)
 ├── install.bat                     # Windows one-click installer
 ├── install.sh                      # Linux/macOS one-click installer

@@ -32,6 +32,7 @@ Human admission counselors spent excessive time repeatedly answering standard FA
 - Automated final degree certification without human committee approval.
 - Direct credit card billing inside the chat interface.
 - Open-ended arbitrary chit-chat unrelated to the university's academic offerings and admissions.
+- **Merit-based scholarships (becas):** Nova does not offer `beca` scholarships; only discounts (10% contado, 15% cajas/familiar, $100k bono) per `12_04_becas_descuentos_aclaratoria.md` and `ADR-008`. Queries about `becas` map to discounts to avoid hallucination.
 
 ---
 
@@ -43,8 +44,9 @@ Human admission counselors spent excessive time repeatedly answering standard FA
 3. **University AI/IT Administrator:** Monitors system health, Prometheus telemetry, and knowledge base indexing.
 
 ### User Stories
-- **US-01 (Guided Exploration):** *As an applicant, I want to type numbers (1 to 9) or click buttons to explore programs, syllabi, labs, tuition, deadlines, and scholarships step-by-step.*
-- **US-02 (Human Advisor via OpenCode Deep Reasoning):** *As an applicant seeking personalized guidance, I want to speak with an advisor (Option 9) and receive empathetic, comprehensive answers synthesized from all official documents.*
+- **US-01 (Guided Exploration):** *As an applicant, I want to type numbers (1 to 4) or click buttons to explore programs, schedules, COP pricing, and campuses step-by-step, with 80+ natural language variants (horario/precio/beca→descuento/curso/modalidad/sede).*
+- **US-02 (Human Advisor via OpenCode Deep Reasoning — Heavy Only):** *As an applicant seeking personalized guidance for very heavy cases (visa, legal, beca 100%), I want escalation only after 2-phase confirmation (show best chunk + “¿Sí/No?”), not for routine pilar queries.*
+- **US-07 (Becas→Descuentos):** *As an applicant asking about scholarships, I want a clear answer that Nova has no merit becas but offers 10%/15% descuentos, grounded in `12_04_becas_descuentos_aclaratoria.md`.*
 - **US-03 (Clean Markdown Typography):** *As an applicant, I want to read structured responses with custom glowing bullet points, callout quote boxes, and clear headers without raw markdown symbols.*
 - **US-04 (Curriculums & Labs):** *As an engineer applicant, I want to inspect specific course syllabi (e.g. CS-201 Algorithms) or GPU research cluster specs (NVIDIA H100).*
 - **US-05 (International Mobility):** *As a foreign student, I want to verify I-20 visa procedures and exchange programs with TU Munich or Tokyo Tech (JASSO scholarship).*
@@ -58,16 +60,35 @@ Human admission counselors spent excessive time repeatedly answering standard FA
 | :--- | :--- | :---: | :--- | :---: |
 | **FR-01** | Pure Python RAG Engine (No LangChain/n8n) | P0 | `src/rag/engine.py` | Complete |
 | **FR-02** | Hybrid Search (Dense Cosine + Auto-Fitting BM25) | P0 | `src/rag/hybrid_retriever.py` | Complete |
-| **FR-03** | 87 Official Documents & 264 Chunks Corpus | P0 | `data/documents/` (7 Clusters) | Complete |
-| **FR-04** | Guided Menu State Machine (1-9, 8 Submenus, '0' return) | P0 | `src/core/navigation.py` | Complete |
+| **FR-03** | 83 Official Documents & 245 Chunks Corpus (+ `12_04` becas→descuentos) | P0 | `data/documents/` (20 Clusters, 83 docs) | Complete (Fase 0) |
+| **FR-04** | Guided Menu State Machine (1-4 pillars, 24 leaves, `0` return) + 80 intent synonyms + threshold pilar 0.35 vs heavy 0.50 | P0 | `src/core/navigation.py:163,330` | Planned (Fase A/D) |
 | **FR-05** | Python Intermediary Bridge to OpenCode (Port 4096) | P0 | `src/core/opencode_client.py` | Complete |
 | **FR-06** | OpenCode Multi-Document Deep Reasoning (45s window) | P0 | `src/core/opencode_client.py` | Complete |
 | **FR-07** | Next.js 15 + PixiJS Web Frontend (App Router, Tailwind) | P0 | `frontend/` | Complete |
 | **FR-08** | GFM Markdown Renderer (`react-markdown` + `remark-gfm`) | P0 | `frontend/src/components/ChatContainer.tsx` | Complete |
 | **FR-09** | Cross-Platform Installer & Process Launcher (`run.py`) | P0 | `installer.py`, `run.py`, `.bat`, `.sh` | Complete |
 | **FR-10** | Pre-Flight Prompt Injection Guardrail | P0 | `src/core/guardrails.py` | Complete |
-| **FR-11** | Automated Human Escalation Logging (`escalations.json`) | P1 | `src/core/dispatcher.py` | Complete |
-| **FR-12** | Dual Cache with File-Hash Invalidation | P1 | `src/core/cache.py` | Complete |
+| **FR-11** | Automated Human Escalation Logging (`escalations.json`) — Heavy Only (2-phase Sí/No, lista negra very heavy) | P1 | `src/core/dispatcher.py:24`, `engine.py:220` | Planned (Fase D31-40) |
+| **FR-12** | Dual Cache with File-Hash Invalidation + Semantic 0.88 pilar (vs 0.95) | P1 | `src/core/cache.py:47` `vector_store.py:167` | Implemented (Fase 2) + Planned (B20) |
 | **FR-13** | SSE Real-Time Streaming (`/api/v1/chat/stream`) | P1 | `src/api/routes.py` | Complete |
 | **FR-14** | JSON & Prometheus Telemetry (`/metrics/prometheus`) | P1 | `src/core/metrics.py` | Complete |
-| **FR-15** | Automated Pytest Test Suite (19/19 Tests Passed) | P0 | `tests/` | Complete |
+| **FR-15** | Automated Pytest Test Suite (55/55 Tests Passed) | P0 | `tests/` | Complete |
+
+---
+
+## 5. Strategic Roadmap & Phased Implementation (50 Proposals)
+
+The long-term technical evolution of Nova OS '97 is organized into **5 sequential phases** covering 50 architectural proposals without touching security guardrails.
+
+For full technical specifications, acceptance criteria, and category breakdowns, refer to:
+- 📖 **[Roadmap Maestro de 50 Propuestas Técnicas (docs/01-product/ROADMAP_50_PROPOSITAS.md)](ROADMAP_50_PROPOSITAS.md)**
+- 📖 **[Propuestas de Mejora Tecnológica (docs/03-architecture/technological-enhancement-proposals.md)](../03-architecture/technological-enhancement-proposals.md)**
+
+| Phase | Core Objective | Key Deliverables | Status |
+| :--- | :--- | :--- | :---: |
+| **Phase 1** | **Data Precision & RAG Retrieval Quality** | Proposals 1-7, 19, 21, 23, 43 (Adaptive RRF, AST Table Chunker, Cross-Encoder, Semantic Cache) | **Planned** |
+| **Phase 2** | **Backend Resilience & Persistence** | Proposals 11-16, 20, 22, 45, 46 (SSE Stream, HTTP Pool, Circuit Breaker, SQLite WAL, Docker) | **Planned** |
+| **Phase 3** | **Modern Frontend & Accessible Retro UI** | Proposals 25-30, 33-36 (Zustand, SSE Reader, Virtualization, WebGL CRT, WCAG AAA Mode) | **Planned** |
+| **Phase 4** | **Automated Testing & Developer Experience** | Proposals 39-44, 47-49 (RAG Evaluation Pipeline, Mutation Testing, Locust, CLI Doctor) | **Planned** |
+| **Phase 5** | **Future Horizons & Specialized Deployments** | Proposals 8-10, 17, 18, 24, 31, 32, 37, 38, 50 (Graph RAG, Web Audio, Tauri Kiosk Mode) | **Planned** |
+

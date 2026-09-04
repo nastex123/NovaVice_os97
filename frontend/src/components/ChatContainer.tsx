@@ -2,7 +2,7 @@
 
 import React, { useRef, useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Bot, User, Clock, FileText, Sparkles, Info, ChevronRight, Terminal } from "lucide-react";
+import { Bot, User, Clock, FileText, Sparkles, Info, ChevronRight, RotateCcw } from "lucide-react";
 import confetti from "canvas-confetti";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -318,7 +318,7 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
                             isReturn
                               ? "bg-retroBeige hover:bg-black hover:text-white text-black sm:col-span-2 font-mono"
                               : isAdvisor
-                              ? "bg-vicePink-pastel hover:bg-vicePink text-black hover:text-white border-black sm:col-span-2"
+                              ? "bg-retroBeige hover:bg-vicePink-pastel text-black hover:text-vicePink-dark sm:col-span-2 font-mono"
                               : "bg-retroBeige hover:bg-vicePink-pastel text-black hover:text-vicePink-dark"
                           }`}
                         >
@@ -330,6 +330,20 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
                         </button>
                       );
                     })}
+
+                    {/* C22: Botón Reformular si confianza baja o clarificación */}
+                    {(msg.mode === "clarification" || (msg.confidence_score !== undefined && msg.confidence_score < 0.55)) && (
+                      <button
+                        onClick={() => onActionButtonClick("¿Cuáles son los cursos, horarios y precios disponibles?")}
+                        className="w-full text-left p-2.5 sm:p-3 text-xs sm:text-sm font-bold transition-all flex items-center justify-between gap-2 border-2 border-dashed border-black bg-viceYellow-light hover:bg-viceYellow text-black shadow-retro sm:col-span-2 font-mono"
+                      >
+                        <div className="flex items-center gap-2">
+                          <RotateCcw className="w-4 h-4 text-black shrink-0" />
+                          <span>🔄 ¿No encontraste lo que buscabas? Reformular con opciones generales</span>
+                        </div>
+                        <ChevronRight className="w-4 h-4 shrink-0 font-bold ml-1" />
+                      </button>
+                    )}
                   </div>
                 )}
               </div>

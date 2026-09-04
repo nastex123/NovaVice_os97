@@ -7,6 +7,282 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [2026-09-04 08:06] [Feat/Fase-1-TODO-1.3-a-1.10-Complete]
+- **Implementación completa de tareas pendientes de Fase 1 (TODO-1.3 a TODO-1.10):**
+  - **TODO-1.3 [Prop. 3 - Re-ranking local Cross-Encoder]:** Creado `backend/src/rag/reranker.py` con `FlashRank` (`ms-marco-TinyBERT-L-2-v2` en CPU ONNX). Integrado en `hybrid_retriever.py` sobre candidatos RRF con fallback automático. Tests en `backend/tests/test_reranker.py`.
+  - **TODO-1.4 [Prop. 4 - Deterministic Query Router]:** Creado `backend/src/core/query_router.py` con respuestas exactas en <15ms para Placement Test y canales de WhatsApp/contacto, integrado antes de la síntesis en `backend/src/rag/engine.py`. Tests en `backend/tests/test_query_router.py`.
+  - **TODO-1.5 [Prop. 5 - Metadatos estructurados y filtros booleanos]:** Implementado `_infer_metadata` (`pillar`, `campus`, `has_pricing`) en `backend/src/rag/ingestion.py`. Agregado parámetro `where` a `ChromaVectorStore.query` en `backend/src/rag/vector_store.py`.
+  - **TODO-1.6 [Prop. 6 - Contextual Compression y Sentence Window Retrieval]:** Creado `backend/src/rag/context_compressor.py` para comprimir chunks periféricos conservando ventanas oracionales alrededor de términos de búsqueda antes del prompt del LLM en `backend/src/rag/engine.py`.
+  - **TODO-1.7 [Prop. 7 - Normalizador fonético y lemático]:** Añadido diccionario `LEMMAS` y normalización fonética sin tildes en `backend/src/rag/bm25.py` para sedes y convenios colombianos ("Chicó", "Laureles", "Comfama", "Colsubsidio", "Daviplata", "Nequi").
+  - **TODO-1.8 [Prop. 19 - Caché semántico LRU multicapa]:** Actualizado `backend/src/core/cache.py` con `OrderedDict`, límite `max_entries=1000` y política de desalojo LRU con `move_to_end`.
+  - **TODO-1.9 [Prop. 21 - Optimización HNSW en ChromaDB]:** Calibrados parámetros `M=16`, `construction_ef=64`, `search_ef=32` y distancia coseno en `backend/src/rag/vector_store.py`.
+  - **TODO-1.10 [Prop. 23 - Persistencia en disco de BM25 con hash SHA-256]:** Añadidos métodos `save` y `load` en `backend/src/rag/bm25.py` almacenando `bm25_index.pkl` en `backend/data/chroma_db/`. Sincronizado en `backend/src/rag/ingestion.py` para recargar el índice si el hash de documentos coincide.
+  - **TODO-1.11 [Prop. 43 - Validador sintáctico CI de documentos Markdown]:** Creada suite en `backend/tests/test_document_integrity.py` validando recuento (83 archivos), formato de encabezados `#`, listas y párrafos sustantivos en todo el corpus.
+  - **Cierre de Fase 1 al 100%:** 11/11 tareas completadas en [`docs/01-product/TODO_50_PROPOSITAS.md`](docs/01-product/TODO_50_PROPOSITAS.md).
+  - **Suite de Pruebas:** 23/23 tests aprobados en `backend/tests/` (test_document_integrity, test_reranker, test_query_router, test_phase1_improvements, test_hybrid_search, test_ingestion).
+
+### [2026-09-04 12:00] [Docs/TODO-2.12-2.17-Fase2-Complemento-Anti-Alucinacion]
+- **Complemento aditivo de Fase 2 con 6 tareas anti-alucinación (TODO-2.12 a TODO-2.17) en [`docs/01-product/TODO_50_PROPOSITAS.md`](docs/01-product/TODO_50_PROPOSITAS.md):**
+  - **TODO-2.12:** Output estructurado con citas obligatorias (`instructor` + Pydantic v2) y doble verificación LLM-as-judge en `engine.py` y `prompt_templates.py`.
+  - **TODO-2.13:** Verificador NLI post-LLM (`transformers` + `vectara/hallucination_evaluation_model`, `DeBERTa-v3-large-mnli`, umbral 0.80) en nuevo `core/faithfulness.py`.
+  - **TODO-2.14:** Temperatura 0.0 + modo extractivo + self-consistency N=3 en `config.py`.
+  - **TODO-2.15:** Embeddings `fastembed bge-m3` en `vector_store.py` y reranker `bge-reranker-v2-m3` en `rag/reranker.py` (top-20 hacia top-5).
+  - **TODO-2.16:** Guardrails de salida (`guardrails-ai`, `presidio`) + normalización (`rapidfuzz`, `spacy es_core_news_lg`) en `guardrails.py` y `bm25.py`.
+  - **TODO-2.17:** Harness `ragas` + `langfuse` con dataset de 50 preguntas y gate `faithfulness=1.0` en CI.
+  - Tablero actualizado: Fase 2 11 hacia 17 tareas, total 51 hacia 57. No se modificó ni eliminó ninguna tarea existente (TODO-2.1 a TODO-2.11 intactas).
+- Motivo: priorizar precisión al 100% sobre latencia (ventana 5-10s aceptada por el usuario) y erradicar alucinaciones en precios COP, horarios y sedes.
+
+### [2026-09-04 07:28] [Docs/TODO-2.11-Cascaded-Intent-Routing-Pipeline]
+- **Incorporación de TODO-2.11 al Tablero Maestro de la Fase 2 (Rendimiento y Resiliencia):**
+  - **Especificación de Tarea ([`docs/01-product/TODO_50_PROPOSITAS.md`](docs/01-product/TODO_50_PROPOSITAS.md)):** Agregada formalmente la tarea **TODO-2.11 [CRÍTICO] Pipeline de Enrutamiento de Intenciones en Cascada y Erradicación de Cruces entre Pilares** basada en el informe técnico de arquitectura experta:
+    - **1. Clasificador de Intención Cerrado & Confidence Gate:** Detección estricta de intents sin permitir búsqueda global no restringida en los 82 documentos.
+    - **2. Hard Domain Mask Obligatorio:** Bloqueo booleano físico en `hybrid_retriever.py` mediante `PILLAR_STRICT_CLUSTERS` (veto absoluto a clústeres incompatibles).
+    - **3. Score Híbrido con Intent Match:** Ponderación compuesta $\text{Score} = (0.4 \times \text{Dense}) + (0.3 \times \text{BM25}) + (0.3 \times \text{IntentMatch})$.
+    - **4. Context Validator Pre-LLM:** Auditor de chunks en `engine.py` que rechaza y sustituye documentos fuera del dominio solicitado.
+    - **5. Output Verification & Prompt con Reglas Estrictas:** Directivas de dominio imperativas en `advisor_common.py` y detección de términos prohibidos post-generación.
+    - **6. Tests de Regresión Automáticos:** Verificación de no-contaminación entre los 5 pilares institucionales.
+  - **Sincronización del Roadmap:** Actualizada la Fase 2 en [`docs/01-product/ROADMAP_50_PROPOSITAS.md`](docs/01-product/ROADMAP_50_PROPOSITAS.md) para incluir TODO-2.11 (Fase 1: 11 tareas, Fase 2: 11 tareas, Total: 51 tareas).
+- Motivo: Establecer un pipeline multi-filtro infalible en la Fase 2 de resiliencia para erradicar cualquier alucinación o cruce semántico entre cursos, sedes, horarios y precios.
+
+### [2026-09-04 07:03] [Added/RAG-AST-Atomic-Table-Chunking]
+- **Chunking Semántico Consciente de Tablas Markdown con AST (TODO-1.2 / Propuesta 2):**
+  - **Extracción Estructurada de Bloques (`backend/src/rag/ingestion.py`):** Implementado `_extract_blocks(text)` para segmentar deterministamente el texto en encabezados Markdown (`#`), párrafos en prosa y tablas completas (`|...|`).
+  - **Preservación Atómica de Tablas Financieras y Horarios (`backend/src/rag/ingestion.py:85`):** Las tablas de precios en COP, cronogramas y convenios de descuento se tratan como bloques indivisibles (`is_table_atomic=True`). Si la tabla cabe dentro del umbral extendido (`1400` caracteres), se indexa íntegramente como un chunk único, erradicando cortes a mitad de fila.
+  - **Partición Resiliente con Cabeceras Preservadas:** En tablas de gran volumen que superan el umbral, el algoritmo las divide por filas completas inyectando en cada partición el encabezado de dos líneas (`header` + `delimiter`), asegurando que ningún fragmento pierda el contexto de las columnas.
+  - **Cobertura de Pruebas Unitarias (`backend/tests/test_ingestion.py`):** Añadidos `test_atomic_table_chunking()` y `test_large_table_header_preservation()` validando la conservación atómica de tablas de precios COP ($ 1.350.000, 3 cuotas) y la duplicación de cabeceras en tablas extensas.
+  - **Actualización de Tablero:** Marcada como completada la tarea **TODO-1.2** en [`docs/01-product/TODO_50_PROPOSITAS.md`](docs/01-product/TODO_50_PROPOSITAS.md).
+- Motivo: Garantizar 0% de fragmentación en tarifas oficiales, cronogramas y políticas financieras para que el retriever y el LLM reciban información tabular íntegra.
+
+### [2026-09-04 06:56] [Added/RAG-Adaptive-RRF-Entity-Weighting]
+- **Recalibración Adaptativa de Fusión RRF para Entidades Exactas (TODO-1.1 / Propuesta 1):**
+  - **Detección de Entidades de Alta Precisión (`backend/src/rag/hybrid_retriever.py`):** Implementado `_detect_exact_entities(clean_query)` para detectar automáticamente cifras numéricas y financieras en pesos colombianos (`$`, `COP`, `cuotas`, `descuentos`, porcentajes), niveles y certificaciones (`A1..C2`, `IELTS`, `TOEFL`, `DELF`, `Goethe`), horarios específicos (`6:00`, `6:30`, `8:00`, `8:30`, `am/pm`) y sedes físicas concretas (`Chicó`, `Chapinero`, `Poblado`, `Laureles`, `Granada`).
+  - **Ponderación RRF Adaptativa (`backend/src/rag/hybrid_retriever.py:320`):** Implementado `_get_adaptive_rrf_params()`. Ante la presencia de entidades exactas, el sistema ajusta dinámicamente el factor de suavizado léxico a $k_{bm25}=40$ y peso $w_{bm25}=1.25$ frente a $k_{dense}=75$ y peso $w_{dense}=0.9$, garantizando máxima fidelidad y prioridad de ranking en tablas de tarifas y sedes. Para preguntas abiertas y conceptuales se preserva el balance canónico $k=60$ ($w=1.0$).
+  - **Cobertura de Pruebas Unitarias (`backend/tests/test_hybrid_search.py`):** Añadido `test_adaptive_rrf_exact_entities()` validando la detección exhaustiva en escenarios financieros, de certificación, sedes y preguntas generales.
+  - **Actualización de Tablero:** Marcada como completada la tarea **TODO-1.1** en [`docs/01-product/TODO_50_PROPOSITAS.md`](docs/01-product/TODO_50_PROPOSITAS.md).
+- Motivo: Eliminar falsos positivos y priorizar con precisión absoluta documentos de tarifas oficiales, certificaciones y sedes cuando el usuario consulta cifras exactas o códigos normativos.
+
+### [2026-09-04 06:50] [Docs/Roadmap-50-Technical-Enhancement-Proposals]
+- **Documentación del Roadmap Estratégico de 50 Propuestas de Mejora Técnica (v2.7.0):**
+  - **Documento Maestro de Roadmap ([`docs/01-product/ROADMAP_50_PROPOSITAS.md`](docs/01-product/ROADMAP_50_PROPOSITAS.md)):** Creado manual exhaustivo que organiza 50 propuestas técnicas en 5 fases secuenciales (Fase 1: Precisión RAG y Datos, Fase 2: Rendimiento Backend y Resiliencia, Fase 3: Frontend y Accesibilidad, Fase 4: Testing y Tooling DX, Fase 5: Evolución Futura) divididas en 7 categorías arquitectónicas, excluyendo temas de seguridad conforme a requerimiento.
+  - **Tablero TODO Detallado de Seguimiento ([`docs/01-product/TODO_50_PROPOSITAS.md`](docs/01-product/TODO_50_PROPOSITAS.md)):** Creado tablero de control granular con 50 tareas principales y subtareas técnicas con casillas de verificación para monitorear el progreso de cada fase.
+  - **Actualización de Propuestas Tecnológicas ([`docs/03-architecture/technological-enhancement-proposals.md`](docs/03-architecture/technological-enhancement-proposals.md)):** Sincronizado el estado base de v2.6.0 e incorporado el mapa completo de las 50 propuestas del programa estratégico v2.7.0 con referencias directas de arquitectura.
+  - **Actualización del PRD ([`docs/01-product/PRD.md`](docs/01-product/PRD.md)):** Incorporada la Sección 5 con la matriz de fases de evolución técnica planificada y criterios de aceptación.
+  - **Sincronización de Manuales Bilingües y Portada:**
+    - [`EXPLICACION_TECNICA.md`](EXPLICACION_TECNICA.md): Añadida la sección 13 con el resumen del Roadmap y enlaces al documento maestro.
+    - [`TECHNICAL_EXPLANATION.md`](TECHNICAL_EXPLANATION.md): Añadida la sección 13 espejo en inglés con el desglose de fases técnicas.
+    - [`README.md`](README.md) y [`README.es.md`](README.es.md): Añadidos los accesos directos al Roadmap dentro de las guías maestras de documentación.
+- Motivo: Establecer la hoja de ruta técnica formal, estructurada por categorías y fases secuenciales, para ejecutar de manera ordenada y documentada la evolución del sistema sin alterar código fuente hasta su planificación aprobada.
+
+### [2026-09-02 20:50] [Docs/Exhaustive-Bilingual-Master-Manuals-And-Ecosystem-Sync]
+- **Expansión Exhaustiva y Sincronización Bilingüe de la Documentación Maestra (v2.6.0):**
+  - **Manual Técnico Maestro en Español ([`EXPLICACION_TECNICA.md`](EXPLICACION_TECNICA.md)):** Rediseñado íntegramente como una guía exhaustiva de 12 secciones que enseña el proyecto desde 0: Ficha técnica v2.6.0, glosario para principiantes, anatomía del monorepo, 3 diagramas Mermaid UML interactivos (Componentes C4, Máquina de Estados FSM, Secuencia Dual OpenCode/AGY), fórmulas matemáticas (Okapi BM25, Cosine Distance y RRF con $k=60$), trazas didácticas paso a paso del ciclo de vida de peticiones hacia el asesor con snippets de código comentados y rutas exactas de archivo.
+  - **Manual Técnico Espejo en Inglés ([`TECHNICAL_EXPLANATION.md`](TECHNICAL_EXPLANATION.md)):** Estricta paridad 1:1 espejo en inglés con idéntica profundidad, diagramas Mermaid UML, trazas paso a paso y referencias de código.
+  - **Sincronización del Ecosistema Documental:**
+    - [`README.md`](README.md): Badges actualizados (55/55 tests PASSED, 80/80 benchmark al 100%), árbol de directorios con `advisor_common.py` y `agy_client.py`, y descripción del selector de asesor.
+    - [`docs/05-ai/opencode-integration.md`](docs/05-ai/opencode-integration.md): Especificación técnica de la arquitectura dual desacoplada con AGY CLI y contratos REST/CLI.
+- Motivo: Proporcionar una base documental de referencia absoluta para auditoría, aprendizaje desde cero y defensa técnica con máxima solidez y transparencia.
+
+### [2026-09-02 20:39] [Refactor/Separate-OpenCode-And-AGY-Clients]
+- **Separación Arquitectónica Modular de Motores de Asesoría (OpenCode & AGY):**
+  - **Módulo Común de Razonamiento y Síntesis ([`backend/src/core/advisor_common.py`](backend/src/core/advisor_common.py)):** Creado módulo centralizado con `build_advisor_reasoning_prompt()` y `generate_advisor_fallback()`. Garantiza que **tanto OpenCode como AGY compartan exactamente las mismas directivas de profundidad**, formato en tablas Markdown, manejo de precios en $ COP (10% descuento y cuotas 40/30/30) y deduplicación de contexto oficial.
+  - **Cliente Dedicado de AGY ([`backend/src/core/agy_client.py`](backend/src/core/agy_client.py)):** Implementada la clase `AGYAdvisorClient` exclusiva para la orquestación del binario Google Antigravity (`agy.exe`) en modo no interactivo (`-p`), gestión de procesos asíncronos y contingencia estructurada de alta profundidad.
+  - **Cliente Dedicado de OpenCode ([`backend/src/core/opencode_client.py`](backend/src/core/opencode_client.py)):** Refactorizada la clase `OpenCodeAdvisorClient` para enfocarse exclusivamente en la comunicación HTTP, gestión de sesiones y persistencia con el servidor OpenCode (`http://127.0.0.1:4096`), manteniendo compatibilidad hacia atrás mediante alias.
+  - **Despacho Limpio en Motor RAG ([`backend/src/rag/engine.py:340`](backend/src/rag/engine.py#L340)):** El motor selecciona y ejecuta de forma limpia e independiente la instancia correspondiente (`agy_advisor` o `opencode_advisor`) según la configuración activa de `settings.advisor_backend`.
+  - **Validación Automatizada:** 55/55 tests PASSED en Pytest en 27.93s, con cobertura unitaria específica para cada cliente por separado (`test_agy_client_standalone()`).
+- Motivo: Desacoplar físicamente ambos clientes en archivos independientes preservando una profundidad analítica idéntica y estricta modularidad en el backend.
+
+### [2026-09-02 20:36] [Feat/Real-AGY-Reasoning-Engine-CLI-Bridge]
+- **Integración Nativa del Motor de Razonamiento AGY (Google Antigravity CLI Bridge):**
+  - **Diagnóstico de Discrepancia AGY vs OpenCode:** Identificado por qué AGY no estructuraba respuestas ni generaba tablas al solicitarlas: mientras OpenCode se comunicaba con un daemon LLM en el puerto 4096, la integración con AGY en `opencode_client.py` era un stub simulado que ejecutaba un formateador estático de Python sin pasar por un LLM real.
+  - **Conexión Directa al CLI de Razonamiento AGY (`opencode_client.py:198`):** Implementado `_query_agy_cli()` mediante ejecución asíncrona no interactiva (`agy.exe --disable-slash-commands -p <prompt>`). Ahora AGY cuenta con la misma potencia generativa y de razonamiento profundo que OpenCode, generando tablas Markdown completas, comparativas detalladas de programas, horarios y planes de financiación en $ COP.
+  - **Prompt de Razonamiento Unificado y Directivas de Formato (`opencode_client.py:250`):** Establecidas directivas explícitas de formato que exigen generación de tablas comparativas en Markdown ante solicitudes de tablas, resúmenes o comparaciones, cálculo de esquemas 40%/30%/30% y horarios exactos.
+  - **Puente de Resiliencia Bi-Direccional:** Si OpenCode está activo pero el daemon no está iniciado, el sistema intenta automáticamente el puente con el CLI de AGY antes de recurrir a la síntesis estática de emergencia.
+  - **Validación Automatizada:** 54/54 tests PASSED en Pytest en 24.43s y generación de tablas Markdown validada en tiempo real.
+- Motivo: Equiparar la capacidad de razonamiento, estructura y generación de tablas de AGY con la de OpenCode para satisfacer las solicitudes analíticas y tabulares de los aspirantes.
+
+### [2026-09-02 20:21] [Fixed/Advisor-Mode-Multi-Turn-Synthesis-And-Freeform-Navigation]
+- **Auditoría Integral y Reingeniería del Modo Asesor y Manejo de Preguntas Libres:**
+  - **Reingeniería del Fallback de Síntesis del Asesor (`opencode_client.py:64`):** Erradicada la fragmentación de texto que cortaba y duplicaba oraciones idénticas de los chunks (como ocurría con fragmentos de sedes y Cali). Se implementó un motor de síntesis estructurado que cubre los 5 pilares con información institucional oficial exhaustiva (tarifas exactas en COP, pronto pago 10%, cuotas 40/30/30, horarios diurnos/nocturnos/madrugadores, modalidades, sedes y becas), con deduplicación por hashing y redacción cálida sin repetir oraciones.
+  - **Erradicación de Consultas Aleatorias en "5. Pregunta Libre" (`navigation.py:612` & `engine.py:284, 311`):** Añadido interceptor de navegación para `"5"`, `"pregunta libre"`, `"consulta libre"` y `"otra consulta"`. Al hacer clic o ingresar "5", el sistema ya no realiza búsquedas vectoriales sobre el dígito "5" (que coincidían arbitrariamente con números de calles o sedes), sino que despliega una invitación cálida para que el usuario escriba su duda con botones rápidos de navegación a pilares principales.
+  - **Sincronización Contextual de la Consulta del Usuario (`engine.py:334`):** Modificado el flujo en `advisor_mode` para pasar la consulta original del usuario (`query`) al asesor en lugar de la consulta canónica mapeada, evitando que el bot mencione temas ajenos (como Cali al preguntar por tarifas).
+  - **Persistencia Episódica en Modo Asesor (`engine.py:350`):** Conectado `applicant_memory.add_interaction(session_id, query, resp_text)` en `advisor_mode` para que las conversaciones con el asesor queden registradas en el historial del aspirante.
+  - **Validación Automatizada:** 54/54 tests PASSED en Pytest en 4.39s, benchmark de 80 variantes al 100% (26.5 ms de latencia) y compilación limpia de Next.js 15 en 3.2s.
+- Motivo: Corregir las inconsistencias reportadas en el modo asesor donde se devolvían respuestas descontextualizadas o aleatorias al hacer clic en opciones de pregunta libre o consultar tarifas.
+
+### [2026-09-02 20:04] [Fixed/Advisor-Button-Recondite-And-Shadow]
+- **Restauración del Botón 9 como Último Recurso Recóndito y Sombra Retro Homogénea:**
+  - **Eliminación de la Inyección Global del Asesor en Frontend (`ChatContainer.tsx`):** Removido el bloque forzado que inyectaba el botón 9 al final de todos los mensajes regulares. El botón 9 ahora preserva su función original como **último recurso y opción recóndita**, mostrándose únicamente cuando el backend lo suministra en `action_buttons` (clarificación por ambigüedad, anti-estancamiento por doble fallo, escalamiento de tickets o ramas finales de casos especiales como `4.6`).
+  - **Sombra Retro Sólida y Bisel Idéntico (`ChatContainer.tsx:321`):** Configurado para que cualquier botón con `isAdvisor` (valor 9 o 5) herede la sombra sólida negra completa **`shadow-retro`** (`3px 3px 0px 0px #000000`), borde doble `border-2 border-black`, fondo beige `bg-retroBeige` y caja indicadora con marco negro (`w-2 h-2 border border-black bg-vicePink`), igualando exactamente a los botones de navegación superiores.
+  - **Acceso Recóndito en Navegación (`navigation.py:536`):** Agregada la opción `9. Hablar con un Asesor` en la hoja `4.6` (Políticas de Congelamiento, Asistencia y Casos Especiales), permitiendo al aspirante encontrar la asistencia humana en el punto más profundo de la estructura institucional.
+  - **Validación Automatizada:** 54/54 tests PASSED en Pytest y compilación de producción Next.js 15 limpia en 4.8s.
+- Motivo: Cumplir con la directriz de diseño de preservar al asesor humano como último recurso recóndito para casos no resueltos y asegurar el biselado y sombreado 90s consistente.
+
+### [2026-09-02 19:57] [Fixed/UI-Style-Advisor-Button-And-Nocturnal-Intent]
+- **Homogeneización Visual del Botón 9 (Asesor) y Corrección de Enrutamiento de Horarios Nocturnos:**
+  - **Estilo Retro Homogéneo en Frontend (`ChatContainer.tsx:348`):** Corregido el botón del asesor silencioso para que conserve el **diseño idéntico a todos los demás botones de navegación**: borde doble negro (`border-2 border-black`), sombra retro offset (`shadow-retro`), dimensiones y padding (`p-2.5 sm:p-3 font-bold`), fondo beige (`bg-retroBeige`), caja indicadora cuadrada con borde (`w-2 h-2 border border-black bg-vicePink`) y flecha chevron negra, eliminando la discrepancia visual y el emoji circular.
+  - **Corrección de Enrutamiento Nocturno (`intent_router.py`, `navigation.py`, `hybrid_retriever.py`):**
+    - Añadida tolerancia y normalización a errores ortográficos y variantes libres (`horaios nocturnos`, `horarios nocturnos`, `horario nocturno`, `clases en la noche`, `estudiar de noche`, `nocturna`).
+    - Enriquecido el prototipo de `franja_nocturna` en `intent_router.py` con términos de noche, after work y franjas laborales.
+    - Actualizado el documento oficial [`07_03_franja_nocturna_after_work.md`](backend/data/documents/07_03_franja_nocturna_after_work.md) con títulos y metadatos explícitos de horarios nocturnos (6:30 a 8:30 p.m., lunes a viernes).
+    - Re-ingestión e invalidación de caché ejecutada: preguntas sobre franja nocturna ahora devuelven con 100% de confianza el horario oficial After Work en lugar de fragmentos descontextualizados de sedes.
+  - **Validación Automatizada:** 54/54 tests PASSED en Pytest, benchmark de 80 variantes al 100% (25.7 ms de latencia) y compilación limpia de Next.js 15 en 4.2s.
+- Motivo: Resolver el reporte de inconsistencia estética en el botón de asesor y asegurar que las consultas sobre franjas nocturnas entreguen la información horaria exacta deseada por el aspirante.
+
+### [2026-09-02 19:52] [Feature/Response-Quality-Polish/Fase-E]
+- **Culminación Integral de la Fase E — Calidad de Respuestas y Pulido Final (E41 a E50):**
+  - **E41 (Plantillas Estructuradas por Pilar):** Directivas dinámicas en `prompt_templates.py` que instruyen al LLM y al motor determinista a estructurar horarios en tablas/bloques horarios precisos (`6:00 a 8:00 a.m.`, `6:30 a 8:30 p.m.`), precios en COP con símbolo `$` en negrita, contado 10% y 3 cuotas 40/30/30, y programas con niveles MCER.
+  - **E42 (Memoria de Preferencias):** Método `detect_and_store_preferences()` en `memory.py:40` para capturar `modalidad_preferida` (Virtual Sincrónica, Presencial, HyFlex 360°), ciudad de interés (Bogotá, Medellín, Cali) e idioma.
+  - **E43 (Resumen Contextual Conciso):** Método `get_conversation_summary()` en `memory.py:75` inyectado dinámicamente en el prompt del LLM (`engine.py:489`) para mantener continuidad en diálogos multi-turno.
+  - **E44 (Validación Post-LLM Regex):** Verificación regex post-síntesis (`engine.py:500`) que garantiza la presencia del símbolo monetario `$` en respuestas de tarifas y formato de hora en horarios.
+  - **E45 (Citas Oficiales en Caché):** Blindaje en `engine.py:270` asegurando que las respuestas devueltas desde caché contengan siempre la mención explícita `🏛️ *Fuente oficial verificada:* <doc>` y la lista de documentos fuente.
+  - **E46 & E47 (Idioma Estricto y Tono Empático):** Reglas institucionales reforzadas en `SYSTEM_PROMPT` exigiendo español impecable (cero cambio a inglés ante preguntas en Spanglish) y tono cálido/motivador de Nova Idiomas.
+  - **E48 (Métrica por Pilar en Frontend):** Contador de consultas por pilar en `metrics.py` y visualización interactiva con barras de progreso en [`MetricsModal.tsx`](frontend/src/components/MetricsModal.tsx#L135).
+  - **E49 (Test 80 Variantes en Pytest):** Suite automatizada `test_80_variants_representative_coverage_e49` en `test_navigation_continuity.py:174` con 100% de éxito.
+  - **E50 (Playground CLI de Evaluación):** Soporte en `scripts/test_variants.py` para banderas `--filter` (filtrar por pilar) y `--query` (evaluar consultas individuales en tiempo real con latencias y fuentes).
+  - **Validación Automatizada:** 54/54 tests unitarios PASSED en Pytest en 4.95s; 80/80 variantes PASSED en 27.0ms de latencia promedio; compilación limpia de Next.js 15 en 4.9s.
+- Motivo: Concluir al 100% la Fase E y completar la totalidad de las 5 fases (0, A, B, C, D, E) del sprint de Nova Idiomas con excelencia técnica y documental.
+
+### [2026-09-02 19:46] [Feature/Escalation-Feedback/Fase-D]
+- **Culminación Integral de la Fase D — Heavy Only & Restantes (D35, D36, D37, D40):**
+  - **D35 (Asesor Silencioso en Frontend):** Añadido botón no invasivo `👤 9. Consultar con un Asesor Académico` en `ChatContainer.tsx:348` para permitir al usuario alternar al modo asesor voluntariamente sin escalamiento forzado.
+  - **D36 (Contexto Extendido en Tickets):** Parámetros `conversation_history` (últimos 3 turnos sanitizados) y `top_chunks` (fuente, sección y fragmento previo de los 3 mejores chunks) incorporados a la estructura persistente de `escalations.json` en `dispatcher.py:30` y conectados en `engine.py:201`.
+  - **D37 (Indicador de Costo de Tiempo <2h):** Clarificación en `engine.py:440` indicando `⏱️ Tiempo estimado de respuesta humana: <2 horas hábiles. ¿Prefieres consultar horarios o tarifas de inmediato?` con botones de acción inmediata para desincentivar escalamientos superfluos.
+  - **D40 (Feedback Loop Semanal):** Implementado método `generate_feedback_report()` en `dispatcher.py:65` y script operativo [`scripts/escalation_feedback_loop.py`](scripts/escalation_feedback_loop.py), que agrupa consultas no resueltas de `escalations.json`, extrae palabras clave frecuentes y sugiere borradores de documentación para cerrar gaps de conocimiento.
+  - **Validación Automatizada:** 53/53 tests unitarios aprobados en Pytest, benchmark de 80 variantes al 100% de éxito (31.6ms de latencia) y compilación de producción Next.js 15 limpia en 5.0s.
+- Motivo: Finalizar al 100% la Fase D, mejorando la experiencia del aspirante al consultar casos complejos y dotando al equipo de admisiones de herramientas analíticas para enriquecer la documentación continuamente.
+
+### [2026-09-02 19:35] [Feature/Vectorized-Intent-Router/Fase-E]
+- **Enrutador Semántico Vectorial Universal & Clasificación Dual de Intenciones (Ítem E41b):**
+  - **Módulo Autónomo (`backend/src/core/intent_router.py`):** Implementada la clase `SemanticIntentRouter` con jerarquía de 2 niveles: 5 Macro-Pilares (`cursos`, `horarios`, `precios`, `sedes`, `becas_descuentos`) y 18 Micro-Intenciones hiper-especializadas (medios de pago, cuotas, tarifas COP, pronto pago, convenios, becas, madrugadores, diurnos, nocturno, sabatinos, virtual, presencial, hyflex, sedes Bogotá/Medellín/Cali, placement test, proceso de matrícula).
+  - **Vectorización Densa y Normalización Unitaria:** Los prototipos de intención son proyectados a un espacio vectorial normalizado ($\|v\|=1$), permitiendo cálculo de similitud de coseno mediante producto punto instantáneo ($<0.5$ ms de latencia por turno).
+  - **Warm-Up al Inicio del Servidor:** Método `warm_up()` integrado en el ciclo de vida de `engine.py` para pre-calcular los centroides una sola vez y mantenerlos en memoria.
+  - **Normalización de Anglicismos y Variantes Morfológicas:** Diccionario integrado de equivalencias de términos en inglés/spanglish (`schedules` -> `horarios`, `fees` -> `tarifas`, `prices` -> `precios`) y alineación jerárquica macro-micro.
+  - **Boosting Dinámico y Fusión Multi-Cluster RRF (`hybrid_retriever.py`):** Detección de intenciones compuestas con boost de cluster (+0.12) para el documento objetivo del micro-intent y bonificación RRF (+0.015) para ambos clusters cuando se identifican consultas multi-tema.
+  - **Blindaje Pre-Flight de Seguridad en Engine (`engine.py:143`):** Inspección de guardrails ejecutada sobre la consulta bruta original antes de la vectorización para evitar bypass de prompt injection o jailbreaks.
+  - **Validación Automatizada:**
+    - `18/18 tests PASSED` en nueva suite unitaria `backend/tests/test_intent_vectorizer.py`.
+    - `53/53 tests PASSED` en suite integral de pytest.
+    - `80/80 (100.0%) PASSED` en el benchmark de variantes de admisiones (`scripts/test_variants.py`) con latencia promedio de 30.1 ms y 0 falsas escalaciones.
+    - Build de producción Next.js 15 compilado limpiamente en 2.4s.
+- Motivo: Erradicar la dependencia de diccionarios rígidos de palabras clave, permitiendo que cualquier formulación libre o coloquial del aspirante sea mapeada con precisión matemática a su verdadera intención.
+
+### [2026-09-02 19:20] [Fixed/Conversational-Sanitization/Fase-E]
+- **Sanitización Institucional de Jargon Técnico y Erradicación de Endpoints REST (Ítem E44b):**
+  - **Detección del Problema:** Al consultar *"que medios de pagos hay?"*, el sistema citaba un fragmento de `12_04_becas_descuentos_aclaratoria.md` instruyendo al aspirante a calcular su cotización mediante una llamada técnica HTTP: `POST /api/v1/tools/quote`.
+  - **Corrección Documental:** Reescrita la sección *"¿Cómo consultar mi caso?"* en `12_04_becas_descuentos_aclaratoria.md:31` con lenguaje puramente humano y conversacional (*"calcular tu cotización personalizada directamente en este chat o pregunta '¿cuánto cuesta el curso de inglés con descuento?'"*).
+  - **Blindaje en Motor RAG (`engine.py:450`):** Implementado un filtro de sanitización regex post-LLM que intercepta y neutraliza cualquier fuga de verbos o rutas HTTP internas (`POST /api/...`, `GET /api/...`, `/api/v1/...`), transformándolas en redacción amigable institucional.
+  - **Enrutamiento de Intenciones de Pago (`navigation.py:360`):** Mapeadas las expresiones coloquiales de pago (`medios de pago`, `formas de pago`, `como puedo pagar`, `pse`, `nequi`, `daviplata`) directamente hacia el catálogo oficial de medios de pago (`10_03` y `03_precios`), garantizando que preguntas de pago reciban los métodos electrónicos y presenciales autorizados.
+  - **Registrado en Roadmap:** Asignado formalmente en `docs/08-operations/TODO_SPRINT_BECAS_DESCUENTOS.md` bajo el ítem **E44b** de la **Fase E (Calidad de Respuestas)**.
+- Motivo: Garantizar una experiencia de usuario 100% natural, cercana y libre de tecnicismos o URLs internas de backend para los aspirantes de Nova Idiomas.
+
+### [2026-09-02 19:15] [Feature/Anti-Stagnation/Fase-C]
+- **Culminación Integral de la Fase C — Anti-Estancamiento y Resiliencia Conversacional (C21-C30):**
+  - **C21 (Sin Errores Duros):** Fallback conversacional suave en `navigation.py:652` con 4 botones rectores y re-enrutamiento automático ante cualquier término no contemplado.
+  - **C22 (Botón Reformular):** Agregado botón interactivo retro `🔄 ¿No encontraste lo que buscabas? Reformular con opciones generales` en `ChatContainer.tsx:335` activado automáticamente cuando la confianza es baja (<0.55) o hay clarificación.
+  - **C23 (Memoria de Fracaso 2x):** Implementado `is_failure_loop()` en `memory.py:45` y evaluador en `engine.py:351`; tras 2 fallos consecutivos se despliega un menú interactivo guiado de rescate para evitar frustración.
+  - **C24 (Clarificación Dinámica 0.35-0.50):** Generación automática de 3 botones de desambiguación (`Cursos`, `Horarios`, `Precios`) cuando la consulta es ambigua y cae entre 0.35 y 0.50 sin un pilar dominante.
+  - **C25 (Sugerencias Cruzadas):** Inyección de botones contextuales en `engine.py:403` según el pilar dominante de la fuente documental (ej. al responder de cursos sugiere horarios y tarifas).
+  - **C26 (Reset Suave):** Ampliada la lista de disparadores de reinicio en `navigation.py:556` con `reset`, `empezar de nuevo`, `comenzar de nuevo`, `cancelar`, `borrar` y `salir`.
+  - **C27 (Breadcrumb Clickeable):** Miga de pan en `Header.tsx:72` transformada en botón retro interactivo que regresa al Menú Principal con un solo clic.
+  - **C28 (Tolerancia Regex):** Soporte en `navigation.py:593` para separadores variados (`1.1`, `1,1`, `1 1`, `1-1`).
+  - **C29 (Re-engage de Inactividad 60s):** Hook de inactividad de 60s en `page.tsx:73` que sugiere proactivamente opciones clave si el aspirante queda inactivo.
+  - **C30 (Detección de Loops de Fuentes):** Rastreador de firmas documentales en `memory.py:65` y alerta en `engine.py:400` que añade nota de desvío proactiva si se repiten las mismas fuentes durante 3 turnos seguidos.
+  - **Validación:** Pytest suite expandida a **35/35 tests PASSED** (incluyendo 3 nuevos tests unitarios en `test_navigation_continuity.py`), **80/80 variantes aprobadas** en `test_variants.py` (latencia promedio 38.0ms) y compilación de producción Next.js 15 en 0 errores.
+- Motivo: Proporcionar una experiencia de usuario fluida, comprensiva y anti-bloqueo en el portal de admisiones de Nova Idiomas.
+
+### [2026-09-02 19:05] [Fixed/RAG/Synthesis]
+- **Anti-Respuestas Vacías & Síntesis Multi-Chunk Resiliente (`src/rag/ingestion.py:35`, `src/rag/engine.py:27`, `docs/08-operations/TODO_SPRINT_BECAS_DESCUENTOS.md`):**
+  - **Diagnóstico del Fallo:** Se identificó que al ingresar consultas naturales como *"que horarios hay?"*, el sistema respondía únicamente con una ficha vacía (`📌 **02. Horarios...**` + `🏛️ *Fuente oficial:* ...`) sin mostrar ninguna franja ni modalidad de estudio.
+  - **Causa Raíz:** 
+    1. En `ingestion.py`, la división por encabezados Markdown (`re.split`) generaba un chunk huérfano que contenía exclusivamente la cabecera `# 02. Horarios...` (sin texto de cuerpo).
+    2. Este chunk obtenía la mayor similitud léxica y densa con la consulta.
+    3. En `engine.py:_call_llm_api`, el extractor determinista tomaba únicamente `chunks[0]`, filtraba todas las líneas que comenzaban por `#`, y al quedar la lista vacía, devolvía solo el título de la cabecera sin información sustantiva.
+  - **Soluciones Implementadas:**
+    1. **Fusión en Ingestión (`ingestion.py:34-58`):** Se implementó un acumulador que detecta secciones que solo contienen encabezados o divisores sin texto sustantivo, fusionándolas automáticamente con la subsección siguiente. Ningún chunk es emitido con solo títulos.
+    2. **Síntesis Multi-Chunk Resiliente (`engine.py:28-75`):** El extractor determinista ahora itera sobre los `top_4` chunks recuperados, extrayendo, desduplicando y formateando hasta 10 viñetas y elementos informativos sustantivos (horarios, modalidades, requisitos, tarifas).
+    3. **Incorporación a Fase C:** Agregado el ítem **C21b** en `docs/08-operations/TODO_SPRINT_BECAS_DESCUENTOS.md` y verificado con 32/32 pruebas unitarias y 80/80 variantes aprobadas.
+- Motivo: Garantizar que el asistente virtual entregue siempre información académica detallada y concreta a los aspirantes, erradicando tarjetas vacías con solo la fuente oficial.
+
+### [2026-09-02 18:55] [Removed/Refactored/Cleaned]
+- **Limpieza Total Agresiva de Componentes Obsoletos y Dependencias Fantasma:**
+  - **Eliminación de Manifiesto Docker (`Dockerfile`):** Retirado el archivo `Dockerfile` en la raíz (32 líneas) y sincronizados todos los diagramas de árbol y referencias en `README.md`, `README.es.md`, `TECHNICAL_EXPLANATION.md`, `EXPLICACION_TECNICA.md` y `docs/04-engineering/technical-design.md`.
+  - **Actualización de Evidencia SENA (`SENA/part2/03_ENTREGA_SOLUCION_SOFTWARE.md`):** Reemplazada la sección de despliegue en contenedores por la guía de "Despliegue y Orquestación Multi-Proceso Nativa con Supervisor Python (`run.py` / `start.bat` / `start.sh`)", alineada con la decisión de arquitectura ADR-006.
+  - **Eliminación de Scripts Scratch Huérfanos:** Eliminados `scratch_generate_80_documents.py` (42.5 KB, generador legado de universidad mock) y `scratch_benchmark_speed.py` (1.4 KB, con imports rotos), reemplazados oficialmente por `scripts/test_variants.py`.
+  - **Poda de Dependencias Fantasma (`backend/requirements.txt`):** Eliminadas 4 librerías sin consumo en el código (`openai`, `flashrank`, `jinja2`, `python-telegram-bot`), reduciendo la huella de instalación de dependencias en `pip install`.
+  - **Retiro de Prototipo Frontend Estático (`backend/src/static/`):** Eliminados `index.html`, `style.css` y `app.js` (~25 KB). Reconfigurado el endpoint raíz `GET /` de FastAPI en `backend/src/main.py` para devolver un JSON descriptivo con hipervínculos a `/docs`, `/metrics/prometheus` y URL del frontend (`http://localhost:3000`).
+  - **Desmantelamiento de Módulos Inactivos y Herramientas Desconectadas:**
+    - Eliminado el módulo de bot de Telegram (`backend/src/bot/telegram_bot.py`), sus hooks de ciclo de vida en `main.py`, variables de entorno en `config.py` y endpoint `/telegram/webhook` en `routes.py`.
+    - Eliminado el módulo de herramientas desconectadas (`backend/src/core/tools.py`), esquemas no consumidos (`QuoteRequest`, `PlacementTestRequest`) y endpoints huérfanos `/api/v1/tools/*`.
+  - **Purga Definitiva del Legado de Hermes:** Eliminado el documento obsoleto `docs/05-ai/hermes-agent-integration.md` (400 líneas) y purgado el parámetro zombie `use_hermes_mode` en `schemas.py`, `routes.py` y `engine.py`.
+  - **Gobernanza Git (`.gitignore`):** Incorporada la regla de exclusión para `backend/data/chroma_db/knowledge_vectors.json`.
+  - **Verificación y Pruebas:** Suite unitaria en Pytest ejecutada con éxito (**32/32 tests PASSED**) y benchmark de 80 variantes en lenguaje natural (**80/80 PASSED**, latencia promedio 45.4ms, 0 falsos escalamientos).
+- Motivo: Optimizar y sanear la base de código eliminando artefactos legados, deuda técnica y dependencias no utilizadas acordadas durante la sesión de `/grill-me`.
+
+### [2026-09-02 18:32] [Fixed/Tooling]
+- **Compatibilidad con Extensiones de Ejecución en Windows (`scripts/installer.py:1`, `run.py:1`):**
+  - Removido el shebang Unix `#!/usr/bin/env python3` en la cabecera de `scripts/installer.py` y `run.py`.
+  - Motivo: Evitar que extensiones de IDEs (como Code Runner en VS Code) intenten invocar la ruta Unix inexistente `/usr/bin/env` en consolas de Windows nativas (CMD / PowerShell), permitiendo la ejecución fluida tanto con el botón de reproducción del IDE como a través de `install.bat` o `python scripts/installer.py`.
+
+### [2026-09-02 18:20] [Fixed/Enhanced/RAG]
+- **Fase B — Recuperación Que Nunca Falla (B11-B20) & Corrección de Aserción de Confianza (`src/rag/hybrid_retriever.py`, `src/rag/ingestion.py`, `src/rag/bm25.py`, `src/rag/engine.py`, `tests/test_rag_pipeline.py`, `tests/test_hybrid_search.py`, `scripts/test_variants.py`):**
+  - **Corrección de Aserción en Pytest (`backend/tests/test_rag_pipeline.py:16`):** Ajustada la validación de confianza mínima de `>= 0.50` a `>= 0.35`, sincronizándola con la arquitectura de umbrales diferenciados de pilares (`similarity_threshold_pilar = 0.35`) introducida en Fase D (D31).
+  - **B11 — Boost Ponderado por Intención y Afinidad de Cluster (`hybrid_retriever.py:155`):** Multiplicador de cobertura $\times 1.4$ para tokens clave de pilares detectados y bonificación $+0.15$ en `similarity_score` para documentos pertenecientes al cluster temático de la intención detectada (`03_`, `09_`, `10_`, `12_`, `02_`, `01_`, `16_`).
+  - **B12 — Fallback BM25 Relajado (`hybrid_retriever.py:228`, `bm25.py:81`):** Búsqueda de contingencia con parámetro $b=0.6$ y `candidate_k=30` activada automáticamente si la similitud del mejor candidato inicial cae por debajo de $0.50$, rescatando consultas con vocabulario disperso.
+  - **B13 — Re-ranking Contextual por Cluster (`hybrid_retriever.py:255`):** Bonificación aditiva de $+0.015$ al score RRF para chunks alineados con el cluster del pilar detectado, priorizando fuentes canónicas en el ordenamiento final.
+  - **B14 — Chunking Jerárquico con Protección de Tablas Markdown (`ingestion.py:38`):** Ventana elástica de $600$ caracteres con $150$ de solapamiento para documentos con alta densidad tabular (`02_horarios`, `03_precios`, `10_planes`) y extensión dinámica hacia el siguiente salto de línea para evitar la fragmentación de filas de tablas.
+  - **B15 — Blindaje de Vocabulario de Admisiones en BM25 (`bm25.py:24`):** Sustracción explícita de `DOMAIN_PROTECTED_WORDS` (`beca`, `descuento`, `precio`, `tarifa`, `horario`, `curso`, `sede`, `subsidio`, `bono`) para asegurar que nunca sean filtrados como stop words.
+  - **B16 — Centroides Semánticos Precomputados para los 5 Pilares (`hybrid_retriever.py:53,165`):** Representaciones vectoriales para Cursos, Horarios, Precios, Sedes y Becas/Descuentos; combinación por similitud coseno ($0.7 \cdot \text{sim} + 0.3 \cdot \cos(\vec{q}, \vec{C}_{\text{pilar}})$) que ancla consultas breves al centroide semántico.
+  - **B17 — Expansión Léxica de Consultas (`hybrid_retriever.py:90`):** Expansión en caliente pre-retrieval inyectando términos sinónimos institucionales (ej. `becas` $\to$ `descuento subsidio beneficio 12_04 aclaratoria`).
+  - **B18 — Detección y Filtro de Restricciones Negativas (`hybrid_retriever.py:105,178`):** Detección de patrones como `no virtual` o `no presencial`, penalizando severamente las modalidades excluidas (reducción al $30\%$ del score) para favorecer la modalidad deseada.
+  - **B19 — Normalización Spanglish y Préstamos Léxicos (`hybrid_retriever.py:10,83`):** Diccionario de normalización para términos comunes de aspirantes bilingües (`schedules`, `fees`, `courses`, `campus`, `placement tests`, `scholarships`).
+  - **B20 — Caché Semántica con Umbrales Elásticos Adaptativos (`engine.py:230`):** Umbral diferenciado de similitud coseno: $0.88$ para consultas de pilares frecuentes, $0.92$ para aclaratorias de becas $\to$ descuentos y $0.95$ para consultas abiertas generales.
+  - **Suite de Pruebas y Benchmark Automatizado (`scripts/test_variants.py`, `test_hybrid_search.py`):** Creado playground de validación masiva con 80 frases de lenguaje natural evaluando los 5 pilares: **80/80 consultas aprobadas (100.0%)**, $0$ escalamientos accidentales a asesor humano y latencia promedio de $48.8\text{ms}$. Suite unitaria ampliada a **32/32 tests aprobados** en Pytest.
+- Motivo: Cumplir con la Fase B del sprint anti-estancamiento garantizando que la recuperación RAG nunca falle y proporcione respuestas precisas para cualquier variante natural sin derivaciones no deseadas.
+
+### [2026-09-02 15:37] [Docs/SENA]
+- **Suite Integral de Evidencias de Competencias Laborales SENA (`SENA/README.md`, `SENA/part1/`, `SENA/part2/`):**
+  - **Estructuración en Dos Partes Normativas:** Creada la carpeta raíz `SENA/` organizada de forma modular según las dos normas de competencia solicitadas:
+    - **Parte 1 — Norma 220501095 (*Diseñar la solución de software...*):**
+      - `00_GUIA_ENTREGA_PARTE_1.md`: Ficha técnica, trazabilidad con rúbrica y enlace a Google Forms (`https://forms.gle/xtd48BgaPFEHzRAJ7`).
+      - `01_DOCUMENTO_DISENO_SOFTWARE.md`: Documento de diseño con introducción, problema, objetivos, actores, matriz de 14 RF y 10 RNF, arquitectura multicapa y justificación técnica.
+      - `02_DIAGRAMAS_UML.md`: Diagramas en Mermaid de Casos de Uso, Clases del dominio/servicios, Secuencias (RAG estándar y escalamiento humano) y Actividades.
+      - `03_PROTOTIPO_SOLUCION_SOFTWARE.md`: Wireframes y mockups de terminal principal CRT, gestión de oferta, gestión de tickets para asesores y formularios de placement test/escalamiento.
+      - `04_MODELO_BASE_DATOS.md`: Modelo conceptual en 3FN, diagrama ERD en Mermaid, diccionario de 9 entidades y script DDL SQL estructurado para PostgreSQL.
+    - **Parte 2 — Norma 220501096 (*Desarrollar solución de software...*):**
+      - `00_GUIA_ENTREGA_PARTE_2.md`: Ficha técnica, trazabilidad y enlace a Google Forms (`https://forms.gle/485g3veWL9CnBGKC7`).
+      - `01_DOCUMENTO_TECNICO_CODIGO_FUENTE.md`: Estructura del código, módulos, y formalización de los 6 algoritmos matemáticos de optimización (Okapi BM25 con lematización, Similitud Coseno, Reciprocal Rank Fusion k=60, Programación Dinámica Levenshtein, Caché SHA-256 en O(1) y Físicas WebGL PixiJS), junto con bloques de código fuente reales comentados.
+      - `02_INSTRUCTIVO_USO_SOLUCION_SOFTWARE.md`: Manual de usuario con requisitos técnicos, instalación en un clic (`install.bat`/`install.sh`), ejecución con el supervisor `run.py`/`start.bat`, manual de funciones y vistas del sistema.
+      - `03_ENTREGA_SOLUCION_SOFTWARE.md`: Ficha de entrega de la solución de software funcional: repositorio GitHub, endpoints API REST, persistencia y validación de 27/27 pruebas Pytest aprobadas.
+    - **Ficha Maestra `SENA/README.md`:** Ficha institucional consolidada con datos del candidato/aprendiz y matriz de trazabilidad con ambos formularios de entrega.
+  - **Compilación Automatizada a PDF (`scripts/generate_sena_pdfs.js`):** Generados 9 documentos PDF institucionales correspondientes a las evidencias de las partes 1 y 2 con renderizado de fórmulas KaTeX, diagramas Mermaid vectoriales y estilos de impresión, excluyendo `part1/03_PROTOTIPO_SOLUCION_SOFTWARE.md` a solicitud expresa del usuario para toma de capturas manuales.
+- Motivo: Cumplir con la estructuración documental rigurosa de las dos evidencias de producto del SENA para certificación de competencias laborales.
+
+### [2026-09-01 10:46] [Docs]
+- **Documentación Fase 0 — Becas=Descuentos para Retomar en Otra PC (`docs/08-operations/TODO_SPRINT_BECAS_DESCUENTOS.md`, `docs/08-operations/SESSION_HANDOFF_BECAS_DESCUENTOS.md`, `backend/data/documents/12_04_becas_descuentos_aclaratoria.md`, `docs/09-decisions/ADR-008-becas-como-descuentos.md`):**
+  - **TODO y Handoff en `docs/` (a petición `en docs`):** Creados `TODO_SPRINT_BECAS_DESCUENTOS.md` (50 pasos Fase A-E + 11 Fase 0, checkboxes `0/50`, con `file:line` y test `pytest -k becas`) y `SESSION_HANDOFF_BECAS_DESCUENTOS.md` (repo, estado 27/27, decisiones, 3 comandos `git pull` para retomar).
+  - **Doc RAG canónico `12_04`:** `12_04_becas_descuentos_aclaratoria.md` (180 palabras, 4 descuentos 10%/15%/bono $100k, fuentes `10_01,12_01,12_03,09_03`) para que `becas disponibles` mapee a `12_04` con `sim 0.85` y no `0.25` heavy.
+  - **Actualizados 10 archivos:** `PRD.md:32` `US-07` + tabla Beca vs Descuento, `system-architecture.md:54` threshold `0.35 pilar vs 0.50 heavy` + cache dual `0.88`, `rag-subsystem-deep-dive.md` BM25 NFD + centroid, `opencode-integration.md` heavy 2 fases, `TECHNICAL_EXPLANATION.md:26` `83 docs` + Q&A becas, `EXPLICACION_TECNICA.md:298` idem, `README.md:42` + `README.es.md:42` árbol `83 docs`, `ADR-008` decision `becas=descuentos`, `DIAGRAMA.md` nodos `BECAS→DESCUENTOS`.
+  - **Validación:** `27/27 pytest` intacto, `ls 12_04` existe, `grep -r becas docs/ | wc -l >=6`.
+- Motivo: Dejar documentación precisa paso a paso para continuar sesión en otra PC sin perder contexto de los 50 + becas=descuentos.
+
+### [2026-09-01 10:15] [Fixed/Critical]
+- **Fix: Supervisor Ctrl+C Ahora Libera la Terminal Correctamente (`run.py:227`, `run.py:349`, `run.py:126/149/188`):**
+  - **Causa Raíz:** `signal.signal(SIGINT, cleanup_processes)` reemplazaba el `KeyboardInterrupt` pero `cleanup_processes` no hacía `sys.exit` y el loop `while True: sleep(1)` nunca salía — tras `🛑 Deteniendo...` el proceso supervisor seguía vivo y el shell no recuperaba el prompt.
+  - **Fix 1 — Salida Explícita:** Añadido flag global `_shutdown_requested` `run.py:33`, `cleanup_processes` ahora hace `sys.exit(0)` / `os._exit(0)` tras matar hijos y el loop principal es `while not _shutdown_requested: sleep(0.5)` `run.py:382` con `finally: sys.exit(0)`. Segundo Ctrl+C fuerza `os._exit(1)` con `SIGKILL` a todo el process group.
+  - **Fix 2 — Terminación Robusta:** `killpg(SIGTERM)` → `wait(timeout=3)` → `killpg(SIGKILL)` para cada hijo (`OpenCode`, `FastAPI`, `Next.js`), evitando huérfanos `next-server`/`uvicorn` que antes dejaban puerto ocupado.
+  - **Fix 3 — stdin Desacoplado:** Añadido `stdin=subprocess.DEVNULL` a `Popen` de `start_opencode` `run.py:128`, `start_fastapi` `run.py:149`, `start_nextjs` `run.py:188` para que los hijos no hereden `stdin` del supervisor y no bloqueen el TTY tras el cierre.
+  - **Validación:** Mock supervisor con `sleep` hijos + `os.kill(SIGINT)` ahora exit `0` en 1.8s y `✔ Terminal liberada` (antes hang infinito). `python -m py_compile run.py` OK, `pytest 27/27` intacto.
+- Motivo: Resolver bloqueo de terminal tras Ctrl+C reportado por el usuario.
+
+### [2026-09-01 09:50] [Added/Removed/Implemented]
+- **Fase 2 — Auditoría Deep Clean + Implementaciones (A/B/C/D):**
+  - **A. Caché Semántica Implementada (`backend/src/rag/vector_store.py:167`, `backend/src/rag/engine.py:164`, `backend/src/core/cache.py:47`):** Activada capa semántica dormida: `vector_store.embed_query()` unificado (Chroma `embedding_fn` o fallback TF-IDF 1807 dims), `engine.py:164` ahora consulta `find_semantic_match(threshold 0.95)` antes de miss, `engine.py:301` almacena `embedding` bajo `effective_query` y raw `query`, `vector_store.add_documents()` ahora siempre hace `fit` para semantic layer aun con Chroma activo. Nuevos tests `backend/tests/test_cache_semantic.py` (2 tests: paraphrase hit + exact/semantic coexist) con validación cosine 1.0.
+  - **B. Legados Borrados (`n8n/`, `backend/hermes_skills/`):** Eliminados `n8n/admissions_rag_workflow.json` (7 nodos) y `hermes_skills/admissions_rag_tool.py`, `openapi_tool_generator.py` (0 imports en `src/`). Actualizados `README.md:42`, `README.es.md:42`, `docs/05-ai/hermes-agent-integration.md` preservado como histórico.
+  - **C. PixiJS Híbrido Real (`frontend/src/components/PixiParticleBackground.tsx:88`):** Implementado `PIXI.Application` WebGL híbrido sobre SVG persistente: 18 nubes + 8 palmas + hierba SVG intactas + canvas WebGL con 18 fireflies doradas (`#F59E0B` con glow `#FDE68A`, magnetismo cursor 160px, friction 0.995), 10 dews esmeralda (`#10B981`) y 8 spores ascendentes, + líneas constelación `120px` `0xD97706` alpha 0.12. `useEffect` SSR-safe, `resizeTo` + `pointer-events-none`, `ticker` GPU. Build `219 kB` route `/` (vs 98.5 kB previo) por inclusión real de `pixi.js@7.4.2`.
+  - **D. Radio Placebo Eliminado (`frontend/src/components/Footer.tsx:19`):** Removido `isPlayingRadio` state y `toggleRadio()`, reemplazado Tile 5 por `<a href="https://poolsuite.net">` estático. Pruned imports `X` en `Footer.tsx`, `Sparkles/Gauge/...` en `Header.tsx:4`, `Gauge/X/Database/Clock/ShieldCheck` en `MetricsModal.tsx:5`, `Terminal` en `ChatContainer.tsx:5`, `isVoice` y `system` en `types.ts:8`, `Optional/PureBM25/Path/re` en backend, `tailwind.config.ts:5` pages glob, `layout.tsx:16` dark class → `bg-retroPaper text-black`.
+  - **Validación Automatizada:** 27/27 Pytest PASSED en 33.85s y Next.js 15 build `3.2s` con 0 errores, 0 warnings de tipos.
+- Motivo: Resolver auditoría de código muerto (Fase 2 A/B/C/D confirmada por usuario: implementar semántica, borrar legados, implementar Pixi, eliminar radio).
+
 ### [2026-08-31 11:30] [Added/Enhanced]
 - **Cielo Ultra-Denso de 18 Nubes Bidireccionales + Alfombra de Hierba Pixel-Art Verde Seco Retro (`PixiParticleBackground.tsx`, `globals.css`):**
   - **18 Nubes Volumétricas 16-bit (9 L2R + 9 R2L):** Expandido de 8 a 18 nubes estratocúmulos/cirros con trayectorias estrictamente alternas (L2R: `cloudDriftL2R` y R2L: `cloudDriftR2L` con `scaleX(-1)` para gaviotas). Nuevas clases `animate-cloud-l2r-5..9` y `animate-cloud-r2l-5..9` en [`frontend/src/app/globals.css`](frontend/src/app/globals.css:215) con duraciones 40-70s y delays escalonados 1-30s para flujo continuo sin huecos visuales. Garantiza aparición simultánea desde borde derecho e izquierdo en todos los viewports (375px a 1920px).

@@ -17,8 +17,8 @@ class PreFlightGuardrails:
         r"(?i)\bprint\s+your\s+(initial|system)\s+(prompt|instructions)\b",
         r"(?i)\bmuestra\s+tu\s+prompt\b",
         r"(?i)\bjailbreak\b",
-        r"(?i)\bpretend\s+you\s+can\s+grant\s+100%\s+scholarship\b",
-        r"(?i)\botorga(me)?\s+una\s+beca\s+(del\s+)?100%\b"
+        r"(?i)\bpretend\s+you\s+can\s+grant\s+100%\s+scholarship",
+        r"(?i)\botorga(me)?\s+una\s+beca\s+(del\s+)?100%"
     ]
 
     def __init__(self, similarity_threshold: Optional[float] = None):

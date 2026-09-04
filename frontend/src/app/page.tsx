@@ -69,6 +69,32 @@ export default function Home() {
     if (h) setHealth(h);
   };
 
+  // C29: Re-engage timer at 60s of inactivity
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (messages.length > 1 && messages[messages.length - 1].sender === "bot") {
+        const lastMsg = messages[messages.length - 1];
+        if (!lastMsg.text.includes("¿Sigues por aquí?")) {
+          const reengageMsg: ChatMessage = {
+            id: "reengage_" + Date.now(),
+            sender: "bot",
+            text: "⏱️ **¿Sigues por aquí?** Recuerda que puedes consultar en cualquier momento sobre becas, horarios o agendar tu examen de clasificación sin costo.",
+            timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+            action_buttons: [
+              { label: "1. Cursos & Idiomas", value: "1" },
+              { label: "2. Horarios & Modalidades", value: "2" },
+              { label: "3. Precios & Becas", value: "3" },
+              { label: "0. Menú Principal", value: "0" },
+            ],
+          };
+          setMessages((prev) => [...prev, reengageMsg]);
+        }
+      }
+    }, 60000);
+
+    return () => clearTimeout(timer);
+  }, [messages]);
+
   const handleSendMessage = async (text: string) => {
     if (!text.trim() || isLoading) return;
 

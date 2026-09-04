@@ -15,12 +15,36 @@ class MetricsBus:
         self.cost_per_million_input: float = 0.15
         self.cost_per_million_output: float = 0.60
         self.start_time: float = time.time()
+        # E48: Telemetry by admissions pillar
+        self.pillar_queries: Dict[str, int] = {
+            "cursos": 0,
+            "horarios": 0,
+            "precios": 0,
+            "sedes": 0,
+            "becas": 0
+        }
 
     def record_query(self, cached: bool = False, latency: float = 0.0) -> None:
         self.total_queries += 1
         if cached:
             self.cache_hits += 1
         self.total_latency_seconds += latency
+
+    def record_pillar(self, pillar: str) -> None:
+        """E48: Tracks admissions query volume categorized by pillar."""
+        p_norm = pillar.lower()
+        if "curso" in p_norm or "idioma" in p_norm:
+            self.pillar_queries["cursos"] += 1
+        elif "horario" in p_norm or "modalidad" in p_norm:
+            self.pillar_queries["horarios"] += 1
+        elif "precio" in p_norm or "tarifa" in p_norm or "financiacion" in p_norm:
+            self.pillar_queries["precios"] += 1
+        elif "sede" in p_norm or "admision" in p_norm or "matricula" in p_norm:
+            self.pillar_queries["sedes"] += 1
+        elif "beca" in p_norm or "descuento" in p_norm or "convenio" in p_norm:
+            self.pillar_queries["becas"] += 1
+        else:
+            self.pillar_queries["cursos"] += 1
 
     def record_tokens(self, prompt: int, completion: int) -> None:
         self.prompt_tokens += prompt
@@ -65,7 +89,8 @@ class MetricsBus:
             "total_completion_tokens": self.completion_tokens,
             "total_tokens": self.prompt_tokens + self.completion_tokens,
             "estimated_cost_usd": self.estimated_cost_usd,
-            "average_latency_ms": self.average_latency_ms
+            "average_latency_ms": self.average_latency_ms,
+            "pillar_distribution": dict(self.pillar_queries)
         }
 
     def to_prometheus_format(self) -> str:

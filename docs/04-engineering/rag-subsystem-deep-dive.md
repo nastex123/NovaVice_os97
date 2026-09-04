@@ -46,8 +46,8 @@ El subsistema RAG (*Retrieval-Augmented Generation*) implementa un pipeline de r
 
 ## 2. Componentes Técnicos y Código Fuente
 
-### 2.1 `src/rag/ingestion.py` — Pipeline de Segmentación y Carga Documental
-Transforma los 87 archivos Markdown en fragmentos de texto enriquecidos con metadatos de cluster, documento y sección.
+### 2.1 `src/rag/ingestion.py:32` — Pipeline de Segmentación y Carga Documental
+Transforma los 83 archivos Markdown (+ `12_04_becas_descuentos_aclaratoria.md`) en 245 fragmentos con metadatos `source/section`. **Plan Fase B14:** `chunk 600/150` para tablas `03_precios`/`02_horarios` para no partir `\$650k`.
 
 ```python
 # src/rag/ingestion.py
@@ -62,8 +62,8 @@ class DocumentIngestionPipeline:
 
 ---
 
-### 2.2 `src/rag/bm25.py` — Motor Léxico BM25 en Python Puro con Lematización
-Implementa el algoritmo estándar Okapi BM25 sin requerir dependencias externas como Java o ElasticSearch.
+### 2.2 `src/rag/bm25.py:18,34` — Motor Léxico BM25 en Python Puro con Lematización + Unicode NFD + STOP 62
+Implementa Okapi BM25 con expansión planificada: **Fase A1** `unicodedata.normalize NFD` para `ubicación→ubicacion`, **A3** 80 sinónimos `beca→descuento`, **B15** STOP revisado, **B17** expansión `precio↔tarifa`.
 
 ```python
 # src/rag/bm25.py
@@ -102,46 +102,29 @@ donde:
 
 ---
 
-### 2.3 `src/rag/hybrid_retriever.py` — Fusión de Rangos Recíprocos (RRF)
-Combina los resultados del vector store y del índice léxico BM25.
+### 2.3 `src/rag/hybrid_retriever.py` — Fusión RRF + Boost por Intent + Centroides Vectoriales (Fase B Completada)
+Combina búsqueda densa y léxica mediante **RRF ($k=60$)**, potenciado con:
+1. **Normalización Spanglish (B19):** Mapeo de términos bilingües (`schedules`, `fees`, `campus`, `placement tests`) a vocabulario canónico institucional.
+2. **Expansión Léxica (B17):** Inyección contextual de sinónimos (`becas` $\to$ `descuento subsidio 12_04`, etc.).
+3. **Boost por Intent (B11):** Multiplicador de cobertura $\times 1.4$ para tokens clave de pilares y bonificación $+0.15$ para chunks de clusters afines.
+4. **Centroides Semánticos por Pilar (B16):** Fusión ponderada con los 5 centroides vectoriales canónicos:
+   $$\text{Score}_{\text{fused}} = 0.7 \cdot \text{Score}_{\text{base}} + 0.3 \cdot \cos(\vec{q}_{\text{emb}}, \vec{C}_{\text{pilar}})$$
+5. **Fallback BM25 Relajado (B12):** Si el candidato top1 obtiene $\text{sim} < 0.50$, se ejecuta búsqueda con $b=0.6$ y `candidate_k=30`.
+6. **Re-ranking por Cluster (B13):** Bonificación aditiva de $+0.015$ al score RRF para documentos pertenecientes al cluster detectado.
 
-```python
-# src/rag/hybrid_retriever.py
-class HybridRetriever:
-    def __init__(self, rrf_k: int = 60):
-        self.rrf_k = rrf_k
-
-    def _ensure_bm25_populated(self):
-        # Auto-inicialización y ajuste en caliente del índice BM25
-        if bm25_index.corpus_size == 0:
-            docs = vector_store.get_all_documents()
-            if docs:
-                bm25_index.fit(docs)
-
-    def retrieve(self, query: str, top_k: int = 4, candidate_k: int = 15):
-        self._ensure_bm25_populated()
-        dense_results = vector_store.query(query, top_k=candidate_k)
-        bm25_results = bm25_index.search(query, top_k=candidate_k)
-
-        # Cálculo de Reciprocal Rank Fusion (RRF)
-        rrf_scores = {}
-        for rank, item in enumerate(dense_results):
-            rrf_scores[item["id"]] = rrf_scores.get(item["id"], 0.0) + (1.0 / (self.rrf_k + rank + 1))
-
-        for rank, (doc_id, score) in enumerate(bm25_results):
-            rrf_scores[doc_id] = rrf_scores.get(doc_id, 0.0) + (1.0 / (self.rrf_k + rank + 1))
-        ...
-```
-
-#### Fórmula Matemática de Reciprocal Rank Fusion (RRF):
-$$RRF(d) = \sum_{m \in \{dense, bm25\}} \frac{1}{k + \text{rank}_m(d)}$$
-donde $k = 60$. La constante $60$ evita que las primeras posiciones tengan un peso desproporcionado sobre candidatos que aparecen consistentemente en ambos rankings.
+#### Fórmula Matemática de Reciprocal Rank Fusion Enriquecido (RRF):
+$$RRF(d) = \sum_{m \in \{\text{dense}, \text{bm25}\}} \frac{1}{k + \text{rank}_m(d)} + \Delta_{\text{cluster}}(d)$$
+donde $k = 60$ y $\Delta_{\text{cluster}}(d) = 0.015$ si el documento $d$ pertenece al cluster temático del pilar detectado.
 
 ---
 
-### 2.4 `src/rag/engine.py` — Orquestador Maestro del RAG
-Controla el flujo de ejecución completo:
-1. Valida guardrails de seguridad.
-2. Evalúa navegación guiada interactiva.
-3. Si está en `advisor_mode` o `use_opencode_mode=True`, delega a OpenCode con los 5 mejores fragmentos.
-4. Si es una consulta estándar, verifica caché, ejecuta la búsqueda híbrida y sintetiza la respuesta oficial con citas y botones de acción.
+### 2.4 `src/rag/engine.py` — Orquestador Maestro + Cache Dual Adaptativa + Heavy Only
+Controla:
+1. Normalización y mapeo en `navigation.py` (~85 sinónimos, Levenshtein $\le 2$, embeddings 384d).
+2. Guardrails de inyección de prompts.
+3. **Caché Dual Adaptativa (B20):** Exacta SHA-256 + Semántica por similitud coseno con umbrales elásticos:
+   - $0.88$ para consultas de pilares catalogados (`horarios`, `precios`, `cursos`, `sedes`).
+   - $0.92$ para consultas sobre `becas` (redirección canónica a `12_04` descuentos).
+   - $0.95$ para consultas abiertas generales.
+4. **Umbrales Diferenciados & 2 Fases (D31-D39):** Umbral pilar $0.35$ vs heavy $0.50$, clarificación en 2 fases con confirmación `Sí/No` en memoria de sesión, y regla dura que impide el auto-escalamiento de consultas de pilares rutinarias.
+5. Modo Asesor (`advisor_mode`) con inyección de 5 fragmentos contextuales profundos hacia OpenCode o AGY Antigravity CLI.

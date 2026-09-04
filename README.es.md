@@ -4,7 +4,7 @@
 
 [![Language: English](https://img.shields.io/badge/Language-English-blue.svg)](README.md)
 [![Language: Español](https://img.shields.io/badge/Idioma-Español-green.svg)](README.es.md)
-[![Tests: 25/25 Passed](https://img.shields.io/badge/Tests-25%2F25%20Passed-brightgreen.svg)](backend/tests/)
+[![Tests: 27/27 Passed](https://img.shields.io/badge/Tests-27%2F27%20Passed-brightgreen.svg)](backend/tests/)
 [![Next.js 15](https://img.shields.io/badge/Frontend-Next.js%2015-black.svg)](frontend/)
 [![FastAPI](https://img.shields.io/badge/Backend-FastAPI%200.115-009688.svg)](backend/)
 [![ChromaDB](https://img.shields.io/badge/Vector%20Store-ChromaDB-orange.svg)](backend/data/chroma_db/)
@@ -19,6 +19,7 @@
 ## 📚 Documentación Técnica y Exposición
 
 * 📖 **[Guía Maestra de Explicación Técnica y Presentación](EXPLICACION_TECNICA.md):** Documento exhaustivo paso a paso para exponer, enseñar y defender la arquitectura técnica del proyecto ante evaluadores y equipos de desarrollo (*[Versión en Inglés](TECHNICAL_EXPLANATION.md)*).
+* 🚀 **[Roadmap Estratégico de 50 Propuestas Técnicas](docs/01-product/ROADMAP_50_PROPOSITAS.md):** Plan maestro de evolución técnica en 5 fases secuenciales (RAG, Backend, Frontend, Testing y DevOps) sin tocar seguridad.
 * 📜 **[Registro de Cambios (Changelog)](CHANGELOG.md):** Historial cronológico estricto de todas las modificaciones y versiones bajo zona horaria `America/Bogota`.
 * 🏛️ **[Directorio de Arquitectura y Decisiones (docs/)](docs/):** Documentación técnica organizada por PRD, Arquitectura, Ingeniería, IA y ADRs.
 
@@ -40,12 +41,11 @@ La academia de idiomas **Nova Idiomas Colombia** cuenta con sedes en **Bogotá (
 ```text
 synapse-admissions-ai/ (NovaVice_os97)
 ├── backend/                               # 🐍 Backend FastAPI & Inteligencia Artificial
-│   ├── data/                              # Base de conocimiento (82 docs) y tickets
+│   ├── data/                              # Base de conocimiento (83 docs, incl. 12_04 becas→descuentos) y tickets
 │   │   ├── documents/                     # Archivos Markdown con programas y reglamentos
 │   │   └── escalations.json               # Registro de tickets humanos
-│   ├── hermes_skills/                     # Skills y herramientas para agentes
 │   ├── src/                               # Código fuente backend (API, bot, core, rag)
-│   ├── tests/                             # Suite completa de 25 pruebas en Pytest
+│   ├── tests/                             # Suite completa de 27 pruebas en Pytest (incl. caché semántica)
 │   └── requirements.txt                   # Dependencias Python
 │
 ├── frontend/                              # 🌐 Aplicación Web Retro Next.js 15
@@ -55,12 +55,12 @@ synapse-admissions-ai/ (NovaVice_os97)
 │
 ├── docs/                                  # 📚 Documentación Técnica y Arquitectónica
 │   ├── assets/                            # Recursos y PDFs (Enunciado original)
-│   ├── 01-product/                        # PRD
-│   ├── 03-architecture/                   # Arquitectura y propuestas
-│   ├── 04-engineering/                    # Guías de ingeniería y diseño técnico
-│   ├── 05-ai/                             # Integraciones de IA y OpenCode/AGY
-│   ├── 08-operations/                     # Optimización y rendimiento
-│   └── 09-decisions/                      # Architecture Decision Records (ADRs)
+│   ├── 01-product/                        # PRD (becas=descuentos)
+│   ├── 03-architecture/                   # Arquitectura y propuestas (threshold 0.35 pilar)
+│   ├── 04-engineering/                    # Guías de ingeniería y diseño técnico (centroid, NFD)
+│   ├── 05-ai/                             # Integraciones de IA y OpenCode/AGY (heavy only)
+│   ├── 08-operations/                     # Optimización, SESSION_HANDOFF y TODO becas
+│   └── 09-decisions/                      # Architecture Decision Records (ADR-001 a ADR-008)
 │
 ├── scripts/                               # 🛠️ Scripts auxiliares e instaladores
 │   ├── installer.py                       # Lógica de instalación multiplataforma
@@ -75,7 +75,6 @@ synapse-admissions-ai/ (NovaVice_os97)
 ├── EXPLICACION_TECNICA.md                 # Guía técnica maestra en español
 ├── README.md                              # Documentación principal en inglés
 ├── README.es.md                           # Documentación en español
-├── Dockerfile                             # Contenedor Docker de producción
 ├── pytest.ini                             # Configuración centralizada de Pytest
 ├── run.py                                 # Supervisor raíz multi-proceso con selector
 ├── start.sh                               # Lanzador rápido Linux/macOS
@@ -226,10 +225,10 @@ El proyecto cuenta con una suite completa de pruebas unitarias y de integración
 ```
 
 ```text
-============================= 25 passed in 14.07s ==============================
+============================= 27 passed in ~35s ==============================
 ```
 
-Las 25 pruebas validan:
+Las 27 pruebas validan:
 - Estado del servidor y detección de motor asesor.
 - Indexación y chunking con solapamiento de los 82 documentos.
 - Búsqueda híbrida (ChromaDB + BM25) y fusión RRF.

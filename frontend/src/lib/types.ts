@@ -5,7 +5,7 @@ export interface ActionButton {
 
 export interface ChatMessage {
   id: string;
-  sender: "user" | "bot" | "system";
+  sender: "user" | "bot";
   text: string;
   timestamp: string;
   confidence_score?: number;
@@ -13,9 +13,8 @@ export interface ChatMessage {
   source_documents?: string[];
   escalated_to_human?: boolean;
   cached?: boolean;
-  mode?: "rag_direct" | "opencode_advisor" | "agy_advisor" | "menu_navigation" | "escalation" | "guardrail_defense";
+  mode?: "rag_direct" | "opencode_advisor" | "agy_advisor" | "menu_navigation" | "escalation" | "guardrail_defense" | "clarification";
   action_buttons?: ActionButton[];
-  isVoice?: boolean;
 }
 
 export interface TelemetryMetrics {
@@ -30,6 +29,7 @@ export interface TelemetryMetrics {
   total_tokens: number;
   estimated_cost_usd: number;
   average_latency_ms: number;
+  pillar_distribution?: Record<string, number>;
 }
 
 export interface ServerHealth {

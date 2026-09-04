@@ -26,8 +26,10 @@
 │                                     │ Clean Inbound Query                  │
 │                                     v                                      │
 │  ┌──────────────────────────────────────────────────────────────────────┐  │
-│  │ Guided Navigation State Machine (src/core/navigation.py)             │  │
-│  │ Root Menu (1-9), 8 Submenus (1.1..8.5), '0' Return Command           │  │
+│  │ Guided Navigation State Machine (src/core/navigation.py:163,330)     │  │
+│  │ Root 1-4 (24 leaves) + 80 intent synonyms (horario/precio/beca→      │  │
+│  │ descuento/curso/modalidad/sede) + Unicode NFD + typo Levenshtein     │  │
+│  │ '0' Return, Heavy Only advisor (9)                                   │  │
 │  └───────┬──────────────────────────────────────────────────────┬───────┘  │
 │          │ Option 9 / Advisor Mode                              │          │
 │          v                                                      │ RAG Flow │
@@ -43,23 +45,26 @@
 │          │                                                      │          │
 │          │                                                      v          │
 │          │      ┌───────────────────────────────────────────────────────┐  │
-│          │      │ Block E: Adaptive Invalidation-Aware Query Cache      │  │
-│          │      │ 1. Exact Match (SHA-256 Hash Table) ──► Hit (<30ms) ─┐│  │
-│          │      │ 2. Semantic Cache (Similarity > 0.95) ──► Hit (<30ms)┤│  │
+│          │      │ Block E: Adaptive Dual-Layer Cache                    │  │
+│          │      │ 1. Exact SHA-256 ──► Hit (<30ms)                     ─┐│  │
+│          │      │ 2. Semantic 0.95 (0.88 pilar: horario/precio/curso/   ─┤│  │
+│          │      │    modalidad/sede/beca→descuento) via embed_query     ││  │
 │          │      └───────────────────┬───────────────────────────────────┼┘  │
 │          │                          │ Cache Miss                        │   │
 │          │                          v                                   │   │
 │          │      ┌──────────────────────────────────────────────────┐    │   │
 │          │      │ Block A: Hybrid Retrieval & Ranking Subsystem    │    │   │
-│          │      │ - 87 Official Documents (264 Indexed Chunks)     │    │   │
-│          │      │ - Dense Cosine Search (ChromaDB + Local Engine)  │    │   │
-│          │      │ - Pure Python BM25 with Auto-Corpus Fitting      │    │   │
-│          │      │ - Reciprocal Rank Fusion (RRF, k=60)             │    │   │
+│          │      │ - 83 Docs (245 Chunks) + 12_04 becas→descuentos  │    │   │
+│          │      │ - Dense Chroma + BM25 (k1 1.5 b 0.75) + Unicode  │    │   │
+│          │      │ - RRF k=60 + boost por intent (1.4) + centroid   │    │   │
+│          │      │ - Auto-fit + query expansion (precio↔tarifa)     │    │   │
 │          │      └───────────────────┬──────────────────────────────┘    │   │
 │          │                          │ Top 5 Ranked Chunks               │   │
 │          │                          v                                   │   │
 │          │      ┌──────────────────────────────────────────────────┐    │   │
-│          │      │ Relevance Threshold Filter (Score >= 0.50)       │    │   │
+│          │      │ Relevance Threshold (0.35 pilar vs 0.50 heavy)   │    │   │
+│          │      │ Pilar: horario/precio/curso/modalidad/sede/beca │    │   │
+│          │      │ → descuento nunca escala (heavy only 2 fases)   │    │   │
 │          │      └───────────┬──────────────────────────┬───────────┘    │   │
 │          │                  │ Pass                     │ Fail (<0.50)   │   │
 │          │                  v                          v                │   │
@@ -88,16 +93,16 @@
 - **ReactMarkdown Engine (`ChatContainer.tsx`):** Native GFM markdown renderer with Dark Glassmorphism callouts, glowing neon bullets, and clear typography.
 - **Process Supervisor (`run.py`):** Multi-process launcher managing OpenCode (:4096), FastAPI (:8000), and Next.js (:3000).
 
-### 2.2 Ingestion & Indexing Pipeline (`src/rag/ingestion.py`)
-- **Source Directory:** `data/documents/` (87 verified university documents across 7 thematic clusters).
-- **Chunking Engine:** Markdown section splitter (`##`, `###`) with character chunking (500 chars) and 100-character overlap.
-- **Vector Store:** ChromaDB with Pure Python vector persistence and cosine similarity.
-- **Lexical Index:** Pure Python BM25 with automatic corpus fitting on startup.
+### 2.2 Ingestion & Indexing Pipeline (`src/rag/ingestion.py:32`)
+- **Source Directory:** `data/documents/` (83 docs, 245 chunks, 20 clusters + `12_04_becas_descuentos_aclaratoria.md` canónico).
+- **Chunking Engine:** Markdown section splitter (`##`, `###`) 500/100 (600/150 para tablas precios/horarios protegido Fase B14).
+- **Vector Store:** ChromaDB `all-MiniLM-L6-v2` + fallback TF-IDF `embed_query()` para cache semántica; centroid por pilar (5) Fase B16.
+- **Lexical Index:** Pure Python BM25 `k1 1.5 b 0.75` + Unicode NFD + STOP 62 + expansión query Fase B17.
 
-### 2.3 Guided Navigation State Machine (`src/core/navigation.py`)
-- **Root Menu:** 9 official options with single-digit routing.
-- **Submenus (1 to 8):** Detailed thematic trees (e.g. 1.1 to 1.7 for syllabi, 5.1 to 5.5 for NVIDIA H100 GPU cluster).
-- **Option 9:** Direct routing to OpenCode Advisor mode.
+### 2.3 Guided Navigation State Machine (`src/core/navigation.py:163,330`)
+- **Root Menu:** 4 pilares (1 Cursos 1.1-1.6, 2 Horarios 2.1-2.6, 3 Precios 3.1-3.5, 4 Sedes 4.1-4.6) + 80 synonyms (horario/precio/beca→descuento/curso/modalidad/sede) + typo + intent embedding cosine 0.82 + multi-intent split.
+- **Becas→Descuentos:** `beca/becas/ayudas/subsidio/scholarship/becas disponibles` → `12_04` (ADR-008). Sin merit becas.
+- **Heavy Only:** `0` return, `9` asesor solo very heavy (lista negra `visa/beca 100%/Australia`).
 
 ### 2.4 OpenCode Advisor Intermediary (`src/core/opencode_client.py`)
 - **REST Client:** High-performance `httpx.AsyncClient` with connection pooling.

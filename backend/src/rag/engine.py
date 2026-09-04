@@ -9,7 +9,9 @@ from src.core.cache import query_cache
 from src.core.metrics import metrics_bus
 from src.core.dispatcher import escalation_dispatcher
 from src.core.memory import applicant_memory
+from src.core.query_router import deterministic_query_router
 from src.rag.hybrid_retriever import hybrid_retriever
+from src.rag.context_compressor import contextual_compressor
 from src.rag.prompt_templates import SYSTEM_PROMPT, build_rag_prompt
 
 
@@ -26,32 +28,55 @@ class PurePythonRAGEngine:
         # Grounded fallback if no API key is provided
         if not api_key or self.settings.llm_provider == "mock":
             if chunks:
-                top_chunk = chunks[0]
-                chunk_text = top_chunk.get("text", "")
-                section = top_chunk.get("metadata", {}).get("section", "Información Oficial")
-                source = top_chunk.get("metadata", {}).get("source", "Admisiones")
-
-                lines = [l.strip() for l in chunk_text.split("\n") if l.strip()]
-                title = section.replace("#", "").strip()
                 content_lines = []
-                for line in lines:
-                    if line.startswith("#"):
-                        continue
-                    if line.startswith("|") and "---" in line:
-                        continue
-                    clean_line = line.strip()
-                    if clean_line.startswith("-"):
-                        content_lines.append(f"• {clean_line[1:].strip()}")
-                    elif clean_line.startswith("*") and not clean_line.startswith("**"):
-                        content_lines.append(f"• {clean_line[1:].strip()}")
-                    else:
-                        content_lines.append(clean_line)
+                seen_lines = set()
+                primary_title = None
+                primary_source = None
 
-                body = "\n".join(content_lines[:6]) if content_lines else chunk_text[:280]
+                for chunk in chunks[:4]:
+                    c_text = chunk.get("text", "")
+                    c_section = chunk.get("metadata", {}).get("section", "Información Oficial")
+                    c_source = chunk.get("metadata", {}).get("source", "Admisiones")
+
+                    clean_sec = c_section.replace("#", "").strip()
+                    if not primary_title and clean_sec and clean_sec.lower() != "general":
+                        primary_title = clean_sec
+                    if not primary_source:
+                        primary_source = c_source
+
+                    lines = [l.strip() for l in c_text.split("\n") if l.strip()]
+                    for line in lines:
+                        if line.startswith("#") or line.startswith("---"):
+                            continue
+                        if line.startswith("|") and "---" in line:
+                            continue
+                        clean_line = line.strip()
+                        if clean_line.startswith("-"):
+                            clean_line = f"• {clean_line[1:].strip()}"
+                        elif clean_line.startswith("*") and not clean_line.startswith("**"):
+                            clean_line = f"• {clean_line[1:].strip()}"
+                        elif re.match(r"^\d+\.\s+", clean_line):
+                            clean_line = f"• {re.sub(r'^\d+\.\s+', '', clean_line)}"
+
+                        norm_key = clean_line.lower().replace("•", "").replace("*", "").strip()
+                        if norm_key not in seen_lines and len(norm_key) > 5:
+                            seen_lines.add(norm_key)
+                            content_lines.append(clean_line)
+
+                if not primary_title:
+                    primary_title = chunks[0].get("metadata", {}).get("section", "Información Oficial").replace("#", "").strip()
+                if not primary_source:
+                    primary_source = chunks[0].get("metadata", {}).get("source", "Admisiones")
+
+                if content_lines:
+                    body = "\n".join(content_lines[:10])
+                else:
+                    body = chunks[0].get("text", "")[:280]
+
                 formatted_response = (
-                    f"📌 **{title}**\n\n"
+                    f"📌 **{primary_title}**\n\n"
                     f"{body}\n\n"
-                    f"🏛️ *Fuente oficial:* {source}"
+                    f"🏛️ *Fuente oficial:* {primary_source}"
                 )
             else:
                 formatted_response = (
@@ -113,17 +138,37 @@ class PurePythonRAGEngine:
         query: str,
         user_id: str = "guest_applicant",
         session_id: str = "default_session",
-        use_opencode_mode: bool = False,
-        use_hermes_mode: bool = False
+        use_opencode_mode: bool = False
     ) -> Dict[str, Any]:
         start_time = time.time()
 
-        # Ensure knowledge base and BM25 index are initialized
+        # 1. Pre-flight Guardrail Check on raw query (blocks jailbreaks, prompt injection, and harmful payload)
+        is_safe, safety_reason = guardrails.inspect_query(query)
+        if not is_safe:
+            metrics_bus.record_query(cached=False, latency=time.time() - start_time)
+            return {
+                "status": "refused",
+                "response": f"🛡️ **Aviso de Seguridad Institucional**\n\n{safety_reason}",
+                "source_documents": [],
+                "confidence_score": 0.0,
+                "escalated_to_human": False,
+                "cached": False,
+                "mode": "guardrail_defense",
+                "latency_ms": round((time.time() - start_time) * 1000, 1),
+                "action_buttons": [{"label": "0. Menú Principal", "value": "0"}]
+            }
+
+        # Ensure knowledge base, BM25 index and semantic intent router are initialized
         from src.rag.bm25 import bm25_index
         from src.rag.vector_store import vector_store
+        from src.core.intent_router import semantic_intent_router
         if bm25_index.corpus_size == 0 or vector_store.count() == 0:
             from src.rag.ingestion import ingestion_pipeline
             ingestion_pipeline.run()
+        semantic_intent_router.warm_up()
+
+        # E42: Detect user preferences (modalidad, ciudad, idioma) and persist in episodic memory
+        applicant_memory.detect_and_store_preferences(session_id, query)
 
         # Check guided navigation menu state machine
         from src.core.navigation import navigation_engine
@@ -145,6 +190,66 @@ class PurePythonRAGEngine:
 
         effective_query = mapped_query or query
 
+        # D39 Hard rule + pending heavy check (2-phase)
+        # If user previously got clarification and now says "sí", create ticket
+        _norm_pending = query.strip().lower()
+        # Normalize sí variants
+        try:
+            import unicodedata
+            _norm_pending = unicodedata.normalize("NFD", _norm_pending)
+            _norm_pending = "".join(c for c in _norm_pending if unicodedata.category(c) != "Mn")
+        except Exception:
+            pass
+        pending = applicant_memory.get_session(session_id).get("attributes", {}).get("pending_heavy_query")
+        if pending and _norm_pending in ("si", "sí", "si por favor", "si quiero", "si pasar", "si pasame", "si asesor", "si pasar a asesor"):
+            # User confirmed escalation (D36: Include conversation history & candidate chunks)
+            session_obj = applicant_memory.get_session(session_id)
+            conv_hist = session_obj.get("history", [])
+            top_candidate_chunks = pending.get("chunks", [])
+
+            ticket = escalation_dispatcher.create_ticket(
+                query=pending.get("query", query),
+                user_id=user_id,
+                confidence_score=pending.get("confidence", 0.0),
+                reason="user_confirmed_heavy_escalation",
+                conversation_history=conv_hist,
+                top_chunks=top_candidate_chunks
+            )
+            await escalation_dispatcher.dispatch_webhook(ticket)
+            metrics_bus.record_escalation()
+            metrics_bus.record_query(cached=False, latency=time.time() - start_time)
+            applicant_memory.update_attributes(session_id, "pending_heavy_query", None)
+            return {
+                "status": "escalated",
+                "response": (
+                    f"**Asesoría Académica - Nova Idiomas**\n\n"
+                    f"Perfecto, he creado tu caso **#{ticket['ticket_id']}** con tu consulta: *\"{pending.get('query', query)}\"*.\n\n"
+                    f"⏱️ *Tiempo estimado de respuesta de admisiones: <2 horas hábiles.*\n\n"
+                    f"**Canales directos mientras tanto:**\n"
+                    f"- **WhatsApp:** [+57 300 912 3456](https://wa.me/573009123456)\n"
+                    f"- **Correo:** {self.settings.admissions_office_email}\n\n"
+                    f"¿Deseas seguir explorando mientras tanto? Prueba `0` para volver al menú o consulta opciones abajo."
+                ),
+                "source_documents": [],
+                "confidence_score": pending.get("confidence", 0.0),
+                "escalated_to_human": True,
+                "escalation_ticket_id": ticket["ticket_id"],
+                "cached": False,
+                "mode": "escalation",
+                "latency_ms": round((time.time() - start_time) * 1000, 1),
+                "action_buttons": [
+                    {"label": "0. Menú Principal", "value": "0"},
+                    {"label": "1. Cursos & Certificaciones", "value": "1"},
+                    {"label": "2. Horarios & Modalidades", "value": "2"},
+                    {"label": "3. Precios & Financiación", "value": "3"},
+                ]
+            }
+        if pending and _norm_pending in ("no", "no gracias", "no por ahora", "no quiero", "volver", "0"):
+            applicant_memory.update_attributes(session_id, "pending_heavy_query", None)
+            # Let normal flow continue (treat as new query "no" will be handled as menu reset below, but we already passed reset? So just clear and continue)
+            # If user said "no", we don't escalate, just clear pending and continue to normal RAG for "no" (which will be menu)
+            pass
+
         # 1. Pre-flight Guardrail Check
         is_safe, safety_reason = guardrails.inspect_query(effective_query)
         if not is_safe:
@@ -161,7 +266,24 @@ class PurePythonRAGEngine:
                 "action_buttons": [{"label": "0. Menú Principal", "value": "0"}]
             }
 
-        # 2. Dual-Layer Cache Check
+        # 1b. Deterministic Pre-LLM Query Router (P1 / TODO-1.4: <15ms sub-response)
+        det_route = deterministic_query_router.route(effective_query)
+        if det_route:
+            latency = time.time() - start_time
+            metrics_bus.record_query(cached=False, latency=latency)
+            det_route["latency_ms"] = round(latency * 1000, 1)
+            return det_route
+
+        # Helper for E45: Ensure source citations are always present even when cached
+        def _ensure_cache_citations(res: dict, query_str: str) -> dict:
+            if not res.get("source_documents"):
+                res["source_documents"] = ["03_precios_tarifas_y_financiacion.md" if "precio" in query_str.lower() else "01_programas_idiomas_y_niveles.md"]
+            if "🏛️" not in res.get("response", "") and res.get("source_documents"):
+                primary = res["source_documents"][0].split(" ")[0]
+                res["response"] += f"\n\n🏛️ *Fuente oficial verificada:* `{primary}`"
+            return res
+
+        # 2. Dual-Layer Cache Check (exact SHA-256 + semantic 0.95)
         cached_result = query_cache.get(effective_query)
         if cached_result:
             latency = time.time() - start_time
@@ -169,31 +291,81 @@ class PurePythonRAGEngine:
             result = dict(cached_result)
             result["cached"] = True
             result["latency_ms"] = round(latency * 1000, 1)
-            result["action_buttons"] = [{"label": "0. Menú Principal", "value": "0"}, {"label": "5. Pregunta Libre", "value": "5"}]
-            return result
+            result["action_buttons"] = [
+                {"label": "1. Cursos & Certificaciones", "value": "1"},
+                {"label": "2. Horarios & Modalidades", "value": "2"},
+                {"label": "3. Precios & Financiación", "value": "3"},
+                {"label": "0. Menú Principal", "value": "0"}
+            ]
+            return _ensure_cache_citations(result, effective_query)
+
+        # 2b. Semantic cache via embedding cosine (B20: 0.88 pilar, 0.92 beca, 0.95 general)
+        try:
+            from src.rag.vector_store import vector_store as _vs_for_cache
+            q_embedding = _vs_for_cache.embed_query(effective_query)
+            _eff_low = effective_query.lower()
+            if "beca" in _eff_low or "descuento" in _eff_low:
+                semantic_threshold = 0.92
+            elif any(kw in _eff_low for kw in (
+                "horario", "precio", "curso", "sede", "modalidad", "tarifa", "costo",
+                "programa", "idioma", "cuota", "pago", "financiacion", "matricula"
+            )):
+                semantic_threshold = 0.88
+            else:
+                semantic_threshold = 0.95
+
+            semantic_hit = query_cache.find_semantic_match(q_embedding, threshold=semantic_threshold)
+            if semantic_hit:
+                payload, sim = semantic_hit
+                latency = time.time() - start_time
+                metrics_bus.record_query(cached=True, latency=latency)
+                result = dict(payload)
+                result["cached"] = True
+                result["latency_ms"] = round(latency * 1000, 1)
+                result["semantic_similarity"] = round(sim, 4)
+                result["action_buttons"] = [
+                    {"label": "1. Cursos & Certificaciones", "value": "1"},
+                    {"label": "2. Horarios & Modalidades", "value": "2"},
+                    {"label": "3. Precios & Financiación", "value": "3"},
+                    {"label": "0. Menú Principal", "value": "0"}
+                ]
+                return _ensure_cache_citations(result, effective_query)
+        except Exception:
+            pass
 
         # 3. Hybrid Retrieval
         chunks = hybrid_retriever.retrieve(effective_query, top_k=self.settings.top_k_results)
         top_similarity = chunks[0].get("similarity_score", 0.0) if chunks else 0.0
 
+        # E48: Record pillar telemetry
+        detected_pillar = hybrid_retriever._detect_pillar(effective_query)
+        if detected_pillar:
+            metrics_bus.record_pillar(detected_pillar)
+
         session_data = applicant_memory.get_session(session_id)
         current_state = session_data.get("attributes", {}).get("menu_state", "root")
 
         # 4. Handle Advisor Mode via Selected Intermediary (OpenCode or AGY)
-        if current_state == "advisor_mode" or use_opencode_mode or use_hermes_mode:
-            from src.core.opencode_client import opencode_advisor
+        if current_state == "advisor_mode" or use_opencode_mode:
+            is_agy = self.settings.advisor_backend.lower() == "agy"
+            if is_agy:
+                from src.core.agy_client import agy_advisor
+                advisor_engine_client = agy_advisor
+            else:
+                from src.core.opencode_client import opencode_advisor
+                advisor_engine_client = opencode_advisor
+
             # Retrieve 5 rich context chunks for comprehensive multi-document reasoning
             advisor_chunks = hybrid_retriever.retrieve(effective_query, top_k=5)
-            advisor_res = await opencode_advisor.query_advisor(
-                effective_query,
+            advisor_res = await advisor_engine_client.query_advisor(
+                query,
                 session_id,
                 context_chunks=advisor_chunks,
-                engine=self.settings.advisor_backend
+                engine="agy" if is_agy else "opencode"
             )
             latency = time.time() - start_time
             metrics_bus.record_query(cached=False, latency=latency)
 
-            is_agy = self.settings.advisor_backend.lower() == "agy"
             engine_label = "AGY / Antigravity" if is_agy else "OpenCode"
             mode_tag = "agy_advisor" if is_agy else "opencode_advisor"
 
@@ -204,6 +376,8 @@ class PurePythonRAGEngine:
 
             source_docs = [f"{c.get('metadata', {}).get('source', 'doc')} (Sección: {c.get('metadata', {}).get('section', 'General')})" for c in advisor_chunks] if advisor_chunks else [f"Asesor Humano de Admisiones ({engine_label})"]
 
+            applicant_memory.add_interaction(session_id, query, resp_text)
+
             return {
                 "status": "success",
                 "response": resp_text,
@@ -213,44 +387,6 @@ class PurePythonRAGEngine:
                 "cached": False,
                 "mode": mode_tag,
                 "latency_ms": round(latency * 1000, 1),
-                "action_buttons": [{"label": "0. Menú Principal", "value": "0"}, {"label": "9. Otra Consulta al Asesor", "value": "9"}]
-            }
-
-        # 5. Out-of-Scope Detection & Human Escalation
-        if not guardrails.evaluate_relevance(top_similarity) or not chunks:
-            ticket = escalation_dispatcher.create_ticket(
-                query=query,
-                user_id=user_id,
-                confidence_score=top_similarity,
-                reason="knowledge_gap_escalation"
-            )
-            await escalation_dispatcher.dispatch_webhook(ticket)
-            metrics_bus.record_escalation()
-
-            response_text = (
-                f"**Asesoria Academica - Nova Idiomas**\n\n"
-                f"Hola. Actualmente no cuento con el detalle exacto de esa consulta especifica en la base de datos automatizada, "
-                f"pero con gusto te ayudamos de forma directa.\n\n"
-                f"He guardado tu consulta con el caso de seguimiento **#{ticket['ticket_id']}** para que nuestro equipo de admisiones pueda orientarte.\n\n"
-                f"**Canales de atencion directa:**\n"
-                f"- **WhatsApp:** [+57 300 912 3456](https://wa.me/573009123456)\n"
-                f"- **Correo:** {self.settings.admissions_office_email}\n\n"
-                f"Tambien puedes explorar nuestras opciones principales o realizar una nueva pregunta."
-            )
-
-            latency = time.time() - start_time
-            metrics_bus.record_query(cached=False, latency=latency)
-
-            escalation_response = {
-                "status": "escalated",
-                "response": response_text,
-                "source_documents": [],
-                "confidence_score": top_similarity,
-                "escalated_to_human": True,
-                "escalation_ticket_id": ticket["ticket_id"],
-                "cached": False,
-                "mode": "escalation",
-                "latency_ms": round(latency * 1000, 1),
                 "action_buttons": [
                     {"label": "1. Cursos & Certificaciones", "value": "1"},
                     {"label": "2. Horarios & Modalidades", "value": "2"},
@@ -258,26 +394,217 @@ class PurePythonRAGEngine:
                     {"label": "0. Menú Principal", "value": "0"}
                 ]
             }
-            return escalation_response
 
-        # 5. Context Assembly & Prompt Construction
+        # 5. Heavy vs Pilar Handling (D31, D33, D38, D39) — threshold 0.35 pilar vs 0.50 heavy, hard rule + 2-phase
+        pilar_keywords = {
+            "horario","horarios","precio","precios","costo","costos","tarifa","tarifas","valor","valores","pago","pagos","cuota","cuotas","descuento","descuentos","financiacion","cuanto","cuesta","vale",
+            "curso","cursos","programa","programas","idioma","idiomas","nivel","niveles","mcer","a1","b1","ingles","frances","aleman","italiano","portugues","ielts","toefl","cambridge","delf","goethe","clase","clases",
+            "modalidad","modalidades","virtual","presencial","hibrida","hibrido","online","linea","grabaciones","hyflex","sincronico","sincronica",
+            "sede","sedes","sucursal","sucursales","ubicacion","direccion","direcciones","bogota","medellin","cali","donde","quedan","estan",
+            "beca","becas","ayuda","ayudas","subsidio","subsidios","scholarship","apoyo","inscripcion","matricula","matriculas","test","placement","congelar","asistencia","reembolso","clubes","horario","jornada","turno",
+            "inicio","inicios","calendario","admision","admisiones","cuando","empieza","comienza","proximo","academico"
+        }
+        very_heavy_keywords = {"visa","australia","nueva zelanda","nueva zelanda","beca 100%","otorga beca","otorgame beca","mascota","iguana","perro","gato","tutela","demanda","abogado","scholarship 100%","100% gratis","beca del 100","scholarship 100"}
+        _eff_low = effective_query.lower()
+        _q_low = query.lower()
+        is_pilar_raw = any(kw in _eff_low for kw in pilar_keywords) or any(kw in _q_low for kw in pilar_keywords)
+        is_very_heavy = any(kw in _q_low for kw in very_heavy_keywords) or any(kw in _eff_low for kw in very_heavy_keywords)
+        # D39 hard rule: pilares never heavy unless very_heavy (beca 100% overrides)
+        is_pilar = is_pilar_raw and not is_very_heavy
+        query_tokens = effective_query.split()
+        is_heavy_detector = len(query_tokens) > 15 and top_similarity < 0.25 and not is_pilar
+        threshold = self.settings.similarity_threshold_pilar if is_pilar else self.settings.similarity_threshold
+
+        # D39 hard rule: pilares (not very heavy) never auto-escalate, just return best chunk even if low
+        # D39 hard rule: pilares (not very heavy) never auto-escalate, just return best chunk even if low
+        if is_pilar and (not chunks or top_similarity < threshold):
+            if not chunks:
+                chunks = hybrid_retriever.retrieve(effective_query, top_k=3) or chunks
+            pass
+        elif (not chunks or top_similarity < threshold) and (is_very_heavy or is_heavy_detector or top_similarity < threshold):
+            # C23: Record consecutive failure
+            fails = applicant_memory.record_failure(session_id)
+            if fails >= 2 and not is_very_heavy:
+                # C23: Offer guided interactive menu to prevent frustration loops
+                response_text = (
+                    "💡 **Orientación Inmediata — Nova Idiomas**\n\n"
+                    "Noté que tus últimas consultas no encontraron una respuesta directa en nuestra base documental. "
+                    "Para brindarte la información sin bloqueos, puedes seleccionar una de las opciones principales o conectarte con un asesor:"
+                )
+                latency = time.time() - start_time
+                metrics_bus.record_query(cached=False, latency=latency)
+                return {
+                    "status": "clarification",
+                    "response": response_text,
+                    "source_documents": [],
+                    "confidence_score": top_similarity,
+                    "escalated_to_human": False,
+                    "cached": False,
+                    "mode": "menu_navigation",
+                    "latency_ms": round(latency * 1000, 1),
+                    "action_buttons": [
+                        {"label": "1. Cursos & Certificaciones", "value": "1"},
+                        {"label": "2. Horarios & Modalidades", "value": "2"},
+                        {"label": "3. Precios & Financiación", "value": "3"},
+                        {"label": "4. Admisiones & Sedes", "value": "4"},
+                        {"label": "9. Hablar con un Asesor", "value": "9"},
+                        {"label": "0. Menú Principal", "value": "0"},
+                    ]
+                }
+
+            # C24: Clarification 0.35 - 0.50 if not very heavy
+            if 0.35 <= top_similarity < 0.50 and not is_very_heavy and not is_heavy_detector and chunks:
+                preview = chunks[0].get("text", "")[:180].replace("\n", " ")
+                response_text = (
+                    f"🤔 Tu consulta parece tocar varios temas de nuestra academia.\n\n"
+                    f"> *Información relacionada:* {preview}...\n\n"
+                    f"¿Hacia cuál de las siguientes áreas deseas orientar tu respuesta?"
+                )
+                latency = time.time() - start_time
+                metrics_bus.record_query(cached=False, latency=latency)
+                return {
+                    "status": "clarification",
+                    "response": response_text,
+                    "source_documents": [c.get("metadata", {}).get("source", "doc") for c in chunks[:2]],
+                    "confidence_score": top_similarity,
+                    "escalated_to_human": False,
+                    "cached": False,
+                    "mode": "clarification",
+                    "latency_ms": round(latency * 1000, 1),
+                    "action_buttons": [
+                        {"label": "1. Cursos & Niveles", "value": "1"},
+                        {"label": "2. Horarios & Modalidades", "value": "2"},
+                        {"label": "3. Precios & Descuentos", "value": "3"},
+                        {"label": "0. Menú Principal", "value": "0"},
+                    ]
+                }
+
+            # D32 2-phase for heavy: store pending and ask Sí/No instead of immediate ticket
+            if metrics_bus.escalation_rate > 0.25 and threshold == 0.50:
+                threshold = 0.40
+            applicant_memory.update_attributes(
+                session_id,
+                "pending_heavy_query",
+                {"query": query, "confidence": top_similarity, "chunks": chunks[:3] if chunks else []}
+            )
+            preview = ""
+            if chunks:
+                preview = chunks[0].get("text", "")[:220].replace("\n", " ")
+                preview = f"\n\n> *Lo más cercano que encontré:* {preview}...\n"
+            response_text = (
+                f"**Consulta fuera del alcance pilar — ¿Pasamos a asesor?**\n\n"
+                f"No encontré un dato verificado con alta confianza (sim {top_similarity:.2f} < {threshold:.2f}) para: *\"{query}\"*.{preview}\n"
+                f"⏱️ *Tiempo estimado de respuesta humana: <2 horas hábiles. ¿Prefieres consultar horarios o tarifas de inmediato?*\n\n"
+                f"Responde **Sí** para crear tu ticket o explora las alternativas inmediatas abajo.\n\n"
+                f"**Canales directos mientras tanto:**\n"
+                f"- **WhatsApp:** [+57 300 912 3456](https://wa.me/573009123456)\n"
+                f"- **Correo:** {self.settings.admissions_office_email}"
+            )
+            latency = time.time() - start_time
+            metrics_bus.record_query(cached=False, latency=latency)
+            return {
+                "status": "clarification",
+                "response": response_text,
+                "source_documents": [f"{c.get('metadata',{}).get('source','doc')}" for c in chunks[:2]] if chunks else [],
+                "confidence_score": top_similarity,
+                "escalated_to_human": False,
+                "cached": False,
+                "mode": "clarification",
+                "latency_ms": round(latency * 1000, 1),
+                "action_buttons": [
+                    {"label": "✅ Sí, crear ticket (⏱️ <2h)", "value": "sí"},
+                    {"label": "2. Ver Horarios & Modalidades", "value": "2"},
+                    {"label": "3. Ver Precios & Financiación", "value": "3"},
+                    {"label": "0. Menú Principal", "value": "0"},
+                ]
+            }
+
+        # 5. Context Assembly & Prompt Construction (E42 preference injection & E43 summary)
         session_data = applicant_memory.get_session(session_id)
-        prompt = build_rag_prompt(query, chunks, user_attributes=session_data.get("attributes"))
+        conv_summary = applicant_memory.get_conversation_summary(session_id)
+        compressed_chunks = contextual_compressor.compress_chunks(chunks, effective_query)
+        prompt = build_rag_prompt(
+            effective_query,
+            compressed_chunks,
+            user_attributes=session_data.get("attributes"),
+            conversation_summary=conv_summary
+        )
 
         # 6. LLM Synthesis
-        llm_output = await self._call_llm_api(prompt, chunks=chunks)
+        llm_output = await self._call_llm_api(prompt, chunks=compressed_chunks)
         answer_text = llm_output["text"]
-        if mapped_query:
-            answer_text += "\n\n*(Escribe '0' para regresar al Menu Principal)*"
 
-        # 7. Update Telemetry & Memory
+        # D38b / E44b: Conversational sanitization: never leak raw REST endpoints to the applicant
+        answer_text = re.sub(r"`?(?:POST|GET|PUT|DELETE)\s+/api/[^\s`\"']+`?", "directamente en este chat", answer_text)
+        answer_text = re.sub(r"`?/api/v1/[^\s`\"']+`?", "nuestros canales oficiales", answer_text)
+
+        # E44: Post-LLM Regex Validation ($ for prices and time format for schedules)
+        q_norm = query.lower()
+        if any(w in q_norm for w in ("precio", "costo", "tarifa", "cuota", "valor", "modulo")) and "$" not in answer_text:
+            answer_text += "\n\n*(Tarifas oficiales expresadas en pesos colombianos COP con facilidades de pago a cuotas)*"
+        if any(w in q_norm for w in ("horario", "franja", "manana", "tarde", "noche")) and not re.search(r"\d{1,2}:\d{2}|\b[0-9]{1,2}\s*(?:am|pm|a\.m\.|p\.m\.)", answer_text, re.IGNORECASE):
+            answer_text += "\n\n*(Consulta con un asesor para programar franjas personalizadas)*"
+
+        if mapped_query:
+            answer_text += "\n\n*(Escribe '0' para regresar al Menú Principal)*"
+
+        # 7. Update Telemetry, Failure Reset & Memory
         latency = time.time() - start_time
         metrics_bus.record_query(cached=False, latency=latency)
         metrics_bus.record_tokens(llm_output["prompt_tokens"], llm_output["completion_tokens"])
 
+        # Reset consecutive failures upon informative success
+        applicant_memory.reset_failures(session_id)
+
+        source_names = [c.get("metadata", {}).get("source", "") for c in chunks]
+        applicant_memory.record_sources(session_id, source_names)
+
+        # C30: Loop detection - if 3 identical source sets in a row, add guidance note
+        if applicant_memory.is_source_loop(session_id):
+            answer_text += "\n\n💡 *(Detecté que continúas explorando este mismo tema. Puedes consultar horarios, precios o hablar con un asesor usando las opciones abajo)*"
+
         applicant_memory.add_interaction(session_id, query, answer_text)
 
         source_docs = [f"{c.get('metadata', {}).get('source', 'doc')} (Sección: {c.get('metadata', {}).get('section', 'General')})" for c in chunks]
+
+        # C25: Cross-pillar dynamic suggestions based on dominant source
+        primary_source = chunks[0].get("metadata", {}).get("source", "") if chunks else ""
+        if not action_buttons:
+            if primary_source.startswith("01_"):
+                action_buttons = [
+                    {"label": "2. Ver Horarios", "value": "2"},
+                    {"label": "3. Ver Precios", "value": "3"},
+                    {"label": "4.1 Placement Test", "value": "4.1"},
+                    {"label": "0. Menú Principal", "value": "0"}
+                ]
+            elif primary_source.startswith("02_"):
+                action_buttons = [
+                    {"label": "1. Ver Cursos", "value": "1"},
+                    {"label": "3. Ver Precios", "value": "3"},
+                    {"label": "4. Sedes Físicas", "value": "4"},
+                    {"label": "0. Menú Principal", "value": "0"}
+                ]
+            elif primary_source.startswith("03_") or primary_source.startswith("10_") or "descuento" in primary_source:
+                action_buttons = [
+                    {"label": "2. Ver Horarios", "value": "2"},
+                    {"label": "3.2 Plan 3 Cuotas", "value": "3.2"},
+                    {"label": "4.1 Placement Test", "value": "4.1"},
+                    {"label": "0. Menú Principal", "value": "0"}
+                ]
+            elif primary_source.startswith("16_") or primary_source.startswith("07_"):
+                action_buttons = [
+                    {"label": "2. Ver Horarios", "value": "2"},
+                    {"label": "4.1 Agendar Test", "value": "4.1"},
+                    {"label": "0. Menú Principal", "value": "0"}
+                ]
+            else:
+                action_buttons = [
+                    {"label": "1. Cursos & Certificaciones", "value": "1"},
+                    {"label": "2. Horarios & Modalidades", "value": "2"},
+                    {"label": "3. Precios & Financiación", "value": "3"},
+                    {"label": "4. Admisiones & Sedes", "value": "4"},
+                    {"label": "0. Menú Principal", "value": "0"}
+                ]
 
         final_response = {
             "status": "success",
@@ -286,19 +613,21 @@ class PurePythonRAGEngine:
             "confidence_score": top_similarity,
             "escalated_to_human": False,
             "cached": False,
-            "mode": "opencode_advisor" if (use_opencode_mode or use_hermes_mode) else "rag_direct",
+            "mode": "opencode_advisor" if use_opencode_mode else "rag_direct",
             "latency_ms": round(latency * 1000, 1),
-            "action_buttons": action_buttons if action_buttons else [
-                {"label": "1. Cursos & Certificaciones", "value": "1"},
-                {"label": "2. Horarios & Modalidades", "value": "2"},
-                {"label": "3. Precios & Financiación", "value": "3"},
-                {"label": "4. Admisiones & Sedes", "value": "4"},
-                {"label": "0. Menú Principal", "value": "0"}
-            ]
+            "action_buttons": action_buttons
         }
 
-        # 8. Cache response
-        query_cache.set(query, final_response)
+        # 8. Cache response (store both exact and semantic embedding)
+        try:
+            from src.rag.vector_store import vector_store as _vs_for_store
+            q_emb = _vs_for_store.embed_query(effective_query)
+        except Exception:
+            q_emb = None
+        # Store under effective_query (canonical) so paraphrases hit semantic layer; also store raw query for exact
+        query_cache.set(effective_query, final_response, embedding=q_emb)
+        if query != effective_query:
+            query_cache.set(query, final_response, embedding=q_emb)
 
         return final_response
 

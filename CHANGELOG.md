@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [2026-09-04 10:11] [Feat/Fase-2-TODO-2.9-Docker-Compose-MultiStage]
+- **Configuración Docker Compose multi-stage y producción lista (TODO-2.9 / Prop. 45):**
+  - Creado `Dockerfile.backend` (Python 3.12-slim multi-stage) con compilación aislada de dependencias, healthcheck automático contra `/api/v1/health` y ejecución no privilegiada.
+  - Creado `Dockerfile.frontend` (Node.js 20-alpine multi-stage) con empaquetado `standalone`, healthcheck y ejecución segura bajo usuario de sistema `nextjs:nodejs`.
+  - Creado `docker-compose.yml` orquestando red interna de puente `nova_network`, volumen persistente para `./backend/data` y sincronización con condición de salud (`condition: service_healthy`).
+  - Habilitado soporte `output: "standalone"` y variables de enrutamiento dinámico en `frontend/next.config.mjs`.
+
 ### [2026-09-04 10:10] [Feat/Fase-2-TODO-2.8-ChromaDB-Snapshot-Manager]
 - **Gestor de snapshots fechados de la base vectorial (TODO-2.8 / Prop. 22):**
   - Creado `backend/src/rag/snapshot_manager.py` con utilitarios para respaldar copias completas point-in-time de `chroma_db/`, listar snapshots disponibles y ejecutar rollbacks atómicos.

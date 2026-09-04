@@ -7,12 +7,21 @@ from src.rag.ingestion import ingestion_pipeline
 @pytest.mark.asyncio
 async def test_api_health():
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        # Request without X-Request-ID (server generates one)
         resp = await client.get("/api/v1/health")
         assert resp.status_code == 200
+        assert "x-request-id" in resp.headers
+        assert len(resp.headers["x-request-id"]) > 10
         data = resp.json()
         assert data["status"] == "healthy"
         assert data["version"] in ("2.5.0", "2.6.0")
         assert "advisor_engine" in data
+
+        # Request with custom X-Request-ID (server preserves and echoes)
+        custom_id = "req_custom_tracer_999"
+        resp2 = await client.get("/api/v1/health", headers={"X-Request-ID": custom_id})
+        assert resp2.status_code == 200
+        assert resp2.headers.get("x-request-id") == custom_id
 
 
 @pytest.mark.asyncio

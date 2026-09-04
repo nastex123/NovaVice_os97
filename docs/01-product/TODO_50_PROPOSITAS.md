@@ -10,11 +10,11 @@
 | Fase | Enfoque Principal | Total Tareas | Completadas | En Progreso | Pendientes | Estado |
 | :---: | :--- | :---: | :---: | :---: | :---: | :---: |
 | **Fase 1** | Precisión de Datos y Recuperación RAG | 11 | 11 | 0 | 0 | ✅ Completada (100%) |
-| **Fase 2** | Rendimiento Backend y Resiliencia + Complemento Anti-alucinación | 17 | 3 | 0 | 14 | 🟡 En Progreso (17.6%) |
+| **Fase 2** | Rendimiento Backend y Resiliencia + Complemento Anti-alucinación | 17 | 4 | 0 | 13 | 🟡 En Progreso (23.5%) |
 | **Fase 3** | Frontend Moderno, UI Retro & Accesibilidad | 10 | 0 | 0 | 10 | ⏳ Pendiente |
 | **Fase 4** | Testing Automatizado, QA & Tooling DX | 8 | 0 | 0 | 8 | ⏳ Pendiente |
 | **Fase 5** | Horizontes Futuros y Despliegues Especializados | 11 | 0 | 11 | ⏳ Pendiente |
-| **TOTAL** | **Propuestas de Mejora Técnica** | **57** | **14** | **0** | **43** | **24.6%** |
+| **TOTAL** | **Propuestas de Mejora Técnica** | **57** | **15** | **0** | **42** | **26.3%** |
 
 ---
 
@@ -71,9 +71,9 @@
 - [x] **TODO-2.3 [Prop. 13 - RECOMENDADO] Circuit Breaker y Backoff Exponencial para proveedores LLM:**
   - [x] Crear clase `CircuitBreaker` en `backend/src/core/resilience.py` (estados: Closed, Open, Half-Open).
   - [x] Conmutar automáticamente entre OpenCode y AGY CLI si uno presenta fallos consecutivos o timeouts (>45s).
-- [ ] **TODO-2.4 [Prop. 14 - RECOMENDADO] Middleware ASGI con Correlation ID (`X-Request-ID`):**
-  - [ ] Agregar middleware en `backend/src/main.py` que genere o capture `X-Request-ID`.
-  - [ ] Propagar el ID en cada log emitido y en el header de respuesta HTTP.
+- [x] **TODO-2.4 [Prop. 14 - RECOMENDADO] Middleware ASGI con Correlation ID (`X-Request-ID`):**
+  - [x] Agregar middleware en `backend/src/main.py` que genere o capture `X-Request-ID`.
+  - [x] Propagar el ID en cada log emitido y en el header de respuesta HTTP.
 - [ ] **TODO-2.5 [Prop. 15 - RECOMENDADO] Migración de `escalations.json` a SQLite transaccional con WAL:**
   - [ ] Crear repositorio `backend/src/data/sqlite_tickets.py` con esquema de tabla `escalation_tickets`.
   - [ ] Habilitar modo `PRAGMA journal_mode=WAL;` para escrituras atómicas concurrentes libres de bloqueos.

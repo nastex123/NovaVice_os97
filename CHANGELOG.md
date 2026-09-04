@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [2026-09-04 10:06] [Feat/Fase-2-TODO-2.4-Correlation-ID-Middleware]
+- **Middleware ASGI con Correlation ID (`X-Request-ID`) (TODO-2.4 / Prop. 14):**
+  - Implementado middleware HTTP en `backend/src/main.py` que genera automáticamente identificadores UUIDv4 para cada solicitud o preserva los IDs entrantes en `X-Request-ID`.
+  - Inyectado `request.state.correlation_id` para trazabilidad transversal en contexto asíncrono y propagado el encabezado `X-Request-ID` en cada respuesta HTTP hacia el frontend/clientes.
+  - Agregado test en `backend/tests/test_api_routes.py` verificando generación de correlation ID automático y preservación de correlation IDs personalizados.
+
 ### [2026-09-04 10:05] [Feat/Fase-2-TODO-2.3-Circuit-Breaker-Resilience]
 - **Circuit Breaker y Backoff Exponencial para proveedores LLM (TODO-2.3 / Prop. 13):**
   - Creado módulo `backend/src/core/resilience.py` con implementación formal de `CircuitBreaker` (estados `CLOSED`, `OPEN`, `HALF_OPEN`) y timeouts dinámicos con factor de retroceso exponencial (`backoff_factor=2.0`).

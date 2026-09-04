@@ -39,6 +39,19 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+import uuid
+from starlette.requests import Request
+
+
+@app.middleware("http")
+async def correlation_id_middleware(request: Request, call_next):
+    correlation_id = request.headers.get("X-Request-ID") or str(uuid.uuid4())
+    # Attach correlation id to request state for access in logs
+    request.state.correlation_id = correlation_id
+    response = await call_next(request)
+    response.headers["X-Request-ID"] = correlation_id
+    return response
+
 # Root API Status Endpoint
 @app.get("/")
 async def root_status():

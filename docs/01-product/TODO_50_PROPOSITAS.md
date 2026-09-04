@@ -10,11 +10,11 @@
 | Fase | Enfoque Principal | Total Tareas | Completadas | En Progreso | Pendientes | Estado |
 | :---: | :--- | :---: | :---: | :---: | :---: | :---: |
 | **Fase 1** | Precisión de Datos y Recuperación RAG | 11 | 11 | 0 | 0 | ✅ Completada (100%) |
-| **Fase 2** | Rendimiento Backend y Resiliencia + Complemento Anti-alucinación | 17 | 6 | 0 | 11 | 🟡 En Progreso (35.3%) |
+| **Fase 2** | Rendimiento Backend y Resiliencia + Complemento Anti-alucinación | 17 | 7 | 0 | 10 | 🟡 En Progreso (41.2%) |
 | **Fase 3** | Frontend Moderno, UI Retro & Accesibilidad | 10 | 0 | 0 | 10 | ⏳ Pendiente |
 | **Fase 4** | Testing Automatizado, QA & Tooling DX | 8 | 0 | 0 | 8 | ⏳ Pendiente |
 | **Fase 5** | Horizontes Futuros y Despliegues Especializados | 11 | 0 | 11 | ⏳ Pendiente |
-| **TOTAL** | **Propuestas de Mejora Técnica** | **57** | **17** | **0** | **40** | **29.8%** |
+| **TOTAL** | **Propuestas de Mejora Técnica** | **57** | **18** | **0** | **39** | **31.6%** |
 
 ---
 
@@ -80,8 +80,8 @@
   - [x] Migrar tickets existentes de `escalations.json` a la base de datos `escalations.db`.
 - [x] **TODO-2.6 [Prop. 16 - RECOMENDADO] Validación de esquemas y serializadores nativos Pydantic V2:**
   - [x] Sustituir conversiones manuales con `json.dumps()` por `model_dump_json()` de Pydantic V2 en todos los modelos API.
-- [ ] **TODO-2.7 [Prop. 20 - CRÍTICO] Rutina de compresión y vacuum periódico de ChromaDB:**
-  - [ ] Crear tarea programada en background que ejecute `VACUUM` sobre la base subyacente de ChromaDB para desfragmentar espacio en disco.
+- [x] **TODO-2.7 [Prop. 20 - CRÍTICO] Rutina de compresión y vacuum periódico de ChromaDB:**
+  - [x] Crear tarea programada en background que ejecute `VACUUM` sobre la base subyacente de ChromaDB para desfragmentar espacio en disco.
 - [ ] **TODO-2.8 [Prop. 22 - RECOMENDADO] Gestor de snapshots fechados de la base vectorial:**
   - [ ] Implementar utilitario en `backend/src/rag/snapshot_manager.py` para respaldar `chroma_db/` previo a re-indexaciones.
   - [ ] Permitir rollback automático si un proceso de re-indexación es interrumpido.

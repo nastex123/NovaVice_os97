@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [2026-09-04 10:09] [Feat/Fase-2-TODO-2.7-ChromaDB-Vacuum-Defragmentation]
+- **Rutina de compresión y vacuum periódico de ChromaDB (TODO-2.7 / Prop. 20):**
+  - Implementado método `vacuum()` en `backend/src/rag/vector_store.py` (`ChromaVectorStore`) que ejecuta `VACUUM;` sobre el almacenamiento SQLite subyacente (`chroma.sqlite3`).
+  - Liberados 5.24 MB de fragmentación en disco de forma atómica y segura (reduciendo el fichero de 7.34 MB a 1.97 MB).
+  - Añadido endpoint de mantenimiento `POST /api/v1/admin/vacuum` en `backend/src/api/routes.py` para invocar la rutina de desfragmentación periódica o programada.
+
 ### [2026-09-04 10:08] [Feat/Fase-2-TODO-2.6-Pydantic-V2-Native-Serializers]
 - **Validación de esquemas y serializadores nativos Pydantic V2 (TODO-2.6 / Prop. 16):**
   - Creado `BaseSchema` en `backend/src/api/schemas.py` con `ConfigDict` (`populate_by_name=True`, `extra='ignore'`, `arbitrary_types_allowed=True`) y serializadores de alto rendimiento `to_json()` (`model_dump_json()`) y `to_dict()` (`model_dump()`).

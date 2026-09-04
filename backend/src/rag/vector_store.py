@@ -270,5 +270,32 @@ class ChromaVectorStore:
                 self.use_chroma = False
         return len(self.fallback_docs)
 
+    def vacuum(self) -> Dict[str, Any]:
+        """
+        Runs database defragmentation and VACUUM on ChromaDB's underlying SQLite store.
+        Reclaims deleted disk blocks and reorganizes index pages.
+        """
+        sqlite_file = self.persist_dir / "chroma.sqlite3"
+        if not sqlite_file.exists():
+            return {"status": "skipped", "message": "chroma.sqlite3 does not exist"}
+
+        size_before = sqlite_file.stat().st_size
+        import sqlite3
+        try:
+            conn = sqlite3.connect(str(sqlite_file), timeout=15.0)
+            conn.execute("VACUUM;")
+            conn.close()
+            size_after = sqlite_file.stat().st_size
+            freed_bytes = max(0, size_before - size_after)
+            return {
+                "status": "success",
+                "size_before_bytes": size_before,
+                "size_after_bytes": size_after,
+                "freed_bytes": freed_bytes,
+                "freed_kb": round(freed_bytes / 1024, 2)
+            }
+        except Exception as e:
+            return {"status": "error", "error": str(e)}
+
 
 vector_store = ChromaVectorStore()

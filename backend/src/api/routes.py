@@ -95,3 +95,12 @@ async def get_escalation_tickets():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Could not read escalations: {str(e)}")
 
+
+@api_router.post("/admin/vacuum")
+async def trigger_database_vacuum():
+    """
+    Triggers routine compression and vacuum on ChromaDB underlying store.
+    """
+    res = vector_store.vacuum()
+    return res
+

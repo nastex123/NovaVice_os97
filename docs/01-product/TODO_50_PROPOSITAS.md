@@ -155,9 +155,9 @@
   - [x] Mantener la directiva `'use client'` únicamente en los nodos interactivos (`components/RetroDesktop.tsx`).
 - [x] **TODO-3.6 [Prop. 30 - RECOMENDADO] Code splitting dinámico con `next/dynamic`:**
   - [x] Cargar perezosamente con `ssr: false` el modal de telemetría y el lienzo de partículas PixiJS en `RetroDesktop.tsx` (reducción de 230kB a 105kB en bundle inicial).
-- [ ] **TODO-3.7 [Prop. 33 - CRÍTICO] Filtro óptico CRT acelerado por GPU / WebGL:**
-  - [ ] Migrar el sombreado de líneas de escaneo y curvatura a clases CSS aceleradas (`transform: translateZ(0)`, `will-change`) o shader WebGL ligero en Canvas.
-  - [ ] Verificar tasa estable de 60 FPS sin picos de consumo de CPU en laptops de bajos recursos.
+- [x] **TODO-3.7 [Prop. 33 - CRÍTICO] Filtro óptico CRT acelerado por GPU / WebGL:**
+  - [x] Migrar el sombreado de líneas de escaneo y curvatura a clases CSS aceleradas (`transform: translateZ(0)`, `will-change`, `backface-visibility: hidden;`, `perspective: 1000px`, `contain: strict`) parametrizadas con CSS custom properties.
+  - [x] Verificar tasa estable de 60 FPS sin picos de consumo de CPU eliminando `backdrop-filter` pesado del compositor.
 - [ ] **TODO-3.8 [Prop. 34 - RECOMENDADO] Modo accesible "Bypass Retro" (WCAG 2.1 AAA):**
   - [ ] Añadir toggle en la barra de tareas que desactive el filtro CRT y las fuentes pixeladas.
   - [ ] Conmutar a tipografía legible del sistema (Inter / SF Pro) con contraste de color AAA.

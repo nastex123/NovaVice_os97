@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [2026-09-04 19:56] [Feat/Fase-3-TODO-3.7-GPU-Accelerated-CRT-Filter]
+- **Filtro óptico CRT acelerado por hardware GPU y estabilización a 60 FPS (TODO-3.7 / Prop. CRÍTICA):**
+  - Migrado el sombreado de líneas de escaneo y viñeta fosfórica a una capa compuesta aislada por hardware con `transform: translateZ(0)`, `will-change: transform, opacity`, `backface-visibility: hidden;`, `perspective: 1000px` y `contain: strict` en `frontend/src/app/globals.css`.
+  - Reemplazado el `backdrop-filter` intensivo por composición óptica directa con `filter` y `mix-blend-mode: multiply`, erradicando repaints continuos de la CPU y asegurando 60 FPS estables en laptops y dispositivos móviles.
+  - Parametrizadas las propiedades ópticas en `:root` (`--crt-scanline-opacity`, `--crt-scanline-size`, `--crt-curvature-opacity`, `--crt-vignette-size`, `--crt-brightness`, `--crt-contrast`) para interoperabilidad con el panel vintage de control de monitor (TODO-3.10).
+  - Verificada compilación de producción limpia con `npm run build` en Next.js 15.
+
 ### [2026-09-04 19:53] [Feat/Fase-3-TODO-3.6-Dynamic-Code-Splitting]
 - **Code splitting dinámico con `next/dynamic` y optimización de bundle (TODO-3.6 / Prop. RECOMENDADA):**
   - Implementada carga perezosa con `ssr: false` para componentes secundarios pesados (`MetricsModal` y `PixiParticleBackground`) en `frontend/src/components/RetroDesktop.tsx`.

@@ -12,11 +12,13 @@ interface DesktopState {
   highestZIndex: number;
   isMetricsOpen: boolean;
   isChatOpen: boolean;
+  isMonitorControlsOpen: boolean;
   windows: Record<string, WindowState>;
 
   // Actions
   setIsMetricsOpen: (isOpen: boolean) => void;
   setIsChatOpen: (isOpen: boolean) => void;
+  setIsMonitorControlsOpen: (isOpen: boolean) => void;
   bringToFront: (windowId: string) => void;
   toggleWindow: (windowId: string) => void;
   closeWindow: (windowId: string) => void;
@@ -27,6 +29,7 @@ export const useDesktopStore = create<DesktopState>((set, get) => ({
   highestZIndex: 10,
   isMetricsOpen: false,
   isChatOpen: true,
+  isMonitorControlsOpen: false,
   windows: {
     chat_window: { isOpen: true, isMinimized: false, isMaximized: false, zIndex: 10 },
     metrics_window: { isOpen: false, isMinimized: false, isMaximized: false, zIndex: 9 },
@@ -56,6 +59,12 @@ export const useDesktopStore = create<DesktopState>((set, get) => ({
           isOpen: isChatOpen,
         },
       },
+    })),
+
+  setIsMonitorControlsOpen: (isMonitorControlsOpen) =>
+    set((state) => ({
+      isMonitorControlsOpen,
+      highestZIndex: isMonitorControlsOpen ? state.highestZIndex + 1 : state.highestZIndex,
     })),
 
   bringToFront: (windowId: string) =>

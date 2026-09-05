@@ -9,9 +9,14 @@ import { useDesktopStore } from "../stores/useDesktopStore";
 import { useSettingsStore } from "../stores/useSettingsStore";
 import { ChatMessage } from "../lib/types";
 
-// Dynamic code splitting for secondary heavy modals and WebGL/Canvas (TODO-3.6)
+// Dynamic code splitting for secondary heavy modals and WebGL/Canvas (TODO-3.6 & TODO-3.10)
 const MetricsModal = dynamic(
   () => import("./MetricsModal").then((mod) => mod.MetricsModal),
+  { ssr: false }
+);
+
+const MonitorControlsModal = dynamic(
+  () => import("./MonitorControlsModal").then((mod) => mod.MonitorControlsModal),
   { ssr: false }
 );
 
@@ -31,6 +36,8 @@ export const RetroDesktop: React.FC = () => {
   const initSettingsStorage = useSettingsStore((state) => state.initFromStorage);
   const isMetricsOpen = useDesktopStore((state) => state.isMetricsOpen);
   const setIsMetricsOpen = useDesktopStore((state) => state.setIsMetricsOpen);
+  const isMonitorControlsOpen = useDesktopStore((state) => state.isMonitorControlsOpen);
+  const setIsMonitorControlsOpen = useDesktopStore((state) => state.setIsMonitorControlsOpen);
   const crtEnabled = useSettingsStore((state) => state.crtEnabled);
   const bypassRetroA11y = useSettingsStore((state) => state.bypassRetroA11y);
   const toggleBypassRetroA11y = useSettingsStore((state) => state.toggleBypassRetroA11y);
@@ -57,14 +64,20 @@ export const RetroDesktop: React.FC = () => {
     }
   }, [bypassRetroA11y]);
 
-  // Global Keyboard Navigation Shortcuts (TODO-3.9)
+  // Global Keyboard Navigation Shortcuts (TODO-3.9 & TODO-3.10)
   useEffect(() => {
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
-      // Escape closes telemetry modal if open
+      // Escape closes open modals
       if (e.key === "Escape") {
+        if (isMonitorControlsOpen) {
+          e.preventDefault();
+          setIsMonitorControlsOpen(false);
+          return;
+        }
         if (isMetricsOpen) {
           e.preventDefault();
           setIsMetricsOpen(false);
+          return;
         }
         return;
       }
@@ -81,6 +94,9 @@ export const RetroDesktop: React.FC = () => {
         } else if (e.key.toLowerCase() === "t") {
           e.preventDefault();
           setIsMetricsOpen(!isMetricsOpen);
+        } else if (e.key.toLowerCase() === "m") {
+          e.preventDefault();
+          setIsMonitorControlsOpen(!isMonitorControlsOpen);
         } else if (e.key.toLowerCase() === "a") {
           e.preventDefault();
           toggleBypassRetroA11y();
@@ -90,7 +106,17 @@ export const RetroDesktop: React.FC = () => {
 
     window.addEventListener("keydown", handleGlobalKeyDown);
     return () => window.removeEventListener("keydown", handleGlobalKeyDown);
-  }, [isMetricsOpen, setIsMetricsOpen, resetChat, streamMode, sendStreamMessage, sendMessage, toggleBypassRetroA11y]);
+  }, [
+    isMetricsOpen,
+    setIsMetricsOpen,
+    isMonitorControlsOpen,
+    setIsMonitorControlsOpen,
+    resetChat,
+    streamMode,
+    sendStreamMessage,
+    sendMessage,
+    toggleBypassRetroA11y,
+  ]);
 
   // C29: Re-engage timer at 60s of inactivity
   useEffect(() => {
@@ -178,6 +204,9 @@ export const RetroDesktop: React.FC = () => {
 
       {/* Telemetry Metrics Retro Modal */}
       <MetricsModal />
+
+      {/* Monitor Controls Vintage Retro Modal (TODO-3.10) */}
+      <MonitorControlsModal />
 
       {/* CRT Anti-Glare Optical Filter Layer (Bypassed under WCAG AAA mode) */}
       {crtEnabled && !bypassRetroA11y && <div className="crt-overlay" />}

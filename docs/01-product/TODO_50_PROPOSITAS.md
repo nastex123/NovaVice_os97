@@ -164,8 +164,9 @@
 - [x] **TODO-3.9 [Prop. 35 - RECOMENDADO] Navegación por teclado y Focus Trap en ventanas retro:**
   - [x] Implementar trampa de foco accesible (`useFocusTrap.ts`) en modales de telemetría y sedes (`Tab` / `Shift+Tab`).
   - [x] Soportar atajos rápidos globales y locales (`Escape` para cerrar modales, `Alt+Enter` / `Enter` para enviar consultas, `Alt+0..5`, `Alt+T`, `Alt+A`).
-- [ ] **TODO-3.10 [Prop. 36 - RECOMENDADO] Panel de control vintage "Monitor Controls":**
-  - [ ] Crear diálogo estilo monitor CRT con sliders para ajustar brillo, curvatura de tubo y grosor de scanlines.
+- [x] **TODO-3.10 [Prop. 36 - RECOMENDADO] Panel de control vintage "Monitor Controls":**
+  - [x] Crear diálogo estilo monitor CRT (`MonitorControlsModal.tsx`) con sliders para ajustar brillo, curvatura de tubo y grosor de scanlines.
+  - [x] Conectar calibración reactiva con CSS variables (`--crt-brightness`, `--crt-curvature-opacity`, `--crt-scanline-opacity`), persistencia `IndexedDB` y presets de fábrica (Trinitron '97, Arcade Neon, Oficina Soft).
 
 ---
 

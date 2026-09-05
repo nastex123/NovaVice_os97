@@ -26,6 +26,7 @@ export const Header: React.FC<HeaderProps> = ({
   const resetChat = useChatStore((state) => state.resetChat);
   const newChat = useChatStore((state) => state.newChat);
   const setIsMetricsOpen = useDesktopStore((state) => state.setIsMetricsOpen);
+  const setIsMonitorControlsOpen = useDesktopStore((state) => state.setIsMonitorControlsOpen);
   const storeCrtEnabled = useSettingsStore((state) => state.crtEnabled);
   const toggleCrt = useSettingsStore((state) => state.toggleCrt);
   const bypassRetroA11y = useSettingsStore((state) => state.bypassRetroA11y);
@@ -70,6 +71,13 @@ export const Header: React.FC<HeaderProps> = ({
           </button>
           <button onClick={onOpenMetrics} className="hover:bg-black hover:text-white px-2 py-0.5 transition-colors">
             Telemetría
+          </button>
+          <button
+            onClick={() => setIsMonitorControlsOpen(true)}
+            className="hover:bg-black hover:text-white px-2 py-0.5 transition-colors"
+            title="Abrir Controles Ópticos de Monitor CRT (Alt+M)"
+          >
+            🎛️ Monitor
           </button>
           {onToggleCrt && (
             <button

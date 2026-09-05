@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageSquare, Gauge, Building2, Phone, Radio, MapPin } from "lucide-react";
+import { MessageSquare, Gauge, Building2, Phone, Radio, MapPin, Sliders } from "lucide-react";
 import { useChatStore } from "../stores/useChatStore";
 import { useDesktopStore } from "../stores/useDesktopStore";
 import { useFocusTrap } from "../hooks/useFocusTrap";
@@ -23,6 +23,7 @@ export const Footer: React.FC<FooterProps> = ({
   const resetChatStore = useChatStore((state) => state.resetChat);
   const newChatStore = useChatStore((state) => state.newChat);
   const setIsMetricsOpen = useDesktopStore((state) => state.setIsMetricsOpen);
+  const setIsMonitorControlsOpen = useDesktopStore((state) => state.setIsMonitorControlsOpen);
 
   const sedesTrapRef = useFocusTrap<HTMLDivElement>({
     isActive: showSedesModal,
@@ -60,6 +61,18 @@ export const Footer: React.FC<FooterProps> = ({
               <Gauge className="w-4 h-4 text-black group-hover:text-viceCyan-dark" />
             </div>
             <span className="text-[10px] font-bold text-black uppercase tracking-wider font-mono">Telemetría</span>
+          </button>
+
+          {/* Tile 2.5: Monitor CRT Controls */}
+          <button
+            onClick={() => setIsMonitorControlsOpen(true)}
+            className="flex flex-col items-center gap-1 group active:translate-y-0.5 transition-transform"
+            title="Calibrar Filtro de Monitor CRT (Alt+M)"
+          >
+            <div className="w-8 h-8 sm:w-9 sm:h-9 bg-white group-hover:bg-vicePink-pastel border-2 border-black shadow-retro-sm flex items-center justify-center transition-colors">
+              <Sliders className="w-4 h-4 text-black group-hover:text-vicePink-dark" />
+            </div>
+            <span className="text-[10px] font-bold text-black uppercase tracking-wider font-mono">Monitor</span>
           </button>
 
           {/* Tile 3: Sedes Oficiales */}

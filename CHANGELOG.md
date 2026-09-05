@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [2026-09-04 20:01] [Feat/Fase-3-TODO-3.10-Vintage-Monitor-Controls-Panel]
+- **Panel de Control Vintage "Monitor Controls" y Calibración Óptica OSD (TODO-3.10 / Prop. RECOMENDADA):**
+  - Creado componente `MonitorControlsModal.tsx` en `frontend/src/components/` emulando el OSD de ajuste analógico de monitores CRT Sony Trinitron / NEC MultiSync de 1997 con trampa de foco y cierre accesible (`Escape`).
+  - Implementados controles deslizantes reactivos para brillo de fósforo (`crtBrightness`), curvatura de tubo y viñeta (`crtCurvature`), y opacidad de scanlines horizontales (`crtScanlineOpacity`), sincronizados en tiempo real mediante CSS Custom Properties sobre el elemento raíz.
+  - Añadidos perfiles de calibración instantáneos con presets de fábrica: *Trinitron '97* (balance por defecto), *Arcade Neon* (alto contraste y fosforescencia) y *Oficina Soft* (atenuación ultra-suave anti-fatiga ocular).
+  - Incluida acción para restablecer ajustes de fábrica CRT y aviso adaptativo de coexistencia cuando el modo accesible WCAG AAA está activo.
+  - Añadidos disparadores de acceso en `Header.tsx` (`🎛️ Monitor`), `Footer.tsx` (icono dock con `Sliders`) y atajo global de teclado `Alt+M` en `RetroDesktop.tsx`.
+  - Integrada carga perezosa con `next/dynamic` (`ssr: false`) para no penalizar el bundle inicial.
+  - Verificada compilación de producción limpia con `npm run build` en Next.js 15.
+
 ### [2026-09-04 19:58] [Feat/Fase-3-TODO-3.9-Keyboard-Navigation-And-Focus-Trap]
 - **Navegación por Teclado, Focus Trap y Atajos Rápidos Vintage (TODO-3.9 / Prop. RECOMENDADA):**
   - Implementado hook reusable `useFocusTrap` en `frontend/src/hooks/useFocusTrap.ts` con retención de foco cíclica (`Tab` / `Shift+Tab`), restauración automática del elemento previo activo al cerrar y captura prioritaria de la tecla `Escape`.

@@ -1,14 +1,24 @@
 "use client";
 
 import React, { useEffect } from "react";
+import dynamic from "next/dynamic";
 import { ChatContainer } from "./ChatContainer";
 import { ChatInput } from "./ChatInput";
-import { MetricsModal } from "./MetricsModal";
-import { PixiParticleBackground } from "./PixiParticleBackground";
 import { useChatStore } from "../stores/useChatStore";
 import { useDesktopStore } from "../stores/useDesktopStore";
 import { useSettingsStore } from "../stores/useSettingsStore";
 import { ChatMessage } from "../lib/types";
+
+// Dynamic code splitting for secondary heavy modals and WebGL/Canvas (TODO-3.6)
+const MetricsModal = dynamic(
+  () => import("./MetricsModal").then((mod) => mod.MetricsModal),
+  { ssr: false }
+);
+
+const PixiParticleBackground = dynamic(
+  () => import("./PixiParticleBackground").then((mod) => mod.PixiParticleBackground),
+  { ssr: false }
+);
 
 export const RetroDesktop: React.FC = () => {
   const messages = useChatStore((state) => state.messages);

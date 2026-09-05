@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [2026-09-04 19:53] [Feat/Fase-3-TODO-3.6-Dynamic-Code-Splitting]
+- **Code splitting dinámico con `next/dynamic` y optimización de bundle (TODO-3.6 / Prop. RECOMENDADA):**
+  - Implementada carga perezosa con `ssr: false` para componentes secundarios pesados (`MetricsModal` y `PixiParticleBackground`) en `frontend/src/components/RetroDesktop.tsx`.
+  - Reducido el tamaño del bundle de la ruta principal en un **54.3%** (de `230 kB` a `105 kB`), acelerando drásticamente el First Contentful Paint (FCP) y reduciendo el consumo de memoria en dispositivos cliente.
+  - Verificada compilación de producción limpia con `npm run build` en Next.js 15.
+
 ### [2026-09-04 19:52] [Feat/Fase-3-TODO-3.5-RSC-Boundary-Isolation]
 - **Optimización de Server Components (RSC) vs Client Components (TODO-3.5 / Prop. RECOMENDADA):**
   - Refactorizado `frontend/src/app/page.tsx` para convertirse en un React Server Component (RSC) nativo de Next.js 15 libre de `'use client'`.

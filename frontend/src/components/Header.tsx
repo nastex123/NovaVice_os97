@@ -28,6 +28,8 @@ export const Header: React.FC<HeaderProps> = ({
   const setIsMetricsOpen = useDesktopStore((state) => state.setIsMetricsOpen);
   const storeCrtEnabled = useSettingsStore((state) => state.crtEnabled);
   const toggleCrt = useSettingsStore((state) => state.toggleCrt);
+  const bypassRetroA11y = useSettingsStore((state) => state.bypassRetroA11y);
+  const toggleBypassRetroA11y = useSettingsStore((state) => state.toggleBypassRetroA11y);
 
   const currentMenuLabel = propCurrentMenuLabel !== undefined ? propCurrentMenuLabel : storeCurrentMenuLabel;
   const onReset = propOnReset || resetChat;
@@ -80,6 +82,19 @@ export const Header: React.FC<HeaderProps> = ({
               📺 CRT: {crtEnabled ? "ON" : "OFF"}
             </button>
           )}
+          <button
+            onClick={toggleBypassRetroA11y}
+            aria-pressed={bypassRetroA11y}
+            aria-label="Conmutar modo accesible WCAG 2.1 AAA"
+            className={`px-2 py-0.5 border border-black shadow-retro-sm transition-all font-mono text-[11px] ${
+              bypassRetroA11y
+                ? "bg-black text-amber-300 font-bold border-2 border-amber-300"
+                : "bg-retroBeige hover:bg-black hover:text-white"
+            }`}
+            title="Modo Accesible WCAG 2.1 AAA: Desactiva CRT y activa contraste alto y tipografía nítida"
+          >
+            ♿ A11Y: {bypassRetroA11y ? "AAA ON" : "OFF"}
+          </button>
         </nav>
       </div>
 
@@ -107,6 +122,16 @@ export const Header: React.FC<HeaderProps> = ({
             CRT: {crtEnabled ? "ON" : "OFF"}
           </button>
         )}
+        <button
+          onClick={toggleBypassRetroA11y}
+          aria-pressed={bypassRetroA11y}
+          aria-label="Conmutar modo accesible WCAG 2.1 AAA"
+          className={`md:hidden px-1.5 py-0.5 border border-black shadow-retro-sm text-[10px] font-bold ${
+            bypassRetroA11y ? "bg-black text-amber-300 border-amber-300" : "bg-white text-black"
+          }`}
+        >
+          A11Y: {bypassRetroA11y ? "ON" : "OFF"}
+        </button>
         <div className="flex items-center space-x-1 text-vicePink-dark font-bold bg-retroCard px-2 py-0.5 border border-black shadow-retro-sm">
           <span className="w-2 h-2 rounded-full bg-viceCyan animate-ping inline-block" />
           <span className="hidden sm:inline">VICE CITY •</span>

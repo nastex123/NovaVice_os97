@@ -71,6 +71,70 @@ body {
   mix-blend-mode: multiply;
 }
 
+/* WCAG 2.1 AAA Accessible Mode (Bypass Retro) */
+html.a11y-mode,
+body.a11y-mode,
+.a11y-mode {
+  --font-inter: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+  --font-outfit: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+}
+
+.a11y-mode body,
+body.a11y-mode {
+  background-color: #f8fafc !important;
+  background-image: none !important;
+  color: #000000 !important;
+  font-family: var(--font-inter) !important;
+}
+
+.a11y-mode .crt-overlay {
+  display: none !important;
+}
+
+/* Halt all continuous decorative background animations to comply with reduced motion guidelines */
+.a11y-mode .animate-palm-left,
+.a11y-mode .animate-palm-left-bg,
+.a11y-mode .animate-palm-left-mid,
+.a11y-mode .animate-palm-right,
+.a11y-mode .animate-palm-right-bg,
+.a11y-mode .animate-palm-right-mid,
+.a11y-mode [class*="animate-cloud-"],
+.a11y-mode [class*="animate-seagull-"],
+.a11y-mode .animate-wing-up,
+.a11y-mode .animate-wing-down,
+.a11y-mode .animate-grass {
+  animation: none !important;
+  transform: none !important;
+}
+
+/* Enforce high contrast ratio >= 7:1 on windows, cards and buttons */
+.a11y-mode .bg-retroBeige,
+.a11y-mode .bg-retroPaper,
+.a11y-mode .bg-retroCard {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  border-color: #000000 !important;
+}
+
+.a11y-mode .retro-striped-titlebar {
+  background-image: none !important;
+  background-color: #e2e8f0 !important;
+  color: #000000 !important;
+  border-bottom: 2px solid #000000 !important;
+}
+
+.a11y-mode button,
+.a11y-mode a {
+  font-weight: 700 !important;
+  letter-spacing: 0 !important;
+}
+
+.a11y-mode :focus-visible {
+  outline: 3px solid #005fcc !important;
+  outline-offset: 3px !important;
+}
+
 /* Custom Sleek 90s Scrollbar */
 .custom-scrollbar::-webkit-scrollbar {
   width: 10px;

@@ -158,9 +158,9 @@
 - [x] **TODO-3.7 [Prop. 33 - CRÍTICO] Filtro óptico CRT acelerado por GPU / WebGL:**
   - [x] Migrar el sombreado de líneas de escaneo y curvatura a clases CSS aceleradas (`transform: translateZ(0)`, `will-change`, `backface-visibility: hidden;`, `perspective: 1000px`, `contain: strict`) parametrizadas con CSS custom properties.
   - [x] Verificar tasa estable de 60 FPS sin picos de consumo de CPU eliminando `backdrop-filter` pesado del compositor.
-- [ ] **TODO-3.8 [Prop. 34 - RECOMENDADO] Modo accesible "Bypass Retro" (WCAG 2.1 AAA):**
-  - [ ] Añadir toggle en la barra de tareas que desactive el filtro CRT y las fuentes pixeladas.
-  - [ ] Conmutar a tipografía legible del sistema (Inter / SF Pro) con contraste de color AAA.
+- [x] **TODO-3.8 [Prop. 34 - RECOMENDADO] Modo accesible "Bypass Retro" (WCAG 2.1 AAA):**
+  - [x] Añadir toggle en la barra de tareas y cabecera que desactive el filtro CRT y las fuentes pixeladas (`bypassRetroA11y`).
+  - [x] Conmutar a tipografía legible del sistema (Inter / SF Pro / sans-serif) con contraste de color AAA (>= 7:1) y desactivación de animaciones continuas.
 - [ ] **TODO-3.9 [Prop. 35 - RECOMENDADO] Navegación por teclado y Focus Trap en ventanas retro:**
   - [ ] Implementar trampa de foco en la ventana del chat (`Tab` / `Shift+Tab`).
   - [ ] Soportar atajos rápidos (`Escape` para cerrar modales, `Alt+Enter` para enviar).

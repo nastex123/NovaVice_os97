@@ -31,6 +31,7 @@ export const RetroDesktop: React.FC = () => {
   const initSettingsStorage = useSettingsStore((state) => state.initFromStorage);
   const setIsMetricsOpen = useDesktopStore((state) => state.setIsMetricsOpen);
   const crtEnabled = useSettingsStore((state) => state.crtEnabled);
+  const bypassRetroA11y = useSettingsStore((state) => state.bypassRetroA11y);
 
   // Initialize persistent session & hydrate from IndexedDB
   useEffect(() => {
@@ -42,6 +43,14 @@ export const RetroDesktop: React.FC = () => {
     const interval = setInterval(refreshTelemetry, 5000);
     return () => clearInterval(interval);
   }, [initChatStorage, initSettingsStorage, refreshTelemetry]);
+
+  // Synchronize WCAG AAA Accessible Mode with document root
+  useEffect(() => {
+    if (typeof document !== "undefined") {
+      document.documentElement.classList.toggle("a11y-mode", bypassRetroA11y);
+      document.body.classList.toggle("a11y-mode", bypassRetroA11y);
+    }
+  }, [bypassRetroA11y]);
 
   // C29: Re-engage timer at 60s of inactivity
   useEffect(() => {
@@ -130,8 +139,8 @@ export const RetroDesktop: React.FC = () => {
       {/* Telemetry Metrics Retro Modal */}
       <MetricsModal />
 
-      {/* CRT Anti-Glare Optical Filter Layer */}
-      {crtEnabled && <div className="crt-overlay" />}
+      {/* CRT Anti-Glare Optical Filter Layer (Bypassed under WCAG AAA mode) */}
+      {crtEnabled && !bypassRetroA11y && <div className="crt-overlay" />}
     </>
   );
 };

@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [2026-09-04 19:57] [Feat/Fase-3-TODO-3.8-WCAG-AAA-Bypass-Retro-Mode]
+- **Modo Accesible "Bypass Retro" WCAG 2.1 AAA (TODO-3.8 / Prop. RECOMENDADA):**
+  - Implementado toggle accesible `[A11Y: ON/OFF]` sincronizado en cabecera desktop y móvil en `frontend/src/components/Header.tsx`, vinculado al store `useSettingsStore` y persistido en `IndexedDB`.
+  - Definida clase `.a11y-mode` en `frontend/src/app/globals.css` que garantiza una relación de contraste superior a 7:1 (WCAG AAA), conmutando fondos pastel a paleta neutra de alto contraste (`#ffffff` / `#000000`).
+  - Sustituidas todas las fuentes display y pixeladas por tipografía de sistema de máxima legibilidad (`Inter`, `-apple-system`, `sans-serif`) y configurados anillos de foco nítidos de alta visibilidad (`outline: 3px solid #005fcc; outline-offset: 3px;`).
+  - Desactivadas por completo las animaciones continuas de fondo (palmeras, nubes, gaviotas) al activar el modo accesible para prevenir fatiga cognitiva y malestar vestibular (pautas de movimiento reducido).
+  - Desactivada la superposición del filtro CRT cuando el modo accesible está activo en `frontend/src/components/RetroDesktop.tsx`.
+  - Verificada compilación de producción limpia con `npm run build` en Next.js 15.
+
 ### [2026-09-04 19:56] [Feat/Fase-3-TODO-3.7-GPU-Accelerated-CRT-Filter]
 - **Filtro óptico CRT acelerado por hardware GPU y estabilización a 60 FPS (TODO-3.7 / Prop. CRÍTICA):**
   - Migrado el sombreado de líneas de escaneo y viñeta fosfórica a una capa compuesta aislada por hardware con `transform: translateZ(0)`, `will-change: transform, opacity`, `backface-visibility: hidden;`, `perspective: 1000px` y `contain: strict` en `frontend/src/app/globals.css`.

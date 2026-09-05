@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [2026-09-04 19:50] [Fix/Backend-Tests-Harmonization-100-Percent-Green]
+- **Armonización de Suite Backend y Estabilización al 100% Verde (72/72 tests aprobados):**
+  - **Corrección de Intent Router (`backend/src/core/intent_router.py`):** Integrado `PurePythonEmbeddingEngine` ajustado sobre el corpus institucional de 83 documentos y prototipos de micro-intención para evitar el secuestro erróneo de consultas libres (como `cursos para ejecutivos` o `tienen descuentos para empresas?`) manteniendo 100% de precisión en consultas coloquiales (18/18 tests).
+  - **Corrección de Heavy Escalation (`backend/src/rag/engine.py:425`):** Desacoplada la verificación de `is_very_heavy` respecto al umbral de similitud numérica de chunks para garantizar que consultas fuera de dominio (ej. visas de trabajo a Australia) siempre activen la clarificación y escalamiento en 2 fases.
+  - **Persistencia de Embeddings de Query Raw en Caché (`backend/src/rag/engine.py:682`):** Almacenado el vector semántico del query original en `query_cache.set` cuando difiere del query mapeado, asegurando coexistencia perfecta entre aciertos exactos y semánticos.
+  - **Normalización de Sinónimos en Navegación (`backend/src/core/navigation.py:300`):** Añadido sinónimo explícito `que horarios tienen disponibles` para el enrutamiento inmediato del menú de horarios.
+  - **Aislamiento de Reranker Local (`backend/src/rag/reranker.py`):** Definido `CACHE_DIR` absoluto y predeterminado modelo ultra-rápido `ms-marco-TinyBERT-L-2-v2` para evitar descargas pesadas durante suites de tests.
+  - **Validación:** 72/72 tests de pytest aprobados en 110s.
+
 ### [2026-09-04 11:37] [Feat/Fase-3-TODO-3.4-IndexedDB-Session-Persistence]
 - **Persistencia asíncrona de sesiones y preferencias en `IndexedDB` con `idb-keyval` (TODO-3.4 / Prop. RECOMENDADA):**
   - Instalada dependencia `idb-keyval` en `frontend/package.json`.

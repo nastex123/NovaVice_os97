@@ -3,7 +3,7 @@ import re
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Tuple, Any
 
-from src.rag.vector_store import vector_store
+from src.rag.vector_store import vector_store, PurePythonEmbeddingEngine
 
 
 @dataclass
@@ -359,21 +359,36 @@ class SemanticIntentRouter:
         self._macro_vectors: Dict[str, List[float]] = {}
         self._micro_vectors: Dict[str, List[float]] = {}
         self._warmed_up = False
+        self._engine = PurePythonEmbeddingEngine()
 
     def warm_up(self) -> None:
         """Precomputes and caches normalized prototype vectors for all macro and micro intents."""
         if self._warmed_up:
             return
 
+        from pathlib import Path
+        docs_dir = Path(__file__).resolve().parent.parent.parent / "data" / "documents"
+        doc_texts = []
+        if docs_dir.exists():
+            for p in docs_dir.glob("*.md"):
+                try:
+                    with open(p, "r", encoding="utf-8") as f:
+                        doc_texts.append(f.read())
+                except Exception:
+                    pass
+
+        all_texts = doc_texts + list(MACRO_PILLARS_PROTOTYPES.values()) + [d["text"] for d in MICRO_INTENTS_PROTOTYPES.values()]
+        self._engine.fit(all_texts)
+
         # 1. Macro-pillars
         for pillar_name, text in MACRO_PILLARS_PROTOTYPES.items():
-            emb = vector_store.embed_query(text)
+            emb = self._engine.embed(text)
             if emb and any(v != 0.0 for v in emb):
                 self._macro_vectors[pillar_name] = self._normalize_vec(emb)
 
         # 2. Micro-intents
         for intent_name, data in MICRO_INTENTS_PROTOTYPES.items():
-            emb = vector_store.embed_query(data["text"])
+            emb = self._engine.embed(data["text"])
             if emb and any(v != 0.0 for v in emb):
                 self._micro_vectors[intent_name] = self._normalize_vec(emb)
 
@@ -427,7 +442,7 @@ class SemanticIntentRouter:
         q_clean = re.sub(r"[^a-zA-Z0-9_áéíóúÁÉÍÓÚñÑ\s]", " ", q_clean)
         q_clean = re.sub(r"\s+", " ", q_clean).strip()
 
-        q_vec = vector_store.embed_query(q_clean)
+        q_vec = self._engine.embed(q_clean)
         if not q_vec or not any(v != 0.0 for v in q_vec):
             return IntentMatch(
                 top_macro_pillar="cursos_idiomas_niveles",

@@ -28,10 +28,10 @@
 | **Enrutador de Intenciones** | Clasificador Vectorial Semántico Dual y Hard Domain Masking (100% veto cruzado) | [`backend/src/core/intent_router.py`](backend/src/core/intent_router.py) |
 | **Verificación Factual** | Verificador NLI Post-LLM (Score >= 0.80) + Citas Estructuradas en 2 Pasadas | [`backend/src/core/faithfulness.py`](backend/src/core/faithfulness.py), [`backend/src/rag/structured_output.py`](backend/src/rag/structured_output.py) |
 | **Memoria Conversacional** | Memoria Episódica con Extracción de Atributos del Aspirante y Resumen Breve | [`backend/src/core/memory.py`](backend/src/core/memory.py) |
-| **Frontend UI/UX** | Next.js 15 (App Router), React 19, TypeScript, Tailwind CSS, Retro Macintosh '97 | [`frontend/src/app/`](frontend/src/app/), [`frontend/src/components/`](frontend/src/components/) |
-| **Filtro Óptico Ergonomía** | CRT Anti-Glare & Warm Amber Phosphor con interruptor interactivo ON/OFF | [`frontend/src/app/globals.css:120`](frontend/src/app/globals.css#L120) |
-| **Fondo Animado GPU** | Canvas Pixel-Art 60 FPS: 8 palmeras balanceantes, 18 nubes bidireccionales, gaviotas y hierba | [`frontend/src/components/AnimatedBackground.tsx`](frontend/src/components/AnimatedBackground.tsx) |
-| **Batería de Pruebas** | **55/55 Tests Unitarios y E2E Aprobados en Pytest** | [`backend/tests/`](backend/tests/) |
+| **Frontend UI/UX** | Next.js 15 (App Router, RSC Shell + RetroDesktop Boundary), Zustand, TypeScript, Tailwind CSS | [`frontend/src/app/`](frontend/src/app/), [`frontend/src/components/`](frontend/src/components/) |
+| **Filtro Óptico Ergonomía** | Filtro CRT Acelerado por GPU (60 FPS, `translateZ(0)`) + Calibración OSD y Modo WCAG AAA | [`frontend/src/app/globals.css`](frontend/src/app/globals.css), [`frontend/src/components/MonitorControlsModal.tsx`](frontend/src/components/MonitorControlsModal.tsx) |
+| **Fondo Animado GPU** | Canvas Pixel-Art 60 FPS: 8 palmeras balanceantes, 18 nubes bidireccionales, gaviotas y hierba | [`frontend/src/components/PixiParticleBackground.tsx`](frontend/src/components/PixiParticleBackground.tsx) |
+| **Batería de Pruebas** | **72/72 Tests Unitarios y E2E Aprobados en Pytest (100% Verde)** | [`backend/tests/`](backend/tests/) |
 | **Evaluación CI Dataset Dorado** | **50/50 Consultas Fieles (100.0% Fidelidad Factual, Promedio 1.000)** | [`scripts/evaluate_rag.py`](scripts/evaluate_rag.py) |
 | **Benchmark Lingüístico** | **80/80 Variantes Aprobadas (100.0%) con latencia media de 26.5 ms** | [`scripts/test_variants.py`](scripts/test_variants.py) |
 | **Contenerización** | Docker Compose Multi-Stage (Backend Python 3.12 + Frontend Next.js 20 Standalone) | [`docker-compose.yml`](docker-compose.yml) |

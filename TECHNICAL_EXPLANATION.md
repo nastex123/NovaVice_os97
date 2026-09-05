@@ -28,10 +28,10 @@
 | **Intent Router** | Dual Semantic Vector Classifier & Hard Domain Masking (100% cross-veto) | [`backend/src/core/intent_router.py`](backend/src/core/intent_router.py) |
 | **Factual Verification** | Post-LLM NLI Verifier (Score >= 0.80) + Two-Pass Structured Citations | [`backend/src/core/faithfulness.py`](backend/src/core/faithfulness.py), [`backend/src/rag/structured_output.py`](backend/src/rag/structured_output.py) |
 | **Conversational Memory** | Episodic Memory with Applicant Preference Extraction & Concise Summary | [`backend/src/core/memory.py`](backend/src/core/memory.py) |
-| **Frontend UI/UX** | Next.js 15 (App Router), React 19, TypeScript, Tailwind CSS, Retro Macintosh '97 | [`frontend/src/app/`](frontend/src/app/), [`frontend/src/components/`](frontend/src/components/) |
-| **Optical Filter Ergonomics** | CRT Anti-Glare & Warm Amber Phosphor with interactive ON/OFF toggle switch | [`frontend/src/app/globals.css:120`](frontend/src/app/globals.css#L120) |
-| **GPU Animated Oasis** | 60 FPS Pixel-Art Canvas: 8 swaying palms, 18 bidirectional clouds, seagulls, grass | [`frontend/src/components/AnimatedBackground.tsx`](frontend/src/components/AnimatedBackground.tsx) |
-| **Automated Test Battery** | **55/55 Unit and E2E Tests Passed in Pytest** | [`backend/tests/`](backend/tests/) |
+| **Frontend UI/UX** | Next.js 15 (App Router, RSC Shell + RetroDesktop Boundary), Zustand, TypeScript, Tailwind CSS | [`frontend/src/app/`](frontend/src/app/), [`frontend/src/components/`](frontend/src/components/) |
+| **Optical Filter Ergonomics** | GPU-Accelerated CRT Filter (60 FPS, `translateZ(0)`) + Vintage OSD Monitor Controls & WCAG AAA Mode | [`frontend/src/app/globals.css`](frontend/src/app/globals.css), [`frontend/src/components/MonitorControlsModal.tsx`](frontend/src/components/MonitorControlsModal.tsx) |
+| **GPU Animated Oasis** | 60 FPS Pixel-Art Canvas: 8 swaying palms, 18 bidirectional clouds, seagulls, grass | [`frontend/src/components/PixiParticleBackground.tsx`](frontend/src/components/PixiParticleBackground.tsx) |
+| **Automated Test Battery** | **72/72 Unit and E2E Tests Passed in Pytest (100% Green)** | [`backend/tests/`](backend/tests/) |
 | **CI Gold Dataset Evaluation** | **50/50 Queries Passed (100.0% Factual Faithfulness, Mean Score 1.000)** | [`scripts/evaluate_rag.py`](scripts/evaluate_rag.py) |
 | **Linguistic Benchmark** | **80/80 Language Variants Passed (100.0%) with 26.5 ms average latency** | [`scripts/test_variants.py`](scripts/test_variants.py) |
 | **Containerization** | Multi-Stage Docker Compose (Python 3.12 Backend + Next.js 20 Standalone Frontend) | [`docker-compose.yml`](docker-compose.yml) |

@@ -72,7 +72,7 @@ Human admission counselors spent excessive time repeatedly answering standard FA
 | **FR-12** | Dual Cache with File-Hash Invalidation + Semantic 0.88 pilar (vs 0.95) | P1 | `src/core/cache.py:47` `vector_store.py:167` | Implemented (Fase 2) + Planned (B20) |
 | **FR-13** | SSE Real-Time Streaming (`/api/v1/chat/stream`) | P1 | `src/api/routes.py` | Complete |
 | **FR-14** | JSON & Prometheus Telemetry (`/metrics/prometheus`) | P1 | `src/core/metrics.py` | Complete |
-| **FR-15** | Automated Pytest Test Suite (55/55 Tests Passed) | P0 | `tests/` | Complete |
+| **FR-15** | Automated Pytest Test Suite (72/72 Tests Passed) | P0 | `tests/` | Complete |
 
 ---
 

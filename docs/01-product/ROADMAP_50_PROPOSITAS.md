@@ -2,7 +2,7 @@
 
 - **Documento:** Roadmap Estratégico de Evolución Técnica
 - **Versión:** 2.7.0
-- **Estado:** Planificado (Fases 1 a 5)
+- **Estado:** Fases 1, 2 y 3 Completadas (100%) | Fases 4 y 5 Planificadas
 - **Fecha:** 2026-09-04 (America/Bogota)
 - **Alcance:** Arquitectura Backend FastAPI, RAG Híbrido, Base Vectorial ChromaDB, Frontend Next.js 15 / React 19 Retro OS '97, Testing y Developer Experience (Sin tocar temas de seguridad).
 
@@ -96,13 +96,13 @@ Este plan maestro organiza las **50 propuestas de mejora técnica** en **5 fases
 
 ## 3. Cronograma de Ejecución por Fases
 
-| Fase | Enfoque Principal | Propuestas Asignadas | Meta Operativa |
-| :--- | :--- | :--- | :--- |
-| **Fase 1** | **Precisión de Datos y Recuperación RAG** | 1, 2, 3, 4, 5, 6, 7, 19, 21, 23, 43 | 0% fragmentación de tablas COP, recall semántico exacto, indexación BM25 persistida. |
-| **Fase 2** | **Rendimiento Backend y Resiliencia** | 11, 12, 13, 14, 15, 16, 20, 22, 45, 46, TODO-2.11 | Streaming SSE token a token, pooling HTTP, pipeline en cascada multi-filtro (precios vs horarios), SQLite WAL y Docker. |
-| **Fase 3** | **Frontend Moderno, UI Retro & Accesibilidad** | 25, 26, 27, 28, 29, 30, 33, 34, 35, 36 | Zustand store, decodificación SSE progresiva, filtro CRT acelerado por GPU y modo WCAG AAA. |
-| **Fase 4** | **Testing Automatizado, QA y Tooling DX** | 39, 40, 41, 42, 44, 47, 48, 49 | Evaluación continua Ragas, Locust carga concurrente, CLI doctor y pre-commits. |
-| **Fase 5** | **Ampliación de Experiencia y Nuevos Horizontes** | 8, 9, 10, 17, 18, 24, 31, 32, 37, 38, 50 | Graph RAG, HyDE, audio web retro, exportador comercial y empaquetado Tauri kiosco. |
+| Fase | Enfoque Principal | Propuestas Asignadas | Estado | Meta Operativa |
+| :--- | :--- | :--- | :---: | :--- |
+| **Fase 1** | **Precisión de Datos y Recuperación RAG** | 1, 2, 3, 4, 5, 6, 7, 19, 21, 23, 43 | **Completada** | 0% fragmentación de tablas COP, recall semántico exacto, indexación BM25 persistida. |
+| **Fase 2** | **Rendimiento Backend y Resiliencia** | 11, 12, 13, 14, 15, 16, 20, 22, 45, 46, TODO-2.11 | **Completada** | Streaming SSE token a token, pooling HTTP, pipeline en cascada multi-filtro (precios vs horarios), SQLite WAL y Docker. |
+| **Fase 3** | **Frontend Moderno, UI Retro & Accesibilidad** | 25, 26, 27, 28, 29, 30, 33, 34, 35, 36 | **Completada** | Zustand store, decodificación SSE progresiva, filtro CRT acelerado por GPU (60 FPS), modo WCAG AAA, focus trap y panel OSD de monitor. |
+| **Fase 4** | **Testing Automatizado, QA y Tooling DX** | 39, 40, 41, 42, 44, 47, 48, 49 | **Planificada** | Evaluación continua Ragas, Locust carga concurrente, CLI doctor y pre-commits. |
+| **Fase 5** | **Ampliación de Experiencia y Nuevos Horizontes** | 8, 9, 10, 17, 18, 24, 31, 32, 37, 38, 50 | **Planificada** | Graph RAG, HyDE, audio web retro, exportador comercial y empaquetado Tauri kiosco. |
 
 ---
 

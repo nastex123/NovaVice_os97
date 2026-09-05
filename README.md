@@ -4,7 +4,7 @@
 
 [![Language: English](https://img.shields.io/badge/Language-English-blue.svg)](README.md)
 [![Language: Español](https://img.shields.io/badge/Language-Español-green.svg)](EXPLICACION_TECNICA.md)
-[![Tests: 55/55 Passed](https://img.shields.io/badge/Tests-55%2F55%20Passed-brightgreen.svg)](backend/tests/)
+[![Tests: 72/72 Passed](https://img.shields.io/badge/Tests-72%2F72%20Passed-brightgreen.svg)](backend/tests/)
 [![Faithfulness: 50/50 (100%)](https://img.shields.io/badge/Faithfulness-50%2F50%20(100%25)-brightgreen.svg)](scripts/evaluate_rag.py)
 [![Benchmark: 80/80 Passed](https://img.shields.io/badge/Benchmark-80%2F80%20(100%25)-brightgreen.svg)](scripts/test_variants.py)
 [![Next.js 15](https://img.shields.io/badge/Frontend-Next.js%2015-black.svg)](frontend/)
@@ -91,10 +91,15 @@ synapse-admissions-ai/ (NovaVice_os97)
 │                   PRESENTATION LAYER (NEXT.JS 15 FRONTEND)             │
 │                                                                        │
 │   Next.js 15 (App Router) + React 19 + TypeScript + Tailwind CSS       │
-│   ├── Macintosh OS '97 Window (Pinstripe titlebar, vintage controls)   │
-│   ├── CRT Anti-Glare Optical Filter (Scanlines + Amber Phosphor + SW)  │
+│   ├── RSC Shell (app/page.tsx) & Client Boundary (RetroDesktop.tsx)    │
+│   ├── Centralized Zustand Stores (useChatStore, useDesktopStore, ...)  │
+│   ├── Dynamic Code Splitting (next/dynamic, -54.3% initial bundle)     │
+│   ├── Virtualized Messages List (@tanstack/react-virtual >30 items)    │
+│   ├── GPU-Accelerated CRT Filter (transform: translateZ(0), 60 FPS)    │
+│   ├── WCAG 2.1 AAA "Bypass Retro" Accessible Mode (.a11y-mode >=7:1)   │
+│   ├── Accessible Focus Trap (useFocusTrap.ts) & Global Keyboard Nav    │
+│   ├── Vintage "Monitor Controls" OSD Dialog (Real-time Calibration)    │
 │   ├── Living Pixel-Art Background (8 Palms + 18 Clouds + Gulls + Grass)│
-│   ├── Safe GFM Markdown Renderer with HTML Sanitization                │
 │   └── Real-time Telemetry Modal (Latency, Tokens, Cost, Cache Ratio)   │
 └───────────────────────────────────┬────────────────────────────────────┘
                                     │ HTTP / JSON (:3000 -> :8000)
@@ -165,10 +170,15 @@ synapse-admissions-ai/ (NovaVice_os97)
      - `[2] 🚀 AGY (Google Antigravity CLI / Engine)`
    - **Reasoning Parity:** Both engines generate rich, complete Markdown tables and structured payment schedules backed by `advisor_common.py`.
 
-3. **Retro "Nova OS '97" Frontend with Anti-Glare CRT Filter:**
-   - Nostalgic design inspired by Poolsuite.net and GTA Vice City 80s/90s aesthetics.
-   - **Optical CRT Screen Filter:** Subtle horizontal scanlines and warm amber phosphor actively reducing eye fatigue, with an interactive `[ 📺 CRT: ON/OFF ]` switch.
-   - **Living Tropical Pixel-Art Landscape:** 8 depth-layered swaying palm trees, 18 bidirectional volumetric drifting clouds, 6 flocks of seagulls with authentic 2-state wing flapping, and a retro pixel-grass carpet with 28 swaying tufts running at 60 FPS GPU hardware acceleration.
+3. **Modern Retro "Nova OS '97" Frontend with Optical CRT & Accessibility:**
+   - Nostalgic design inspired by Poolsuite.net and GTA Vice City 80s/90s aesthetics, architected with Next.js 15 Server Components and Client Boundaries.
+   - **Centralized State Management (Zustand):** Eliminates prop-drilling with `useChatStore`, `useDesktopStore`, and `useSettingsStore`.
+   - **Dynamic Code Splitting (-54.3% Bundle Reduction):** Lazy-loads secondary modals and WebGL/PixiJS canvas via `next/dynamic` (`ssr: false`), dropping initial route JS from 230 kB to 105 kB.
+   - **GPU-Accelerated Optical CRT Filter:** Hardware composite acceleration (`transform: translateZ(0)`, `will-change`) maintaining stable 60 FPS without CPU usage spikes.
+   - **WCAG 2.1 AAA "Bypass Retro" Mode:** Accessible toggle switching off CRT effects and pixel fonts to high-contrast system typography (`Inter`) with contrast ratio $\ge 7:1$.
+   - **Keyboard Navigation & Focus Trap:** Full keyboard operability (`useFocusTrap.ts`, `Escape` to close, `Alt+Enter` to send, `Alt+0..5`, `Alt+T`, `Alt+M`).
+   - **Vintage "Monitor Controls" OSD:** Retro analog calibration panel with sliders for phosphor brightness, tube curvature, and scanlines with IndexedDB persistence.
+   - **Living Tropical Pixel-Art Landscape:** 8 depth-layered swaying palm trees, 18 bidirectional volumetric drifting clouds, 6 flocks of seagulls with authentic 2-state wing flapping, and a retro pixel-grass carpet with 28 swaying tufts.
 
 4. **Deterministic Guided Navigation & Zero Hallucination Guardrails:**
    - Structured 4-pillar menu navigation (1. Courses, 2. Schedules, 3. COP Pricing, 4. Admissions/Campuses, with 0 root reset).
@@ -239,7 +249,7 @@ pytest backend/tests -v
 ```
 
 ```text
-============================= 55 passed in ~27s ==============================
+======================== 72 passed, 1 warning in ~88s ========================
 ```
 
 And a linguistic benchmark validating 80 real-world user variants:

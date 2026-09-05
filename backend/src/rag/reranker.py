@@ -1,3 +1,4 @@
+from pathlib import Path
 import time
 from typing import List, Dict, Any, Optional
 
@@ -7,24 +8,26 @@ try:
 except ImportError:
     HAS_FLASHRANK = False
 
+CACHE_DIR = str(Path(__file__).resolve().parent.parent.parent / "data" / "cache_models")
+
 
 class LocalCrossEncoderReranker:
-    # High-precision Cross-Encoder reranker using BAAI/bge-reranker-v2-m3 (via FlashRank or ONNX runtime)
+    # High-precision Cross-Encoder reranker using FlashRank or ONNX runtime
     # Reranks top-20 candidates from hybrid retrieval down to highest quality top_k (TODO-2.15).
 
-    def __init__(self, model_name: str = "ms-marco-TinyBERT-L-2-v2", preferred_bge_model: str = "bge-reranker-large"):
+    def __init__(self, model_name: str = "ms-marco-TinyBERT-L-2-v2", preferred_bge_model: str = "ms-marco-TinyBERT-L-2-v2"):
         self.model_name = model_name
         self.preferred_bge_model = preferred_bge_model
         self.ranker: Optional[Any] = None
         self.enabled = HAS_FLASHRANK
         if self.enabled:
             try:
-                # Try preferred multilingual high-precision reranker if cached or supported
-                self.ranker = Ranker(model_name=self.preferred_bge_model, cache_dir="backend/data/cache_models")
+                # Try preferred reranker if cached or supported
+                self.ranker = Ranker(model_name=self.preferred_bge_model, cache_dir=CACHE_DIR)
             except Exception:
                 try:
                     # Fallback to local high-efficiency model
-                    self.ranker = Ranker(model_name=self.model_name, cache_dir="backend/data/cache_models")
+                    self.ranker = Ranker(model_name=self.model_name, cache_dir=CACHE_DIR)
                 except Exception:
                     self.ranker = None
                     self.enabled = False

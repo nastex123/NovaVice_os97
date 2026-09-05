@@ -417,12 +417,11 @@ class PurePythonRAGEngine:
         threshold = self.settings.similarity_threshold_pilar if is_pilar else self.settings.similarity_threshold
 
         # D39 hard rule: pilares (not very heavy) never auto-escalate, just return best chunk even if low
-        # D39 hard rule: pilares (not very heavy) never auto-escalate, just return best chunk even if low
         if is_pilar and (not chunks or top_similarity < threshold):
             if not chunks:
                 chunks = hybrid_retriever.retrieve(effective_query, top_k=3) or chunks
             pass
-        elif (not chunks or top_similarity < threshold) and (is_very_heavy or is_heavy_detector or top_similarity < threshold):
+        elif is_very_heavy or is_heavy_detector or not chunks or top_similarity < threshold:
             # C23: Record consecutive failure
             fails = applicant_memory.record_failure(session_id)
             if fails >= 2 and not is_very_heavy:
@@ -681,7 +680,11 @@ class PurePythonRAGEngine:
         # Store under effective_query (canonical) so paraphrases hit semantic layer; also store raw query for exact
         query_cache.set(effective_query, final_response, embedding=q_emb)
         if query != effective_query:
-            query_cache.set(query, final_response, embedding=q_emb)
+            try:
+                raw_emb = _vs_for_store.embed_query(query)
+            except Exception:
+                raw_emb = q_emb
+            query_cache.set(query, final_response, embedding=raw_emb)
 
         return final_response
 

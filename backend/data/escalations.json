@@ -1461,5 +1461,63 @@
         "preview": "as a trav\u00e9s del Studienkolleg.  ### 2. Progresi\u00f3n Curricular - A1 y A2 (Fundamentos): Gram\u00e1tica estructurada, declinaciones (nominativo, acusativo, dativo) y conversaci\u00f3n cotidiana. - B1 y B2 (Indepen"
       }
     ]
+  },
+  {
+    "ticket_id": "ESC-20260904-E28E2B",
+    "created_at": "2026-09-04T19:47:44-0500",
+    "user_id": "guest_applicant",
+    "query": "\u00bfUstedes tramitan visas de trabajo para vivir en Australia o Nueva Zelanda?",
+    "confidence_score": 0.5775,
+    "escalation_reason": "user_confirmed_heavy_escalation",
+    "assigned_to": "admisiones@novaidiomas.edu.co",
+    "estimated_resolution_window": "<2h",
+    "status": "pending_human_review",
+    "conversation_history_last3": [],
+    "top3_candidate_chunks": [
+      {
+        "source": "01_programas_idiomas_y_niveles.md",
+        "section": "01. Programas de Idiomas, Niveles MCER y Metodolog\u00eda de Ense\u00f1anza",
+        "preview": "Franc\u00e9s general, diplom\u00e1tico y de negocios, con preparaci\u00f3n para visas de estudio o migraci\u00f3n a Canad\u00e1 y Francia. 3. **Alem\u00e1n:** Estructura especializada para estudiantes universitarios, ingenieros y"
+      },
+      {
+        "source": "01_05_aleman_academico_y_laboral.md",
+        "section": "Programa de Alem\u00e1n Acad\u00e9mico y Laboral (Goethe-Zertifikat y TestDaF)",
+        "preview": "cular - A1 y A2 (Fundamentos): Gram\u00e1tica estructurada, declinaciones (nominativo, acusativo, dativo) y conversaci\u00f3n cotidiana. - B1 y B2 (Independencia y Trabajo): Vocabulario t\u00e9cnico, redacci\u00f3n forma"
+      },
+      {
+        "source": "03_05_ielts_vs_toefl_comparativa.md",
+        "section": "1. \u00bfCu\u00e1l Examen Elegir?",
+        "preview": "# Nova Idiomas Colombia - Academia Oficial de Idiomas  ## Gu\u00eda Comparativa Oficial: \u00bfIELTS o TOEFL iBT?  ### 1. \u00bfCu\u00e1l Examen Elegir?  - IELTS: Preferido para Reino Unido, Australia, Nueva Zelanda y pr"
+      }
+    ]
+  },
+  {
+    "ticket_id": "ESC-20260904-49D3E0",
+    "created_at": "2026-09-04T19:49:41-0500",
+    "user_id": "guest_applicant",
+    "query": "\u00bfUstedes tramitan visas de trabajo para vivir en Australia o Nueva Zelanda?",
+    "confidence_score": 0.5775,
+    "escalation_reason": "user_confirmed_heavy_escalation",
+    "assigned_to": "admisiones@novaidiomas.edu.co",
+    "estimated_resolution_window": "<2h",
+    "status": "pending_human_review",
+    "conversation_history_last3": [],
+    "top3_candidate_chunks": [
+      {
+        "source": "01_programas_idiomas_y_niveles.md",
+        "section": "01. Programas de Idiomas, Niveles MCER y Metodolog\u00eda de Ense\u00f1anza",
+        "preview": "Franc\u00e9s general, diplom\u00e1tico y de negocios, con preparaci\u00f3n para visas de estudio o migraci\u00f3n a Canad\u00e1 y Francia. 3. **Alem\u00e1n:** Estructura especializada para estudiantes universitarios, ingenieros y"
+      },
+      {
+        "source": "01_05_aleman_academico_y_laboral.md",
+        "section": "Programa de Alem\u00e1n Acad\u00e9mico y Laboral (Goethe-Zertifikat y TestDaF)",
+        "preview": "cular - A1 y A2 (Fundamentos): Gram\u00e1tica estructurada, declinaciones (nominativo, acusativo, dativo) y conversaci\u00f3n cotidiana. - B1 y B2 (Independencia y Trabajo): Vocabulario t\u00e9cnico, redacci\u00f3n forma"
+      },
+      {
+        "source": "03_05_ielts_vs_toefl_comparativa.md",
+        "section": "1. \u00bfCu\u00e1l Examen Elegir?",
+        "preview": "# Nova Idiomas Colombia - Academia Oficial de Idiomas  ## Gu\u00eda Comparativa Oficial: \u00bfIELTS o TOEFL iBT?  ### 1. \u00bfCu\u00e1l Examen Elegir?  - IELTS: Preferido para Reino Unido, Australia, Nueva Zelanda y pr"
+      }
+    ]
   }
 ]

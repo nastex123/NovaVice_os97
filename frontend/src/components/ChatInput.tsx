@@ -2,13 +2,26 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { Send, Mic, MicOff } from "lucide-react";
+import { useChatStore } from "../stores/useChatStore";
 
 interface ChatInputProps {
-  onSendMessage: (text: string) => void;
-  isLoading: boolean;
+  onSendMessage?: (text: string) => void;
+  isLoading?: boolean;
 }
 
-export const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, isLoading }) => {
+export const ChatInput: React.FC<ChatInputProps> = ({
+  onSendMessage: propOnSendMessage,
+  isLoading: propIsLoading,
+}) => {
+  const storeSendMessage = useChatStore((state) => state.sendMessage);
+  const storeSendStreamMessage = useChatStore((state) => state.sendStreamMessage);
+  const streamMode = useChatStore((state) => state.streamMode);
+  const storeIsLoading = useChatStore((state) => state.isLoading);
+
+  const defaultSend = streamMode ? storeSendStreamMessage : storeSendMessage;
+  const onSendMessage = propOnSendMessage || defaultSend;
+  const isLoading = propIsLoading !== undefined ? propIsLoading : storeIsLoading;
+
   const [input, setInput] = useState("");
   const [isRecording, setIsRecording] = useState(false);
   const recognitionRef = useRef<any>(null);
@@ -66,6 +79,15 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, isLoading }
     setInput("");
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if ((e.key === "Enter" && e.altKey) || (e.key === "Enter" && !e.shiftKey)) {
+      e.preventDefault();
+      if (!input.trim() || isLoading) return;
+      onSendMessage(input.trim());
+      setInput("");
+    }
+  };
+
   return (
     <div className="p-3 sm:p-4 border-t-2 border-black bg-retroBeige z-10 select-none w-full">
       {/* Input Form Centered */}
@@ -75,8 +97,11 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, isLoading }
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
             placeholder="Digita tu consulta (ej. '1.1', 'horarios', 'precios COP', 'sedes')..."
             disabled={isLoading}
+            aria-label="Campo de consulta para admisiones"
+            title="Presiona Enter o Alt+Enter para enviar tu consulta"
             className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-retroCard border-2 border-black shadow-retro-inset font-mono text-xs sm:text-sm text-black placeholder-slate-600 transition-all outline-none"
           />
         </div>

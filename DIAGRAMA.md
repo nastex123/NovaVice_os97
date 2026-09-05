@@ -9,10 +9,13 @@
 ```mermaid
 flowchart TB
     subgraph FE [PRESENTACIÓN — Next.js 15 Frontend :3000]
-        A1[Header Retro OS 97]
-        A2[PixiParticleBackground<br/>SVG 18 nubes+8 palmas+hierba +<br/>PIXI WebGL 36 partículas<br/>18 fireflies+10 dews+8 spores]
-        A3[ChatContainer + ChatInput]
-        A4[MetricsModal + CRT Filter]
+        A1[RSC Shell app/page.tsx]
+        A2[Client Boundary RetroDesktop.tsx]
+        A3[Zustand Stores<br/>useChatStore + useDesktopStore + useSettingsStore<br/>IndexedDB idb-keyval]
+        A4[ChatContainer Virtualizado<br/>@tanstack/react-virtual + ReactMarkdown]
+        A5[ChatInput + Alt+Enter / Enter + Mic]
+        A6[Modales con Focus Trap<br/>MetricsModal + Sedes + MonitorControlsModal OSD]
+        A7[Filtro CRT GPU 60 FPS<br/>+ Modo Accesible WCAG AAA .a11y-mode]
     end
 
     subgraph API [API GATEWAY — FastAPI :8000]
@@ -50,11 +53,11 @@ flowchart TB
         G2[AGY Antigravity<br/>gemini-3.7-flash low<br/>opencode_client.py:212]
     end
 
-    FE -->|HTTP JSON| API
+    FE -->|HTTP JSON / SSE Stream| API
     API --> SEC --> NAV --> CACHE --> RAG --> ADV
 ```
 
-**Capas:** `frontend/src/app/page.tsx` → `backend/src/api/routes.py:35` → `guardrails.py:28` → `navigation.py:325` → `cache.py:19` → `hybrid_retriever.py:18` → `opencode_client.py:127` / `engine.py:220` (escalamiento) / `engine.py:264` (LLM).
+**Capas:** `frontend/src/app/page.tsx` (RSC) → `frontend/src/components/RetroDesktop.tsx` (Client Boundary) → `backend/src/api/routes.py:35` → `guardrails.py:28` → `navigation.py:325` → `cache.py:19` → `hybrid_retriever.py:18` → `opencode_client.py:127` / `engine.py:220` (escalamiento) / `engine.py:264` (LLM).
 
 ---
 

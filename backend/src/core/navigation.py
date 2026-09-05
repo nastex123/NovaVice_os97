@@ -298,6 +298,7 @@ INTENT_SYNONYMS = {
     "horarios disponibles": "Cuales son los horarios, franjas y modalidades de estudio disponibles?",
     "horarios existentes": "Cuales son los horarios, franjas y modalidades de estudio disponibles?",
     "que horarios tienen": "Cuales son los horarios, franjas y modalidades de estudio disponibles?",
+    "que horarios tienen disponibles": "Cuales son los horarios, franjas y modalidades de estudio disponibles?",
     "que horarios hay": "Cuales son los horarios, franjas y modalidades de estudio disponibles?",
     "a que hora dan clases": "Cuales son los horarios, franjas y modalidades de estudio disponibles?",
     "jornadas": "Cuales son los horarios, franjas y modalidades de estudio disponibles?",

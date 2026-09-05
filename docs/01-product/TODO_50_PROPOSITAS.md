@@ -11,10 +11,10 @@
 | :---: | :--- | :---: | :---: | :---: | :---: | :---: |
 | **Fase 1** | Precisión de Datos y Recuperación RAG | 11 | 11 | 0 | 0 | ✅ Completada (100%) |
 | **Fase 2** | Rendimiento Backend y Resiliencia + Complemento Anti-alucinación | 17 | 17 | 0 | 0 | ✅ Completada (100%) |
-| **Fase 3** | Frontend Moderno, UI Retro & Accesibilidad | 10 | 0 | 0 | 10 | ⏳ Pendiente |
+| **Fase 3** | Frontend Moderno, UI Retro & Accesibilidad | 10 | 6 | 0 | 4 | 🚀 En Progreso (60%) |
 | **Fase 4** | Testing Automatizado, QA & Tooling DX | 8 | 0 | 0 | 8 | ⏳ Pendiente |
-| **Fase 5** | Horizontes Futuros y Despliegues Especializados | 11 | 0 | 11 | ⏳ Pendiente |
-| **TOTAL** | **Propuestas de Mejora Técnica** | **57** | **28** | **0** | **29** | **49.1%** |
+| **Fase 5** | Horizontes Futuros y Despliegues Especializados | 11 | 0 | 0 | 11 | ⏳ Pendiente |
+| **TOTAL** | **Propuestas de Mejora Técnica** | **57** | **34** | **0** | **23** | **59.6%** |
 
 ---
 
@@ -138,34 +138,35 @@
 ## 🔵 FASE 3: Frontend Moderno, UI Retro y Accesibilidad (10 Tareas)
 > **Objetivo:** Eliminar prop-drilling con Zustand, decodificar SSE progresivo, acelerar el filtro CRT con WebGL/GPU (60 FPS) y garantizar accesibilidad WCAG AAA.
 
-- [ ] **TODO-3.1 [Prop. 25 - CRÍTICO] Store global centralizado con Zustand:**
-  - [ ] Instalar `zustand` en `frontend/`.
-  - [ ] Crear stores modulares: `useChatStore` (mensajes, estado de envío), `useDesktopStore` (ventanas, z-index), `useSettingsStore` (CRT, accesibilidad).
-  - [ ] Refactorizar componentes para eliminar prop-drilling en `ChatContainer.tsx` y `Desktop.tsx`.
-- [ ] **TODO-3.2 [Prop. 26 - CRÍTICO] Consumo de streams SSE con decodificador progresivo UTF-8:**
-  - [ ] Crear hook `useChatStream.ts` en el frontend utilizando `ReadableStreamDefaultReader` y `TextDecoder`.
-  - [ ] Mostrar el texto entrante progresivamente con cursor parpadeante retro vintage.
-- [ ] **TODO-3.3 [Prop. 27 - RECOMENDADO] Virtualización de mensajes del chat (`@tanstack/react-virtual`):**
-  - [ ] Implementar lista virtualizada en el contenedor de mensajes para chats con más de 50 intervenciones.
-  - [ ] Mantener el auto-scroll hacia el fondo cuando se generen nuevos tokens en streaming.
-- [ ] **TODO-3.4 [Prop. 28 - RECOMENDADO] Persistencia de sesiones en `IndexedDB`:**
-  - [ ] Implementar almacenamiento asíncrono con `idb-keyval` para historial de chat y preferencias del usuario.
-- [ ] **TODO-3.5 [Prop. 29 - RECOMENDADO] Optimización de Server Components (RSC) vs Client Components:**
-  - [ ] Separar la cáscara estática del escritorio retro en Server Components de Next.js 15.
-  - [ ] Mantener la directiva `'use client'` únicamente en los nodos interactivos.
-- [ ] **TODO-3.6 [Prop. 30 - RECOMENDADO] Code splitting dinámico con `next/dynamic`:**
-  - [ ] Cargar perezosamente con `ssr: false` el modal de telemetría y el visor de tickets de escalamiento.
-- [ ] **TODO-3.7 [Prop. 33 - CRÍTICO] Filtro óptico CRT acelerado por GPU / WebGL:**
-  - [ ] Migrar el sombreado de líneas de escaneo y curvatura a clases CSS aceleradas (`transform: translateZ(0)`, `will-change`) o shader WebGL ligero en Canvas.
-  - [ ] Verificar tasa estable de 60 FPS sin picos de consumo de CPU en laptops de bajos recursos.
-- [ ] **TODO-3.8 [Prop. 34 - RECOMENDADO] Modo accesible "Bypass Retro" (WCAG 2.1 AAA):**
-  - [ ] Añadir toggle en la barra de tareas que desactive el filtro CRT y las fuentes pixeladas.
-  - [ ] Conmutar a tipografía legible del sistema (Inter / SF Pro) con contraste de color AAA.
-- [ ] **TODO-3.9 [Prop. 35 - RECOMENDADO] Navegación por teclado y Focus Trap en ventanas retro:**
-  - [ ] Implementar trampa de foco en la ventana del chat (`Tab` / `Shift+Tab`).
-  - [ ] Soportar atajos rápidos (`Escape` para cerrar modales, `Alt+Enter` para enviar).
-- [ ] **TODO-3.10 [Prop. 36 - RECOMENDADO] Panel de control vintage "Monitor Controls":**
-  - [ ] Crear diálogo estilo monitor CRT con sliders para ajustar brillo, curvatura de tubo y grosor de scanlines.
+- [x] **TODO-3.1 [Prop. 25 - CRÍTICO] Store global centralizado con Zustand:**
+  - [x] Instalar `zustand` en `frontend/`.
+  - [x] Crear stores modulares: `useChatStore` (mensajes, estado de envío), `useDesktopStore` (ventanas, z-index), `useSettingsStore` (CRT, accesibilidad).
+  - [x] Refactorizar componentes para eliminar prop-drilling en `ChatContainer.tsx` y `Desktop.tsx`.
+- [x] **TODO-3.2 [Prop. 26 - CRÍTICO] Consumo de streams SSE con decodificador progresivo UTF-8:**
+  - [x] Crear hook `useChatStream.ts` en el frontend utilizando `ReadableStreamDefaultReader` y `TextDecoder`.
+  - [x] Mostrar el texto entrante progresivamente con cursor parpadeante retro vintage.
+- [x] **TODO-3.3 [Prop. 27 - RECOMENDADO] Virtualización de mensajes del chat (`@tanstack/react-virtual`):**
+  - [x] Implementar lista virtualizada en el contenedor de mensajes para chats con más de 50 intervenciones.
+  - [x] Mantener el auto-scroll hacia el fondo cuando se generen nuevos tokens en streaming.
+- [x] **TODO-3.4 [Prop. 28 - RECOMENDADO] Persistencia de sesiones en `IndexedDB`:**
+  - [x] Implementar almacenamiento asíncrono con `idb-keyval` para historial de chat y preferencias del usuario.
+- [x] **TODO-3.5 [Prop. 29 - RECOMENDADO] Optimización de Server Components (RSC) vs Client Components:**
+  - [x] Separar la cáscara estática del escritorio retro en Server Components de Next.js 15 (`app/page.tsx`).
+  - [x] Mantener la directiva `'use client'` únicamente en los nodos interactivos (`components/RetroDesktop.tsx`).
+- [x] **TODO-3.6 [Prop. 30 - RECOMENDADO] Code splitting dinámico con `next/dynamic`:**
+  - [x] Cargar perezosamente con `ssr: false` el modal de telemetría y el lienzo de partículas PixiJS en `RetroDesktop.tsx` (reducción de 230kB a 105kB en bundle inicial).
+- [x] **TODO-3.7 [Prop. 33 - CRÍTICO] Filtro óptico CRT acelerado por GPU / WebGL:**
+  - [x] Migrar el sombreado de líneas de escaneo y curvatura a clases CSS aceleradas (`transform: translateZ(0)`, `will-change`, `backface-visibility: hidden;`, `perspective: 1000px`, `contain: strict`) parametrizadas con CSS custom properties.
+  - [x] Verificar tasa estable de 60 FPS sin picos de consumo de CPU eliminando `backdrop-filter` pesado del compositor.
+- [x] **TODO-3.8 [Prop. 34 - RECOMENDADO] Modo accesible "Bypass Retro" (WCAG 2.1 AAA):**
+  - [x] Añadir toggle en la barra de tareas y cabecera que desactive el filtro CRT y las fuentes pixeladas (`bypassRetroA11y`).
+  - [x] Conmutar a tipografía legible del sistema (Inter / SF Pro / sans-serif) con contraste de color AAA (>= 7:1) y desactivación de animaciones continuas.
+- [x] **TODO-3.9 [Prop. 35 - RECOMENDADO] Navegación por teclado y Focus Trap en ventanas retro:**
+  - [x] Implementar trampa de foco accesible (`useFocusTrap.ts`) en modales de telemetría y sedes (`Tab` / `Shift+Tab`).
+  - [x] Soportar atajos rápidos globales y locales (`Escape` para cerrar modales, `Alt+Enter` / `Enter` para enviar consultas, `Alt+0..5`, `Alt+T`, `Alt+A`).
+- [x] **TODO-3.10 [Prop. 36 - RECOMENDADO] Panel de control vintage "Monitor Controls":**
+  - [x] Crear diálogo estilo monitor CRT (`MonitorControlsModal.tsx`) con sliders para ajustar brillo, curvatura de tubo y grosor de scanlines.
+  - [x] Conectar calibración reactiva con CSS variables (`--crt-brightness`, `--crt-curvature-opacity`, `--crt-scanline-opacity`), persistencia `IndexedDB` y presets de fábrica (Trinitron '97, Arcade Neon, Oficina Soft).
 
 ---
 

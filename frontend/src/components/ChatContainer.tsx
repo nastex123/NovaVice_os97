@@ -1,29 +1,39 @@
 "use client";
 
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Bot, User, Clock, FileText, Sparkles, Info, ChevronRight, RotateCcw } from "lucide-react";
 import confetti from "canvas-confetti";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import { ChatMessage, ActionButton } from "../lib/types";
+import { useChatStore } from "../stores/useChatStore";
 
 interface ChatContainerProps {
-  messages: ChatMessage[];
-  isLoading: boolean;
-  onActionButtonClick: (value: string) => void;
+  messages?: ChatMessage[];
+  isLoading?: boolean;
+  onActionButtonClick?: (value: string) => void;
 }
 
-// Typewriter Subcomponent for smooth progressive word revealing
+// Typewriter Subcomponent for smooth progressive word revealing or real-time streaming
 const TypewriterMessage: React.FC<{
   text: string;
   isLatest: boolean;
+  isStreaming?: boolean;
   onFinish?: () => void;
-}> = ({ text, isLatest, onFinish }) => {
-  const [displayedText, setDisplayedText] = useState(isLatest ? "" : text);
-  const [isDone, setIsDone] = useState(!isLatest);
+}> = ({ text, isLatest, isStreaming, onFinish }) => {
+  const [displayedText, setDisplayedText] = useState(isLatest && !isStreaming ? "" : text);
+  const [isDone, setIsDone] = useState(!isLatest || !isStreaming);
 
   useEffect(() => {
+    // If the message is actively streaming tokens from SSE, display directly without client-side lag
+    if (isStreaming) {
+      setDisplayedText(text);
+      setIsDone(false);
+      return;
+    }
+
     if (!isLatest) {
       setDisplayedText(text);
       setIsDone(true);
@@ -48,7 +58,7 @@ const TypewriterMessage: React.FC<{
     }, 18);
 
     return () => clearInterval(interval);
-  }, [text, isLatest]);
+  }, [text, isLatest, isStreaming, onFinish]);
 
   const handleSkip = () => {
     setDisplayedText(text);
@@ -165,16 +175,225 @@ const TypewriterMessage: React.FC<{
   );
 };
 
-export const ChatContainer: React.FC<ChatContainerProps> = ({
-  messages,
-  isLoading,
+interface MessageItemProps {
+  msg: ChatMessage;
+  index: number;
+  totalMessages: number;
+  onActionButtonClick: (value: string) => void;
+  triggerConfetti: () => void;
+  sanitizeMarkdown: (text: string) => string;
+}
+
+const MessageItem: React.FC<MessageItemProps> = ({
+  msg,
+  index,
+  totalMessages,
   onActionButtonClick,
+  triggerConfetti,
+  sanitizeMarkdown,
 }) => {
+  const isUser = msg.sender === "user";
+  const isAdvisor = msg.mode === "opencode_advisor" || msg.mode === "agy_advisor";
+  const isAgy = msg.mode === "agy_advisor";
+  const isLatest = index === totalMessages - 1 && !isUser;
+
+  return (
+    <motion.div
+      key={msg.id}
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.18 }}
+      className={`flex gap-3 w-full ${
+        isUser ? "ml-auto flex-row-reverse max-w-xl" : "mr-auto max-w-full"
+      }`}
+    >
+      {/* Retro Avatar */}
+      <div
+        className={`w-8 h-8 sm:w-9 sm:h-9 flex-shrink-0 flex items-center justify-center border-2 border-black shadow-retro-sm ${
+          isUser
+            ? "bg-viceCyan text-black"
+            : isAdvisor
+            ? isAgy
+              ? "bg-viceCyan text-black"
+              : "bg-vicePink text-white"
+            : "bg-retroBeige text-black"
+        }`}
+      >
+        {isUser ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
+      </div>
+
+      {/* Message Memo Box */}
+      <div className="flex flex-col space-y-2 max-w-full overflow-hidden w-full">
+        <div
+          className={`p-4 sm:p-5 border-2 border-black shadow-retro transition-all relative overflow-hidden ${
+            isUser
+              ? "bg-viceCyan-pastel text-black"
+              : isAdvisor
+              ? isAgy
+                ? "bg-retroCard border-2 border-viceCyan-dark"
+                : "bg-retroCard border-2 border-vicePink-dark"
+              : "bg-retroCard text-slate-900"
+          }`}
+        >
+          {/* Advisor Banner */}
+          {isAdvisor && !isUser && (
+            <div
+              className={`flex items-center gap-2 mb-3 pb-2 border-b-2 border-black text-xs font-bold font-mono uppercase ${
+                isAgy ? "text-viceCyan-dark" : "text-vicePink-dark"
+              }`}
+            >
+              <Sparkles className={`w-4 h-4 ${isAgy ? "text-viceCyan-dark" : "text-vicePink-dark"}`} />
+              <span>
+                {isAgy
+                  ? "ASESORÍA DE ADMISIONES (AGY ANTIGRAVITY MEMO)"
+                  : "ASESORÍA DE ADMISIONES (OPENCODE MEMO)"}
+              </span>
+            </div>
+          )}
+
+          {/* Markdown Content */}
+          <div className="markdown-body space-y-2.5 text-xs sm:text-sm leading-relaxed">
+            {!isUser ? (
+              <TypewriterMessage
+                text={sanitizeMarkdown(msg.text)}
+                isLatest={isLatest}
+                isStreaming={msg.isStreaming}
+              />
+            ) : (
+              <p className="text-xs sm:text-sm leading-relaxed text-black font-medium font-sans">
+                {msg.text}
+              </p>
+            )}
+          </div>
+
+          {/* Metadata Chips: Latency and Sources */}
+          {!isUser && (msg.latency_ms !== undefined || (msg.source_documents && msg.source_documents.length > 0)) && (
+            <div className="mt-3.5 pt-2.5 border-t border-black/20 flex flex-wrap items-center gap-2 text-[10px] text-slate-700 font-mono">
+              {msg.latency_ms !== undefined && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-retroBeige border border-black font-bold">
+                  <Clock className="w-3 h-3 text-black" />
+                  {msg.latency_ms} ms
+                </span>
+              )}
+
+              {msg.source_documents && msg.source_documents.length > 0 && (
+                <div className="flex flex-wrap items-center gap-1.5">
+                  {msg.source_documents.map((src, sIdx) => (
+                    <span
+                      key={sIdx}
+                      className="inline-flex items-center gap-1 px-2 py-0.5 bg-retroBeige border border-black"
+                    >
+                      <FileText className="w-3 h-3 text-vicePink-dark" />
+                      <span className="truncate max-w-[240px]">{src}</span>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* 90s Raised Bevel Action Buttons Grid */}
+        {!isUser && msg.action_buttons && msg.action_buttons.length > 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 w-full pt-1">
+            {msg.action_buttons.map((btn: ActionButton, bIdx: number) => {
+              const isReturn = btn.value === "0";
+              const isAdvisor = btn.value === "9" || btn.value === "5";
+
+              return (
+                <button
+                  key={bIdx}
+                  onClick={() => {
+                    if (btn.value.includes("beca") || btn.value.includes("4") || btn.value.includes("3")) {
+                      triggerConfetti();
+                    }
+                    onActionButtonClick(btn.value);
+                  }}
+                  className={`w-full text-left p-2.5 sm:p-3 text-xs sm:text-sm font-bold transition-all flex items-center justify-between gap-2 border-2 border-black shadow-retro active:translate-x-[2px] active:translate-y-[2px] active:shadow-none overflow-hidden ${
+                    isReturn
+                      ? "bg-retroBeige hover:bg-black hover:text-white text-black sm:col-span-2 font-mono"
+                      : isAdvisor
+                      ? "bg-retroBeige hover:bg-vicePink-pastel text-black hover:text-vicePink-dark sm:col-span-2 font-mono"
+                      : "bg-retroBeige hover:bg-vicePink-pastel text-black hover:text-vicePink-dark"
+                  }`}
+                >
+                  <div className="flex items-center gap-2 min-w-0 flex-1 overflow-hidden">
+                    <span
+                      className={`w-2 h-2 border border-black ${
+                        isAdvisor ? "bg-vicePink" : isReturn ? "bg-black" : "bg-viceCyan"
+                      } shrink-0`}
+                    />
+                    <span className="min-w-0 flex-1 break-words whitespace-normal leading-tight">
+                      {btn.label}
+                    </span>
+                  </div>
+                  <ChevronRight className="w-4 h-4 shrink-0 font-bold ml-1" />
+                </button>
+              );
+            })}
+
+            {/* C22: Botón Reformular si confianza baja o clarificación */}
+            {(msg.mode === "clarification" ||
+              (msg.confidence_score !== undefined && msg.confidence_score < 0.55)) && (
+              <button
+                onClick={() =>
+                  onActionButtonClick("¿Cuáles son los cursos, horarios y precios disponibles?")
+                }
+                className="w-full text-left p-2.5 sm:p-3 text-xs sm:text-sm font-bold transition-all flex items-center justify-between gap-2 border-2 border-dashed border-black bg-viceYellow-light hover:bg-viceYellow text-black shadow-retro sm:col-span-2 font-mono"
+              >
+                <div className="flex items-center gap-2">
+                  <RotateCcw className="w-4 h-4 text-black shrink-0" />
+                  <span>🔄 ¿No encontraste lo que buscabas? Reformular con opciones generales</span>
+                </div>
+                <ChevronRight className="w-4 h-4 shrink-0 font-bold ml-1" />
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+    </motion.div>
+  );
+};
+
+export const ChatContainer: React.FC<ChatContainerProps> = ({
+  messages: propMessages,
+  isLoading: propIsLoading,
+  onActionButtonClick: propOnActionButtonClick,
+}) => {
+  const storeMessages = useChatStore((state) => state.messages);
+  const storeIsLoading = useChatStore((state) => state.isLoading);
+  const sendMessage = useChatStore((state) => state.sendMessage);
+  const sendStreamMessage = useChatStore((state) => state.sendStreamMessage);
+  const streamMode = useChatStore((state) => state.streamMode);
+
+  const defaultActionClick = streamMode ? sendStreamMessage : sendMessage;
+  const messages = propMessages !== undefined ? propMessages : storeMessages;
+  const isLoading = propIsLoading !== undefined ? propIsLoading : storeIsLoading;
+  const onActionButtonClick = propOnActionButtonClick || defaultActionClick;
+
   const bottomRef = useRef<HTMLDivElement>(null);
+  const parentRef = useRef<HTMLDivElement>(null);
+
+  const isVirtualized = messages.length > 30;
+
+  const rowVirtualizer = useVirtualizer({
+    count: messages.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 140,
+    overscan: 5,
+  });
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isLoading]);
+    if (isVirtualized && parentRef.current) {
+      parentRef.current.scrollTo({
+        top: parentRef.current.scrollHeight,
+        behavior: "smooth",
+      });
+    } else {
+      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages, isLoading, isVirtualized]);
 
   const triggerConfetti = () => {
     confetti({
@@ -196,165 +415,65 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
   };
 
   return (
-    <div className="flex-1 overflow-y-auto p-3 sm:p-5 space-y-5 custom-scrollbar z-10 w-full">
-      <AnimatePresence initial={false}>
-        {messages.map((msg, index) => {
-          const isUser = msg.sender === "user";
-          const isAdvisor = msg.mode === "opencode_advisor" || msg.mode === "agy_advisor";
-          const isAgy = msg.mode === "agy_advisor";
-          const isLatest = index === messages.length - 1 && !isUser;
-
-          return (
-            <motion.div
-              key={msg.id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.18 }}
-              className={`flex gap-3 w-full ${
-                isUser ? "ml-auto flex-row-reverse max-w-xl" : "mr-auto max-w-full"
-              }`}
-            >
-              {/* Retro Avatar */}
+    <div
+      ref={parentRef}
+      className="flex-1 overflow-y-auto p-3 sm:p-5 space-y-5 custom-scrollbar z-10 w-full relative"
+    >
+      {isVirtualized ? (
+        <div
+          style={{
+            height: `${rowVirtualizer.getTotalSize()}px`,
+            width: "100%",
+            position: "relative",
+          }}
+        >
+          {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+            const msg = messages[virtualRow.index];
+            return (
               <div
-                className={`w-8 h-8 sm:w-9 sm:h-9 flex-shrink-0 flex items-center justify-center border-2 border-black shadow-retro-sm ${
-                  isUser
-                    ? "bg-viceCyan text-black"
-                    : isAdvisor
-                    ? isAgy
-                      ? "bg-viceCyan text-black"
-                      : "bg-vicePink text-white"
-                    : "bg-retroBeige text-black"
-                }`}
+                key={msg.id}
+                data-index={virtualRow.index}
+                ref={rowVirtualizer.measureElement}
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  transform: `translateY(${virtualRow.start}px)`,
+                  paddingBottom: "1.25rem",
+                }}
               >
-                {isUser ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
+                <MessageItem
+                  msg={msg}
+                  index={virtualRow.index}
+                  totalMessages={messages.length}
+                  onActionButtonClick={onActionButtonClick}
+                  triggerConfetti={triggerConfetti}
+                  sanitizeMarkdown={sanitizeMarkdown}
+                />
               </div>
-
-              {/* Message Memo Box */}
-              <div className="flex flex-col space-y-2 max-w-full overflow-hidden w-full">
-                <div
-                  className={`p-4 sm:p-5 border-2 border-black shadow-retro transition-all relative overflow-hidden ${
-                    isUser
-                      ? "bg-viceCyan-pastel text-black"
-                      : isAdvisor
-                      ? isAgy
-                        ? "bg-retroCard border-2 border-viceCyan-dark"
-                        : "bg-retroCard border-2 border-vicePink-dark"
-                      : "bg-retroCard text-slate-900"
-                  }`}
-                >
-                  {/* Advisor Banner */}
-                  {isAdvisor && !isUser && (
-                    <div className={`flex items-center gap-2 mb-3 pb-2 border-b-2 border-black text-xs font-bold font-mono uppercase ${
-                      isAgy ? "text-viceCyan-dark" : "text-vicePink-dark"
-                    }`}>
-                      <Sparkles className={`w-4 h-4 ${isAgy ? "text-viceCyan-dark" : "text-vicePink-dark"}`} />
-                      <span>
-                        {isAgy
-                          ? "ASESORÍA DE ADMISIONES (AGY ANTIGRAVITY MEMO)"
-                          : "ASESORÍA DE ADMISIONES (OPENCODE MEMO)"}
-                      </span>
-                    </div>
-                  )}
-
-                  {/* Markdown Content */}
-                  <div className="markdown-body space-y-2.5 text-xs sm:text-sm leading-relaxed">
-                    {!isUser ? (
-                      <TypewriterMessage
-                        text={sanitizeMarkdown(msg.text)}
-                        isLatest={isLatest}
-                      />
-                    ) : (
-                      <p className="text-xs sm:text-sm leading-relaxed text-black font-medium font-sans">
-                        {msg.text}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Metadata Chips: Latency and Sources */}
-                  {!isUser && (msg.latency_ms !== undefined || (msg.source_documents && msg.source_documents.length > 0)) && (
-                    <div className="mt-3.5 pt-2.5 border-t border-black/20 flex flex-wrap items-center gap-2 text-[10px] text-slate-700 font-mono">
-                      {msg.latency_ms !== undefined && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-retroBeige border border-black font-bold">
-                          <Clock className="w-3 h-3 text-black" />
-                          {msg.latency_ms} ms
-                        </span>
-                      )}
-
-                      {msg.source_documents && msg.source_documents.length > 0 && (
-                        <div className="flex flex-wrap items-center gap-1.5">
-                          {msg.source_documents.map((src, sIdx) => (
-                            <span
-                              key={sIdx}
-                              className="inline-flex items-center gap-1 px-2 py-0.5 bg-retroBeige border border-black"
-                            >
-                              <FileText className="w-3 h-3 text-vicePink-dark" />
-                              <span className="truncate max-w-[240px]">{src}</span>
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-
-                {/* 90s Raised Bevel Action Buttons Grid */}
-                {!isUser && msg.action_buttons && msg.action_buttons.length > 0 && (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 w-full pt-1">
-                    {msg.action_buttons.map((btn: ActionButton, bIdx: number) => {
-                      const isReturn = btn.value === "0";
-                      const isAdvisor = btn.value === "9" || btn.value === "5";
-
-                      return (
-                        <button
-                          key={bIdx}
-                          onClick={() => {
-                            if (btn.value.includes("beca") || btn.value.includes("4") || btn.value.includes("3")) {
-                              triggerConfetti();
-                            }
-                            onActionButtonClick(btn.value);
-                          }}
-                          className={`w-full text-left p-2.5 sm:p-3 text-xs sm:text-sm font-bold transition-all flex items-center justify-between gap-2 border-2 border-black shadow-retro active:translate-x-[2px] active:translate-y-[2px] active:shadow-none overflow-hidden ${
-                            isReturn
-                              ? "bg-retroBeige hover:bg-black hover:text-white text-black sm:col-span-2 font-mono"
-                              : isAdvisor
-                              ? "bg-retroBeige hover:bg-vicePink-pastel text-black hover:text-vicePink-dark sm:col-span-2 font-mono"
-                              : "bg-retroBeige hover:bg-vicePink-pastel text-black hover:text-vicePink-dark"
-                          }`}
-                        >
-                          <div className="flex items-center gap-2 min-w-0 flex-1 overflow-hidden">
-                            <span className={`w-2 h-2 border border-black ${isAdvisor ? "bg-vicePink" : isReturn ? "bg-black" : "bg-viceCyan"} shrink-0`} />
-                            <span className="min-w-0 flex-1 break-words whitespace-normal leading-tight">{btn.label}</span>
-                          </div>
-                          <ChevronRight className="w-4 h-4 shrink-0 font-bold ml-1" />
-                        </button>
-                      );
-                    })}
-
-                    {/* C22: Botón Reformular si confianza baja o clarificación */}
-                    {(msg.mode === "clarification" || (msg.confidence_score !== undefined && msg.confidence_score < 0.55)) && (
-                      <button
-                        onClick={() => onActionButtonClick("¿Cuáles son los cursos, horarios y precios disponibles?")}
-                        className="w-full text-left p-2.5 sm:p-3 text-xs sm:text-sm font-bold transition-all flex items-center justify-between gap-2 border-2 border-dashed border-black bg-viceYellow-light hover:bg-viceYellow text-black shadow-retro sm:col-span-2 font-mono"
-                      >
-                        <div className="flex items-center gap-2">
-                          <RotateCcw className="w-4 h-4 text-black shrink-0" />
-                          <span>🔄 ¿No encontraste lo que buscabas? Reformular con opciones generales</span>
-                        </div>
-                        <ChevronRight className="w-4 h-4 shrink-0 font-bold ml-1" />
-                      </button>
-                    )}
-                  </div>
-                )}
-              </div>
-            </motion.div>
-          );
-        })}
-      </AnimatePresence>
+            );
+          })}
+        </div>
+      ) : (
+        <AnimatePresence initial={false}>
+          {messages.map((msg, index) => (
+            <MessageItem
+              key={msg.id}
+              msg={msg}
+              index={index}
+              totalMessages={messages.length}
+              onActionButtonClick={onActionButtonClick}
+              triggerConfetti={triggerConfetti}
+              sanitizeMarkdown={sanitizeMarkdown}
+            />
+          ))}
+        </AnimatePresence>
+      )}
 
       {/* Retro Loading Indicator */}
       {isLoading && (
-        <div className="flex gap-3 max-w-lg mr-auto w-full">
+        <div className="flex gap-3 max-w-lg mr-auto w-full pt-2">
           <div className="w-8 h-8 sm:w-9 sm:h-9 bg-retroBeige border-2 border-black shadow-retro-sm flex items-center justify-center text-black">
             <Bot className="w-4 h-4" />
           </div>

@@ -4,7 +4,7 @@
 
 [![Language: English](https://img.shields.io/badge/Language-English-blue.svg)](README.md)
 [![Language: Español](https://img.shields.io/badge/Idioma-Español-green.svg)](README.es.md)
-[![Tests: 55/55 Passed](https://img.shields.io/badge/Tests-55%2F55%20Passed-brightgreen.svg)](backend/tests/)
+[![Tests: 72/72 Pasados](https://img.shields.io/badge/Tests-72%2F72%20Pasados-brightgreen.svg)](backend/tests/)
 [![Fidelidad Factual: 50/50 (100%)](https://img.shields.io/badge/Fidelidad-50%2F50%20(100%25)-brightgreen.svg)](scripts/evaluate_rag.py)
 [![Next.js 15](https://img.shields.io/badge/Frontend-Next.js%2015-black.svg)](frontend/)
 [![FastAPI](https://img.shields.io/badge/Backend-FastAPI%200.115-009688.svg)](backend/)
@@ -91,12 +91,17 @@ synapse-admissions-ai/ (NovaVice_os97)
 ┌────────────────────────────────────────────────────────────────────────┐
 │               CAPA DE EXPERIENCIA DE USUARIO (FRONTEND)               │
 │                                                                        │
-│   Next.js 15 (App Router) + TypeScript + Tailwind CSS                  │
-│   ├── Ventana Retro Macintosh OS '97 (Barra rayada + Botones retro)   │
-│   ├── Filtro Óptico CRT Anti-Glare (Scanlines + Fósforo Ámbar + Switch)│
-│   ├── Oasis Pixel-Art (8 Palmeras + 18 Nubes Bidireccionales + Gaviotas + Hierba Pixel) │
-│   ├── Renderizador Markdown GFM Seguro con Sanitización               │
-│   └── Modal de Telemetría en Tiempo Real (Costos, Tokens, Latencia)   │
+│   Next.js 15 (App Router) + React 19 + TypeScript + Tailwind CSS       │
+│   ├── Shell RSC (app/page.tsx) y Frontera de Cliente (RetroDesktop.tsx)│
+│   ├── Stores Centralizados Zustand (useChatStore, useSettingsStore...) │
+│   ├── Code Splitting Dinámico (next/dynamic, -54.3% bundle inicial)    │
+│   ├── Lista Virtualizada (@tanstack/react-virtual en >30 mensajes)     │
+│   ├── Filtro Óptico CRT Acelerado por GPU (transform: translateZ, 60fps│
+│   ├── Modo Accesible "Bypass Retro" WCAG 2.1 AAA (.a11y-mode >=7:1)    │
+│   ├── Trampa de Foco Accesible (useFocusTrap.ts) y Atajos de Teclado   │
+│   ├── Panel OSD Vintage "Monitor Controls" (Calibración en tiempo real)│
+│   ├── Oasis Pixel-Art (8 Palmeras + 18 Nubes + Gaviotas + Hierba Pixel)│
+│   └── Modal de Telemetría en Tiempo Real (Costos, Tokens, Latencia)    │
 └───────────────────────────────────┬────────────────────────────────────┘
                                     │ HTTP / JSON (:3000 -> :8000)
                                     ▼
@@ -220,23 +225,24 @@ Al iniciar, se levantarán automáticamente:
 
 ## 🧪 Pruebas Automatizadas
 
-El proyecto cuenta con una suite completa de pruebas unitarias y de integración en `pytest`:
+El proyecto cuenta con una suite completa de 72 pruebas unitarias, de integración y E2E en `pytest`:
 
 ```bash
-./venv/bin/pytest -v
+pytest backend/tests -v
 ```
 
 ```text
-============================= 27 passed in ~35s ==============================
+======================== 72 passed, 1 warning in ~88s ========================
 ```
 
-Las 27 pruebas validan:
-- Estado del servidor y detección de motor asesor.
-- Indexación y chunking con solapamiento de los 82 documentos.
-- Búsqueda híbrida (ChromaDB + BM25) y fusión RRF.
-- Escalamiento automático a humanos ante consultas fuera de alcance.
-- Filtros de seguridad ante inyecciones de prompt.
-- Funcionamiento de la máquina de estados de navegación y continuidad de menús.
-- Integración E2E tanto con el motor OpenCode como con el motor AGY Antigravity.
+Las 72 pruebas validan:
+- Estado del servidor y detección del motor de asesor (OpenCode / AGY).
+- Indexación, chunking y preservación semántica de tablas AST de los 83 documentos.
+- Búsqueda híbrida (ChromaDB + BM25) y fusión RRF adaptativa.
+- Clasificador y enrutador semántico de micro-intenciones sin secuestro de consultas abiertas.
+- Escalamiento automático a humanos ante consultas complejas o fuera de dominio.
+- Filtros de seguridad ante inyecciones de prompt y sanitización Unicode NFD.
+- Streaming SSE continuo, serialización Pydantic v2 y persistencia transaccional SQLite WAL.
+- Coexistencia fluida de aciertos de caché exacta y similitud coseno semántica.
 
 ## URL del Repositorio: https://github.com/nastex123/NovaVice_os97.git

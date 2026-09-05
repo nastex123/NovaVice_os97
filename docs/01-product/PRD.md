@@ -72,7 +72,7 @@ Human admission counselors spent excessive time repeatedly answering standard FA
 | **FR-12** | Dual Cache with File-Hash Invalidation + Semantic 0.88 pilar (vs 0.95) | P1 | `src/core/cache.py:47` `vector_store.py:167` | Implemented (Fase 2) + Planned (B20) |
 | **FR-13** | SSE Real-Time Streaming (`/api/v1/chat/stream`) | P1 | `src/api/routes.py` | Complete |
 | **FR-14** | JSON & Prometheus Telemetry (`/metrics/prometheus`) | P1 | `src/core/metrics.py` | Complete |
-| **FR-15** | Automated Pytest Test Suite (55/55 Tests Passed) | P0 | `tests/` | Complete |
+| **FR-15** | Automated Pytest Test Suite (72/72 Tests Passed) | P0 | `tests/` | Complete |
 
 ---
 
@@ -86,9 +86,9 @@ For full technical specifications, acceptance criteria, and category breakdowns,
 
 | Phase | Core Objective | Key Deliverables | Status |
 | :--- | :--- | :--- | :---: |
-| **Phase 1** | **Data Precision & RAG Retrieval Quality** | Proposals 1-7, 19, 21, 23, 43 (Adaptive RRF, AST Table Chunker, Cross-Encoder, Semantic Cache) | **Planned** |
-| **Phase 2** | **Backend Resilience & Persistence** | Proposals 11-16, 20, 22, 45, 46 (SSE Stream, HTTP Pool, Circuit Breaker, SQLite WAL, Docker) | **Planned** |
-| **Phase 3** | **Modern Frontend & Accessible Retro UI** | Proposals 25-30, 33-36 (Zustand, SSE Reader, Virtualization, WebGL CRT, WCAG AAA Mode) | **Planned** |
+| **Phase 1** | **Data Precision & RAG Retrieval Quality** | Proposals 1-7, 19, 21, 23, 43 (Adaptive RRF, AST Table Chunker, Cross-Encoder, Semantic Cache) | **Completed** |
+| **Phase 2** | **Backend Resilience & Persistence** | Proposals 11-16, 20, 22, 45, 46 (SSE Stream, HTTP Pool, Circuit Breaker, SQLite WAL, Docker) | **Completed** |
+| **Phase 3** | **Modern Frontend & Accessible Retro UI** | Proposals 25-30, 33-36 (Zustand, SSE Reader, Virtualization, WebGL CRT, WCAG AAA Mode) | **Completed** |
 | **Phase 4** | **Automated Testing & Developer Experience** | Proposals 39-44, 47-49 (RAG Evaluation Pipeline, Mutation Testing, Locust, CLI Doctor) | **Planned** |
 | **Phase 5** | **Future Horizons & Specialized Deployments** | Proposals 8-10, 17, 18, 24, 31, 32, 37, 38, 50 (Graph RAG, Web Audio, Tauri Kiosk Mode) | **Planned** |
 

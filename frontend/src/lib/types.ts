@@ -15,6 +15,7 @@ export interface ChatMessage {
   cached?: boolean;
   mode?: "rag_direct" | "opencode_advisor" | "agy_advisor" | "menu_navigation" | "escalation" | "guardrail_defense" | "clarification";
   action_buttons?: ActionButton[];
+  isStreaming?: boolean;
 }
 
 export interface TelemetryMetrics {

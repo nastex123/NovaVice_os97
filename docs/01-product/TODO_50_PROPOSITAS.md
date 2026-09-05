@@ -161,9 +161,9 @@
 - [x] **TODO-3.8 [Prop. 34 - RECOMENDADO] Modo accesible "Bypass Retro" (WCAG 2.1 AAA):**
   - [x] Añadir toggle en la barra de tareas y cabecera que desactive el filtro CRT y las fuentes pixeladas (`bypassRetroA11y`).
   - [x] Conmutar a tipografía legible del sistema (Inter / SF Pro / sans-serif) con contraste de color AAA (>= 7:1) y desactivación de animaciones continuas.
-- [ ] **TODO-3.9 [Prop. 35 - RECOMENDADO] Navegación por teclado y Focus Trap en ventanas retro:**
-  - [ ] Implementar trampa de foco en la ventana del chat (`Tab` / `Shift+Tab`).
-  - [ ] Soportar atajos rápidos (`Escape` para cerrar modales, `Alt+Enter` para enviar).
+- [x] **TODO-3.9 [Prop. 35 - RECOMENDADO] Navegación por teclado y Focus Trap en ventanas retro:**
+  - [x] Implementar trampa de foco accesible (`useFocusTrap.ts`) en modales de telemetría y sedes (`Tab` / `Shift+Tab`).
+  - [x] Soportar atajos rápidos globales y locales (`Escape` para cerrar modales, `Alt+Enter` / `Enter` para enviar consultas, `Alt+0..5`, `Alt+T`, `Alt+A`).
 - [ ] **TODO-3.10 [Prop. 36 - RECOMENDADO] Panel de control vintage "Monitor Controls":**
   - [ ] Crear diálogo estilo monitor CRT con sliders para ajustar brillo, curvatura de tubo y grosor de scanlines.
 

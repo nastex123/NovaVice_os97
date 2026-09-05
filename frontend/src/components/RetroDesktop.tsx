@@ -29,9 +29,14 @@ export const RetroDesktop: React.FC = () => {
 
   const initChatStorage = useChatStore((state) => state.initFromStorage);
   const initSettingsStorage = useSettingsStore((state) => state.initFromStorage);
+  const isMetricsOpen = useDesktopStore((state) => state.isMetricsOpen);
   const setIsMetricsOpen = useDesktopStore((state) => state.setIsMetricsOpen);
   const crtEnabled = useSettingsStore((state) => state.crtEnabled);
   const bypassRetroA11y = useSettingsStore((state) => state.bypassRetroA11y);
+  const toggleBypassRetroA11y = useSettingsStore((state) => state.toggleBypassRetroA11y);
+  const sendMessage = useChatStore((state) => state.sendMessage);
+  const sendStreamMessage = useChatStore((state) => state.sendStreamMessage);
+  const streamMode = useChatStore((state) => state.streamMode);
 
   // Initialize persistent session & hydrate from IndexedDB
   useEffect(() => {
@@ -51,6 +56,41 @@ export const RetroDesktop: React.FC = () => {
       document.body.classList.toggle("a11y-mode", bypassRetroA11y);
     }
   }, [bypassRetroA11y]);
+
+  // Global Keyboard Navigation Shortcuts (TODO-3.9)
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      // Escape closes telemetry modal if open
+      if (e.key === "Escape") {
+        if (isMetricsOpen) {
+          e.preventDefault();
+          setIsMetricsOpen(false);
+        }
+        return;
+      }
+
+      // Alt key combinations
+      if (e.altKey) {
+        if (e.key === "0") {
+          e.preventDefault();
+          resetChat();
+        } else if (["1", "2", "3", "4", "5"].includes(e.key)) {
+          e.preventDefault();
+          const dispatcher = streamMode ? sendStreamMessage : sendMessage;
+          dispatcher(e.key);
+        } else if (e.key.toLowerCase() === "t") {
+          e.preventDefault();
+          setIsMetricsOpen(!isMetricsOpen);
+        } else if (e.key.toLowerCase() === "a") {
+          e.preventDefault();
+          toggleBypassRetroA11y();
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleGlobalKeyDown);
+    return () => window.removeEventListener("keydown", handleGlobalKeyDown);
+  }, [isMetricsOpen, setIsMetricsOpen, resetChat, streamMode, sendStreamMessage, sendMessage, toggleBypassRetroA11y]);
 
   // C29: Re-engage timer at 60s of inactivity
   useEffect(() => {

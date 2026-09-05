@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { MessageSquare, Gauge, Building2, Phone, Radio, MapPin } from "lucide-react";
 import { useChatStore } from "../stores/useChatStore";
 import { useDesktopStore } from "../stores/useDesktopStore";
+import { useFocusTrap } from "../hooks/useFocusTrap";
 
 interface FooterProps {
   onReset?: () => void;
@@ -22,6 +23,11 @@ export const Footer: React.FC<FooterProps> = ({
   const resetChatStore = useChatStore((state) => state.resetChat);
   const newChatStore = useChatStore((state) => state.newChat);
   const setIsMetricsOpen = useDesktopStore((state) => state.setIsMetricsOpen);
+
+  const sedesTrapRef = useFocusTrap<HTMLDivElement>({
+    isActive: showSedesModal,
+    onEscape: () => setShowSedesModal(false),
+  });
 
   const handleReset = onReset || resetChatStore;
   const handleOpenMetrics = onOpenMetrics || (() => setIsMetricsOpen(true));
@@ -103,6 +109,7 @@ export const Footer: React.FC<FooterProps> = ({
         {showSedesModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-[1px]">
             <motion.div
+              ref={sedesTrapRef}
               initial={{ opacity: 0, scale: 0.95, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 10 }}

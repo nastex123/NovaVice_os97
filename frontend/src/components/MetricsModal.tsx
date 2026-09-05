@@ -6,6 +6,7 @@ import { Activity, TrendingUp, HelpCircle, DollarSign } from "lucide-react";
 import { TelemetryMetrics, ServerHealth } from "../lib/types";
 import { useChatStore } from "../stores/useChatStore";
 import { useDesktopStore } from "../stores/useDesktopStore";
+import { useFocusTrap } from "../hooks/useFocusTrap";
 
 interface MetricsModalProps {
   isOpen?: boolean;
@@ -29,11 +30,18 @@ export const MetricsModal: React.FC<MetricsModalProps> = ({
   const onClose = propOnClose || (() => setIsMetricsOpen(false));
   const metrics = propMetrics !== undefined ? propMetrics : storeMetrics;
   const health = propHealth !== undefined ? propHealth : storeHealth;
+
+  const trapRef = useFocusTrap<HTMLDivElement>({
+    isActive: isOpen,
+    onEscape: onClose,
+  });
+
   return (
     <AnimatePresence>
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-[1px]">
           <motion.div
+            ref={trapRef}
             initial={{ opacity: 0, scale: 0.95, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 10 }}

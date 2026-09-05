@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [2026-09-04 19:58] [Feat/Fase-3-TODO-3.9-Keyboard-Navigation-And-Focus-Trap]
+- **Navegación por Teclado, Focus Trap y Atajos Rápidos Vintage (TODO-3.9 / Prop. RECOMENDADA):**
+  - Implementado hook reusable `useFocusTrap` en `frontend/src/hooks/useFocusTrap.ts` con retención de foco cíclica (`Tab` / `Shift+Tab`), restauración automática del elemento previo activo al cerrar y captura prioritaria de la tecla `Escape`.
+  - Integrada trampa de foco en los modales de escritorio retro (`MetricsModal.tsx` y `Footer.tsx` modal de sedes).
+  - Añadido soporte de envío con `Alt+Enter` y `Enter` sin salto de línea en `frontend/src/components/ChatInput.tsx`.
+  - Registrado listener global de atajos en `frontend/src/components/RetroDesktop.tsx`:
+    - `Escape`: Cierre inmediato de modales flotantes.
+    - `Alt+0`: Retorno instantáneo al menú principal de admisiones.
+    - `Alt+1` a `Alt+5`: Navegación directa por pilares de admisión (cursos, horarios, precios, sedes, becas).
+    - `Alt+T`: Alternar visualización del modal de telemetría del sistema.
+    - `Alt+A`: Alternar modo accesible WCAG 2.1 AAA "Bypass Retro".
+  - Verificada compilación de producción limpia con `npm run build` en Next.js 15.
+
 ### [2026-09-04 19:57] [Feat/Fase-3-TODO-3.8-WCAG-AAA-Bypass-Retro-Mode]
 - **Modo Accesible "Bypass Retro" WCAG 2.1 AAA (TODO-3.8 / Prop. RECOMENDADA):**
   - Implementado toggle accesible `[A11Y: ON/OFF]` sincronizado en cabecera desktop y móvil en `frontend/src/components/Header.tsx`, vinculado al store `useSettingsStore` y persistido en `IndexedDB`.

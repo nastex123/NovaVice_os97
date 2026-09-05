@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [2026-09-04 19:52] [Feat/Fase-3-TODO-3.5-RSC-Boundary-Isolation]
+- **Optimización de Server Components (RSC) vs Client Components (TODO-3.5 / Prop. RECOMENDADA):**
+  - Refactorizado `frontend/src/app/page.tsx` para convertirse en un React Server Component (RSC) nativo de Next.js 15 libre de `'use client'`.
+  - Creado `frontend/src/components/RetroDesktop.tsx` encapsulando estrictamente las fronteras reactivas del cliente (canvas PixiJS, hidratación de IndexedDB, timers de inactividad C29 y controles de ventana).
+  - Reducido el payload JavaScript inicial y optimizada la renderización de la cáscara del escritorio retro en el servidor.
+  - Verificada compilación de producción limpia con `npm run build` en Next.js 15.
+
 ### [2026-09-04 19:50] [Fix/Backend-Tests-Harmonization-100-Percent-Green]
 - **Armonización de Suite Backend y Estabilización al 100% Verde (72/72 tests aprobados):**
   - **Corrección de Intent Router (`backend/src/core/intent_router.py`):** Integrado `PurePythonEmbeddingEngine` ajustado sobre el corpus institucional de 83 documentos y prototipos de micro-intención para evitar el secuestro erróneo de consultas libres (como `cursos para ejecutivos` o `tienen descuentos para empresas?`) manteniendo 100% de precisión en consultas coloquiales (18/18 tests).

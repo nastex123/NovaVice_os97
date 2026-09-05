@@ -11,10 +11,10 @@
 | :---: | :--- | :---: | :---: | :---: | :---: | :---: |
 | **Fase 1** | Precisión de Datos y Recuperación RAG | 11 | 11 | 0 | 0 | ✅ Completada (100%) |
 | **Fase 2** | Rendimiento Backend y Resiliencia + Complemento Anti-alucinación | 17 | 17 | 0 | 0 | ✅ Completada (100%) |
-| **Fase 3** | Frontend Moderno, UI Retro & Accesibilidad | 10 | 4 | 0 | 6 | 🚀 En Progreso (40%) |
+| **Fase 3** | Frontend Moderno, UI Retro & Accesibilidad | 10 | 5 | 0 | 5 | 🚀 En Progreso (50%) |
 | **Fase 4** | Testing Automatizado, QA & Tooling DX | 8 | 0 | 0 | 8 | ⏳ Pendiente |
 | **Fase 5** | Horizontes Futuros y Despliegues Especializados | 11 | 0 | 0 | 11 | ⏳ Pendiente |
-| **TOTAL** | **Propuestas de Mejora Técnica** | **57** | **32** | **0** | **25** | **56.1%** |
+| **TOTAL** | **Propuestas de Mejora Técnica** | **57** | **33** | **0** | **24** | **57.9%** |
 
 ---
 
@@ -150,9 +150,9 @@
   - [x] Mantener el auto-scroll hacia el fondo cuando se generen nuevos tokens en streaming.
 - [x] **TODO-3.4 [Prop. 28 - RECOMENDADO] Persistencia de sesiones en `IndexedDB`:**
   - [x] Implementar almacenamiento asíncrono con `idb-keyval` para historial de chat y preferencias del usuario.
-- [ ] **TODO-3.5 [Prop. 29 - RECOMENDADO] Optimización de Server Components (RSC) vs Client Components:**
-  - [ ] Separar la cáscara estática del escritorio retro en Server Components de Next.js 15.
-  - [ ] Mantener la directiva `'use client'` únicamente en los nodos interactivos.
+- [x] **TODO-3.5 [Prop. 29 - RECOMENDADO] Optimización de Server Components (RSC) vs Client Components:**
+  - [x] Separar la cáscara estática del escritorio retro en Server Components de Next.js 15 (`app/page.tsx`).
+  - [x] Mantener la directiva `'use client'` únicamente en los nodos interactivos (`components/RetroDesktop.tsx`).
 - [ ] **TODO-3.6 [Prop. 30 - RECOMENDADO] Code splitting dinámico con `next/dynamic`:**
   - [ ] Cargar perezosamente con `ssr: false` el modal de telemetría y el visor de tickets de escalamiento.
 - [ ] **TODO-3.7 [Prop. 33 - CRÍTICO] Filtro óptico CRT acelerado por GPU / WebGL:**

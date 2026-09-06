@@ -56,3 +56,19 @@ async def test_agy_advisor_mode_e2e():
 
     # Reset back to opencode
     settings.advisor_backend = "opencode"
+
+
+@pytest.mark.asyncio
+async def test_agy_client_standalone():
+    from src.core.agy_client import agy_advisor
+    # Check binary resolution
+    assert agy_advisor.get_binary_path() is not None
+    assert agy_advisor.is_cli_available() is True
+
+    # Standalone query
+    chunks = [{"metadata": {"source": "03_precios.md", "section": "Tarifas"}, "text": "Curso Regular: $650.000 COP"}]
+    res = await agy_advisor.query_advisor("Costo del regular", "test_agy_standalone_sess", context_chunks=chunks)
+    assert res["success"] is True
+    assert res["engine"] == "agy"
+    assert len(res["text"]) > 20
+

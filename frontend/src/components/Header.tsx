@@ -1,26 +1,43 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Sparkles, Gauge, RefreshCw, MessageSquarePlus, Globe, Sun } from "lucide-react";
+import { useChatStore } from "../stores/useChatStore";
+import { useDesktopStore } from "../stores/useDesktopStore";
+import { useSettingsStore } from "../stores/useSettingsStore";
 
 interface HeaderProps {
-  currentMenuLabel: string;
-  onReset: () => void;
-  onNewChat: () => void;
-  onOpenMetrics: () => void;
-  useOpenCodeMode?: boolean;
+  currentMenuLabel?: string;
+  onReset?: () => void;
+  onNewChat?: () => void;
+  onOpenMetrics?: () => void;
   crtEnabled?: boolean;
   onToggleCrt?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
-  currentMenuLabel,
-  onReset,
-  onNewChat,
-  onOpenMetrics,
-  crtEnabled = true,
-  onToggleCrt,
+  currentMenuLabel: propCurrentMenuLabel,
+  onReset: propOnReset,
+  onNewChat: propOnNewChat,
+  onOpenMetrics: propOnOpenMetrics,
+  crtEnabled: propCrtEnabled,
+  onToggleCrt: propOnToggleCrt,
 }) => {
+  const storeCurrentMenuLabel = useChatStore((state) => state.currentMenuLabel);
+  const resetChat = useChatStore((state) => state.resetChat);
+  const newChat = useChatStore((state) => state.newChat);
+  const setIsMetricsOpen = useDesktopStore((state) => state.setIsMetricsOpen);
+  const setIsMonitorControlsOpen = useDesktopStore((state) => state.setIsMonitorControlsOpen);
+  const storeCrtEnabled = useSettingsStore((state) => state.crtEnabled);
+  const toggleCrt = useSettingsStore((state) => state.toggleCrt);
+  const bypassRetroA11y = useSettingsStore((state) => state.bypassRetroA11y);
+  const toggleBypassRetroA11y = useSettingsStore((state) => state.toggleBypassRetroA11y);
+
+  const currentMenuLabel = propCurrentMenuLabel !== undefined ? propCurrentMenuLabel : storeCurrentMenuLabel;
+  const onReset = propOnReset || resetChat;
+  const onNewChat = propOnNewChat || newChat;
+  const onOpenMetrics = propOnOpenMetrics || (() => setIsMetricsOpen(true));
+  const crtEnabled = propCrtEnabled !== undefined ? propCrtEnabled : storeCrtEnabled;
+  const onToggleCrt = propOnToggleCrt || toggleCrt;
   const [retroTime, setRetroTime] = useState("");
 
   useEffect(() => {
@@ -55,6 +72,13 @@ export const Header: React.FC<HeaderProps> = ({
           <button onClick={onOpenMetrics} className="hover:bg-black hover:text-white px-2 py-0.5 transition-colors">
             Telemetría
           </button>
+          <button
+            onClick={() => setIsMonitorControlsOpen(true)}
+            className="hover:bg-black hover:text-white px-2 py-0.5 transition-colors"
+            title="Abrir Controles Ópticos de Monitor CRT (Alt+M)"
+          >
+            🎛️ Monitor
+          </button>
           {onToggleCrt && (
             <button
               onClick={onToggleCrt}
@@ -66,14 +90,32 @@ export const Header: React.FC<HeaderProps> = ({
               📺 CRT: {crtEnabled ? "ON" : "OFF"}
             </button>
           )}
+          <button
+            onClick={toggleBypassRetroA11y}
+            aria-pressed={bypassRetroA11y}
+            aria-label="Conmutar modo accesible WCAG 2.1 AAA"
+            className={`px-2 py-0.5 border border-black shadow-retro-sm transition-all font-mono text-[11px] ${
+              bypassRetroA11y
+                ? "bg-black text-amber-300 font-bold border-2 border-amber-300"
+                : "bg-retroBeige hover:bg-black hover:text-white"
+            }`}
+            title="Modo Accesible WCAG 2.1 AAA: Desactiva CRT y activa contraste alto y tipografía nítida"
+          >
+            ♿ A11Y: {bypassRetroA11y ? "AAA ON" : "OFF"}
+          </button>
         </nav>
       </div>
 
-      {/* Center: Active Topic Breadcrumb */}
+      {/* Center: Active Topic Breadcrumb (C27 clickeable) */}
       <div className="hidden lg:flex items-center space-x-2 text-[11px] font-mono text-slate-700">
-        <span className="px-2 py-0.5 bg-retroCard border border-black shadow-retro-sm text-black">
-          {currentMenuLabel || "Nova Idiomas - Admisiones"}
-        </span>
+        <button
+          onClick={onReset}
+          title="Clic para regresar al Menú Principal (0)"
+          className="px-2 py-0.5 bg-retroCard hover:bg-black hover:text-white border border-black shadow-retro-sm text-black transition-colors cursor-pointer flex items-center gap-1.5"
+        >
+          <span className="text-vicePink font-bold">📁</span>
+          <span>{currentMenuLabel || "Nova Idiomas - Admisiones"}</span>
+        </button>
       </div>
 
       {/* Right: Retro Live Clock & Status */}
@@ -88,6 +130,16 @@ export const Header: React.FC<HeaderProps> = ({
             CRT: {crtEnabled ? "ON" : "OFF"}
           </button>
         )}
+        <button
+          onClick={toggleBypassRetroA11y}
+          aria-pressed={bypassRetroA11y}
+          aria-label="Conmutar modo accesible WCAG 2.1 AAA"
+          className={`md:hidden px-1.5 py-0.5 border border-black shadow-retro-sm text-[10px] font-bold ${
+            bypassRetroA11y ? "bg-black text-amber-300 border-amber-300" : "bg-white text-black"
+          }`}
+        >
+          A11Y: {bypassRetroA11y ? "ON" : "OFF"}
+        </button>
         <div className="flex items-center space-x-1 text-vicePink-dark font-bold bg-retroCard px-2 py-0.5 border border-black shadow-retro-sm">
           <span className="w-2 h-2 rounded-full bg-viceCyan animate-ping inline-block" />
           <span className="hidden sm:inline">VICE CITY •</span>

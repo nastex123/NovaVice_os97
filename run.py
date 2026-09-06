@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 Nova Idiomas Colombia - Admissions Assistant RAG
 Unified Multi-Process Program Supervisor & Launcher
@@ -32,6 +31,7 @@ VENV_DIR = BASE_DIR / "venv"
 
 IS_WINDOWS = platform.system() == "Windows"
 processes = []
+_shutdown_requested = False
 
 
 def is_port_in_use(port: int) -> bool:
@@ -133,6 +133,7 @@ def start_opencode():
         cmd = "opencode serve --port 4096" if IS_WINDOWS else [opencode_bin, "serve", "--port", "4096"]
         p = subprocess.Popen(
             cmd,
+            stdin=subprocess.DEVNULL,
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
             shell=IS_WINDOWS,
@@ -154,6 +155,7 @@ def start_fastapi(py_exec: str) -> subprocess.Popen:
     p = subprocess.Popen(
         cmd,
         cwd=str(BACKEND_DIR),
+        stdin=subprocess.DEVNULL,
         shell=IS_WINDOWS,
         env=os.environ,
         preexec_fn=None if IS_WINDOWS else os.setsid
@@ -196,6 +198,7 @@ def start_nextjs():
         p = subprocess.Popen(
             cmd,
             cwd=str(FRONTEND_DIR),
+            stdin=subprocess.DEVNULL,
             shell=IS_WINDOWS,
             env=os.environ,
             preexec_fn=None if IS_WINDOWS else os.setsid
@@ -225,27 +228,81 @@ def wait_and_open_browser(has_nextjs: bool):
 
 
 def cleanup_processes(signum=None, frame=None):
-    """Clean up all child processes and process groups on exit."""
+    """Clean up all child processes and process groups on exit, then release terminal."""
+    global _shutdown_requested
+    # Prevent re-entrant double cleanup from signal + KeyboardInterrupt
+    if _shutdown_requested and signum is None:
+        # Call originated from except KeyboardInterrupt after signal already handled
+        return
+    if _shutdown_requested and signum is not None:
+        # Second Ctrl+C -> force kill
+        print("\n[!] Forzando salida inmediata...")
+        for _, p in processes:
+            try:
+                if p.poll() is None:
+                    if IS_WINDOWS:
+                        subprocess.call(["taskkill", "/F", "/T", "/PID", str(p.pid)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                    else:
+                        try:
+                            os.killpg(os.getpgid(p.pid), signal.SIGKILL)
+                        except Exception:
+                            p.kill()
+            except Exception:
+                pass
+        # Hard exit without flushing handlers that could block
+        os._exit(1)
+
+    _shutdown_requested = True
     print("\n\n🛑 Deteniendo todos los servicios de Nova Idiomas...")
+
     for name, p in processes:
         try:
+            if p.poll() is not None:
+                continue
             print(f"  [-] Cerrando {name} (PID {p.pid})...")
             if IS_WINDOWS:
                 subprocess.call(["taskkill", "/F", "/T", "/PID", str(p.pid)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                try:
+                    p.wait(timeout=3)
+                except subprocess.TimeoutExpired:
+                    p.kill()
             else:
                 try:
-                    os.killpg(os.getpgid(p.pid), signal.SIGTERM)
+                    pgid = os.getpgid(p.pid)
+                    os.killpg(pgid, signal.SIGTERM)
                 except Exception:
-                    p.terminate()
-                p.wait(timeout=2)
+                    try:
+                        p.terminate()
+                    except Exception:
+                        pass
+                try:
+                    p.wait(timeout=3)
+                except subprocess.TimeoutExpired:
+                    try:
+                        pgid = os.getpgid(p.pid)
+                        os.killpg(pgid, signal.SIGKILL)
+                    except Exception:
+                        p.kill()
+                    try:
+                        p.wait(timeout=1)
+                    except Exception:
+                        pass
         except Exception:
-            try:
-                if not IS_WINDOWS:
-                    os.killpg(os.getpgid(p.pid), signal.SIGKILL)
-                else:
-                    p.kill()
-            except Exception:
-                pass
+            pass
+
+    print("  ✔ Todos los servicios detenidos. Terminal liberada. ¡Hasta luego!")
+    # Ensure stdout is flushed and terminal echo is restored
+    try:
+        sys.stdout.flush()
+        sys.stderr.flush()
+    except Exception:
+        pass
+    # Exit supervisor process explicitly so shell prompt returns
+    # Use sys.exit for clean finally blocks, fallback to os._exit if blocked
+    try:
+        sys.exit(0)
+    except SystemExit:
+        os._exit(0)
 
 import argparse
 
@@ -296,7 +353,7 @@ def main():
     print("  🎓 NOVA IDIOMAS COLOMBIA - LANZADOR SUPERVISADO DEL SISTEMA (RAG 2.6)")
     print("=" * 70)
 
-    # Register exit signal handlers
+    # Register exit signal handlers - handler will exit process via sys.exit/os._exit
     signal.signal(signal.SIGINT, cleanup_processes)
     signal.signal(signal.SIGTERM, cleanup_processes)
 
@@ -323,11 +380,21 @@ def main():
     wait_and_open_browser(has_nextjs)
 
     try:
-        # Keep supervisor alive
-        while True:
-            time.sleep(1)
+        # Keep supervisor alive until shutdown is requested via Ctrl+C / SIGTERM
+        while not _shutdown_requested:
+            time.sleep(0.5)
     except KeyboardInterrupt:
+        # Fallback if signal handler was not triggered (e.g., Windows)
         cleanup_processes()
+    finally:
+        # If loop exited without shutdown flag (unexpected), ensure cleanup
+        if not _shutdown_requested:
+            cleanup_processes()
+        # Final explicit exit to return prompt to shell
+        try:
+            sys.exit(0)
+        except SystemExit:
+            os._exit(0)
 
 
 if __name__ == "__main__":

@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 Nova Idiomas Colombia - Admissions Assistant RAG
 Multiplatform Automated Installer (Windows / Linux / macOS)
@@ -127,10 +126,10 @@ def setup_python_environment(os_type):
         print("[✓] Python dependencies installed successfully.")
 
     # Ingest Knowledge Base
-    print("\n--- Indexing RAG Knowledge Base (82 Official Documents) ---")
+    print("\n--- Indexing RAG Knowledge Base (83 Official Documents) ---")
     try:
         subprocess.check_call([str(py_bin), "-m", "src.rag.ingestion"], cwd=str(BACKEND_DIR))
-        print("[✓] 82 Official Documents indexed in ChromaDB and BM25.")
+        print("[✓] 83 Official Documents indexed in ChromaDB and BM25.")
     except Exception as e:
         print(f"[!] Error indexing documents: {e}")
 

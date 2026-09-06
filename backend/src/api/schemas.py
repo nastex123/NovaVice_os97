@@ -1,16 +1,31 @@
 from typing import List, Optional, Dict, Any
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 
-class ChatRequest(BaseModel):
+class BaseSchema(BaseModel):
+    model_config = ConfigDict(
+        populate_by_name=True,
+        extra="ignore",
+        arbitrary_types_allowed=True
+    )
+
+    def to_json(self) -> str:
+        """Native Pydantic V2 JSON serialization."""
+        return self.model_dump_json()
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Native Pydantic V2 dictionary dump."""
+        return self.model_dump()
+
+
+class ChatRequest(BaseSchema):
     query: str = Field(..., min_length=1, max_length=1000, description="Applicant question or menu selection.")
     user_id: Optional[str] = Field("guest_applicant", description="Identifier of the applicant.")
     session_id: Optional[str] = Field("default_session", description="Session identifier for conversation memory.")
     use_opencode_mode: Optional[bool] = Field(False, description="Whether to route inquiry to OpenCode Advisor reasoning loop.")
-    use_hermes_mode: Optional[bool] = Field(False, description="Legacy alias for OpenCode mode.")
 
 
-class ChatResponse(BaseModel):
+class ChatResponse(BaseSchema):
     status: str = Field(..., description="'success', 'escalated', or 'refused'")
     response: str = Field(..., description="The answer text grounded in official documents or escalation message.")
     source_documents: List[str] = Field(default_factory=list, description="Citations of official documents used.")
@@ -23,7 +38,7 @@ class ChatResponse(BaseModel):
     action_buttons: Optional[List[Dict[str, str]]] = Field(default_factory=list, description="Interactive quick action buttons.")
 
 
-class HealthResponse(BaseModel):
+class HealthResponse(BaseSchema):
     status: str
     version: str
     documents_indexed: int
@@ -32,7 +47,7 @@ class HealthResponse(BaseModel):
     advisor_engine: Optional[str] = "opencode"
 
 
-class MetricsResponse(BaseModel):
+class MetricsResponse(BaseSchema):
     uptime_seconds: float
     total_queries_processed: int
     cache_hits: int
@@ -44,27 +59,13 @@ class MetricsResponse(BaseModel):
     total_tokens: int
     estimated_cost_usd: float
     average_latency_ms: float
+    average_faithfulness_score: Optional[float] = 1.0
 
 
-class WebhookRequest(BaseModel):
+class WebhookRequest(BaseSchema):
     event: Optional[str] = Field("inquiry", description="Tipo de evento recibido por el webhook.")
     query: str = Field(..., description="Consulta o mensaje del usuario.")
     user_id: Optional[str] = Field("webhook_user", description="Identificador del usuario.")
-    channel: Optional[str] = Field("api_webhook", description="Canal de origen (ej. 'telegram', 'email', 'crm').")
+    channel: Optional[str] = Field("api_webhook", description="Canal de origen (ej. 'email', 'crm').")
     metadata: Optional[Dict[str, Any]] = Field(default_factory=dict, description="Metadatos adicionales del remitente.")
-
-
-class QuoteRequest(BaseModel):
-    idioma: str = Field(..., description="Idioma a cotizar (inglés, francés, alemán, italiano, portugués, español).")
-    modalidad: Optional[str] = Field("regular", description="'regular', 'intensivo', 'sabatino', 'privadas_10h', 'paquete_b1', 'bilinguismo_total'")
-    tipo_pago: Optional[str] = Field("contado", description="'contado' (10% descuento) o 'cuotas' (3 cuotas sin interés)")
-    es_familiar: Optional[bool] = Field(False, description="True si aplica descuento familiar del 15%.")
-
-
-class PlacementTestRequest(BaseModel):
-    nombre_completo: str = Field(..., description="Nombre completo del estudiante.")
-    correo: str = Field(..., description="Correo electrónico.")
-    telefono: str = Field(..., description="Número de WhatsApp o teléfono.")
-    idioma: str = Field(..., description="Idioma a clasificar.")
-    modalidad_examen: Optional[str] = Field("virtual", description="'virtual', 'presencial_bogota', 'presencial_medellin', 'presencial_cali'")
 

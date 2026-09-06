@@ -1,13 +1,15 @@
-# 🌴 Nova Idiomas Colombia — Asistente de Admisiones "Nova OS '97" (v2.6.0)
+# 🌴 Nova Idiomas Colombia — Asistente de Admisiones "Nova OS '97" (v2.7.0)
 
 <div align="center">
 
 [![Language: English](https://img.shields.io/badge/Language-English-blue.svg)](README.md)
 [![Language: Español](https://img.shields.io/badge/Idioma-Español-green.svg)](README.es.md)
-[![Tests: 25/25 Passed](https://img.shields.io/badge/Tests-25%2F25%20Passed-brightgreen.svg)](backend/tests/)
+[![Tests: 72/72 Pasados](https://img.shields.io/badge/Tests-72%2F72%20Pasados-brightgreen.svg)](backend/tests/)
+[![Fidelidad Factual: 50/50 (100%)](https://img.shields.io/badge/Fidelidad-50%2F50%20(100%25)-brightgreen.svg)](scripts/evaluate_rag.py)
 [![Next.js 15](https://img.shields.io/badge/Frontend-Next.js%2015-black.svg)](frontend/)
 [![FastAPI](https://img.shields.io/badge/Backend-FastAPI%200.115-009688.svg)](backend/)
 [![ChromaDB](https://img.shields.io/badge/Vector%20Store-ChromaDB-orange.svg)](backend/data/chroma_db/)
+[![Docker Compose](https://img.shields.io/badge/Docker-Multi--stage%20Listo-blue.svg)](docker-compose.yml)
 
 </div>
 
@@ -19,6 +21,7 @@
 ## 📚 Documentación Técnica y Exposición
 
 * 📖 **[Guía Maestra de Explicación Técnica y Presentación](EXPLICACION_TECNICA.md):** Documento exhaustivo paso a paso para exponer, enseñar y defender la arquitectura técnica del proyecto ante evaluadores y equipos de desarrollo (*[Versión en Inglés](TECHNICAL_EXPLANATION.md)*).
+* 🚀 **[Roadmap Estratégico de 50 Propuestas Técnicas](docs/01-product/ROADMAP_50_PROPOSITAS.md):** Plan maestro de evolución técnica en 5 fases secuenciales (RAG, Backend, Frontend, Testing y DevOps) sin tocar seguridad.
 * 📜 **[Registro de Cambios (Changelog)](CHANGELOG.md):** Historial cronológico estricto de todas las modificaciones y versiones bajo zona horaria `America/Bogota`.
 * 🏛️ **[Directorio de Arquitectura y Decisiones (docs/)](docs/):** Documentación técnica organizada por PRD, Arquitectura, Ingeniería, IA y ADRs.
 
@@ -40,12 +43,11 @@ La academia de idiomas **Nova Idiomas Colombia** cuenta con sedes en **Bogotá (
 ```text
 synapse-admissions-ai/ (NovaVice_os97)
 ├── backend/                               # 🐍 Backend FastAPI & Inteligencia Artificial
-│   ├── data/                              # Base de conocimiento (82 docs) y tickets
+│   ├── data/                              # Base de conocimiento (83 docs, incl. 12_04 becas→descuentos) y tickets
 │   │   ├── documents/                     # Archivos Markdown con programas y reglamentos
 │   │   └── escalations.json               # Registro de tickets humanos
-│   ├── hermes_skills/                     # Skills y herramientas para agentes
 │   ├── src/                               # Código fuente backend (API, bot, core, rag)
-│   ├── tests/                             # Suite completa de 25 pruebas en Pytest
+│   ├── tests/                             # Suite completa de 27 pruebas en Pytest (incl. caché semántica)
 │   └── requirements.txt                   # Dependencias Python
 │
 ├── frontend/                              # 🌐 Aplicación Web Retro Next.js 15
@@ -55,12 +57,12 @@ synapse-admissions-ai/ (NovaVice_os97)
 │
 ├── docs/                                  # 📚 Documentación Técnica y Arquitectónica
 │   ├── assets/                            # Recursos y PDFs (Enunciado original)
-│   ├── 01-product/                        # PRD
-│   ├── 03-architecture/                   # Arquitectura y propuestas
-│   ├── 04-engineering/                    # Guías de ingeniería y diseño técnico
-│   ├── 05-ai/                             # Integraciones de IA y OpenCode/AGY
-│   ├── 08-operations/                     # Optimización y rendimiento
-│   └── 09-decisions/                      # Architecture Decision Records (ADRs)
+│   ├── 01-product/                        # PRD (becas=descuentos)
+│   ├── 03-architecture/                   # Arquitectura y propuestas (threshold 0.35 pilar)
+│   ├── 04-engineering/                    # Guías de ingeniería y diseño técnico (centroid, NFD)
+│   ├── 05-ai/                             # Integraciones de IA y OpenCode/AGY (heavy only)
+│   ├── 08-operations/                     # Optimización, SESSION_HANDOFF y TODO becas
+│   └── 09-decisions/                      # Architecture Decision Records (ADR-001 a ADR-008)
 │
 ├── scripts/                               # 🛠️ Scripts auxiliares e instaladores
 │   ├── installer.py                       # Lógica de instalación multiplataforma
@@ -75,7 +77,6 @@ synapse-admissions-ai/ (NovaVice_os97)
 ├── EXPLICACION_TECNICA.md                 # Guía técnica maestra en español
 ├── README.md                              # Documentación principal en inglés
 ├── README.es.md                           # Documentación en español
-├── Dockerfile                             # Contenedor Docker de producción
 ├── pytest.ini                             # Configuración centralizada de Pytest
 ├── run.py                                 # Supervisor raíz multi-proceso con selector
 ├── start.sh                               # Lanzador rápido Linux/macOS
@@ -90,12 +91,17 @@ synapse-admissions-ai/ (NovaVice_os97)
 ┌────────────────────────────────────────────────────────────────────────┐
 │               CAPA DE EXPERIENCIA DE USUARIO (FRONTEND)               │
 │                                                                        │
-│   Next.js 15 (App Router) + TypeScript + Tailwind CSS                  │
-│   ├── Ventana Retro Macintosh OS '97 (Barra rayada + Botones retro)   │
-│   ├── Filtro Óptico CRT Anti-Glare (Scanlines + Fósforo Ámbar + Switch)│
-│   ├── Oasis Pixel-Art (8 Palmeras + 18 Nubes Bidireccionales + Gaviotas + Hierba Pixel) │
-│   ├── Renderizador Markdown GFM Seguro con Sanitización               │
-│   └── Modal de Telemetría en Tiempo Real (Costos, Tokens, Latencia)   │
+│   Next.js 15 (App Router) + React 19 + TypeScript + Tailwind CSS       │
+│   ├── Shell RSC (app/page.tsx) y Frontera de Cliente (RetroDesktop.tsx)│
+│   ├── Stores Centralizados Zustand (useChatStore, useSettingsStore...) │
+│   ├── Code Splitting Dinámico (next/dynamic, -54.3% bundle inicial)    │
+│   ├── Lista Virtualizada (@tanstack/react-virtual en >30 mensajes)     │
+│   ├── Filtro Óptico CRT Acelerado por GPU (transform: translateZ, 60fps│
+│   ├── Modo Accesible "Bypass Retro" WCAG 2.1 AAA (.a11y-mode >=7:1)    │
+│   ├── Trampa de Foco Accesible (useFocusTrap.ts) y Atajos de Teclado   │
+│   ├── Panel OSD Vintage "Monitor Controls" (Calibración en tiempo real)│
+│   ├── Oasis Pixel-Art (8 Palmeras + 18 Nubes + Gaviotas + Hierba Pixel)│
+│   └── Modal de Telemetría en Tiempo Real (Costos, Tokens, Latencia)    │
 └───────────────────────────────────┬────────────────────────────────────┘
                                     │ HTTP / JSON (:3000 -> :8000)
                                     ▼
@@ -219,23 +225,24 @@ Al iniciar, se levantarán automáticamente:
 
 ## 🧪 Pruebas Automatizadas
 
-El proyecto cuenta con una suite completa de pruebas unitarias y de integración en `pytest`:
+El proyecto cuenta con una suite completa de 72 pruebas unitarias, de integración y E2E en `pytest`:
 
 ```bash
-./venv/bin/pytest -v
+pytest backend/tests -v
 ```
 
 ```text
-============================= 25 passed in 14.07s ==============================
+======================== 72 passed, 1 warning in ~88s ========================
 ```
 
-Las 25 pruebas validan:
-- Estado del servidor y detección de motor asesor.
-- Indexación y chunking con solapamiento de los 82 documentos.
-- Búsqueda híbrida (ChromaDB + BM25) y fusión RRF.
-- Escalamiento automático a humanos ante consultas fuera de alcance.
-- Filtros de seguridad ante inyecciones de prompt.
-- Funcionamiento de la máquina de estados de navegación y continuidad de menús.
-- Integración E2E tanto con el motor OpenCode como con el motor AGY Antigravity.
+Las 72 pruebas validan:
+- Estado del servidor y detección del motor de asesor (OpenCode / AGY).
+- Indexación, chunking y preservación semántica de tablas AST de los 83 documentos.
+- Búsqueda híbrida (ChromaDB + BM25) y fusión RRF adaptativa.
+- Clasificador y enrutador semántico de micro-intenciones sin secuestro de consultas abiertas.
+- Escalamiento automático a humanos ante consultas complejas o fuera de dominio.
+- Filtros de seguridad ante inyecciones de prompt y sanitización Unicode NFD.
+- Streaming SSE continuo, serialización Pydantic v2 y persistencia transaccional SQLite WAL.
+- Coexistencia fluida de aciertos de caché exacta y similitud coseno semántica.
 
 ## URL del Repositorio: https://github.com/nastex123/NovaVice_os97.git

@@ -2,7 +2,10 @@
 
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageSquare, Gauge, Building2, Phone, Radio, MapPin, X } from "lucide-react";
+import { MessageSquare, Gauge, Building2, Phone, Radio, MapPin, Sliders } from "lucide-react";
+import { useChatStore } from "../stores/useChatStore";
+import { useDesktopStore } from "../stores/useDesktopStore";
+import { useFocusTrap } from "../hooks/useFocusTrap";
 
 interface FooterProps {
   onReset?: () => void;
@@ -16,11 +19,20 @@ export const Footer: React.FC<FooterProps> = ({
   onNewChat,
 }) => {
   const [showSedesModal, setShowSedesModal] = useState(false);
-  const [isPlayingRadio, setIsPlayingRadio] = useState(false);
 
-  const toggleRadio = () => {
-    setIsPlayingRadio(!isPlayingRadio);
-  };
+  const resetChatStore = useChatStore((state) => state.resetChat);
+  const newChatStore = useChatStore((state) => state.newChat);
+  const setIsMetricsOpen = useDesktopStore((state) => state.setIsMetricsOpen);
+  const setIsMonitorControlsOpen = useDesktopStore((state) => state.setIsMonitorControlsOpen);
+
+  const sedesTrapRef = useFocusTrap<HTMLDivElement>({
+    isActive: showSedesModal,
+    onEscape: () => setShowSedesModal(false),
+  });
+
+  const handleReset = onReset || resetChatStore;
+  const handleOpenMetrics = onOpenMetrics || (() => setIsMetricsOpen(true));
+  const handleNewChat = onNewChat || newChatStore;
 
   return (
     <>
@@ -29,7 +41,7 @@ export const Footer: React.FC<FooterProps> = ({
         <div className="bg-retroBeige border-2 border-black shadow-retro-lg rounded-t-2xl px-4 sm:px-6 py-2 flex items-center gap-3 sm:gap-6">
           {/* Tile 1: Chatbot / Reset */}
           <button
-            onClick={onReset}
+            onClick={handleReset}
             className="flex flex-col items-center gap-1 group active:translate-y-0.5 transition-transform"
             title="Ir al Menú Principal (0)"
           >
@@ -41,7 +53,7 @@ export const Footer: React.FC<FooterProps> = ({
 
           {/* Tile 2: Telemetría */}
           <button
-            onClick={onOpenMetrics}
+            onClick={handleOpenMetrics}
             className="flex flex-col items-center gap-1 group active:translate-y-0.5 transition-transform"
             title="Abrir Telemetría del Sistema"
           >
@@ -49,6 +61,18 @@ export const Footer: React.FC<FooterProps> = ({
               <Gauge className="w-4 h-4 text-black group-hover:text-viceCyan-dark" />
             </div>
             <span className="text-[10px] font-bold text-black uppercase tracking-wider font-mono">Telemetría</span>
+          </button>
+
+          {/* Tile 2.5: Monitor CRT Controls */}
+          <button
+            onClick={() => setIsMonitorControlsOpen(true)}
+            className="flex flex-col items-center gap-1 group active:translate-y-0.5 transition-transform"
+            title="Calibrar Filtro de Monitor CRT (Alt+M)"
+          >
+            <div className="w-8 h-8 sm:w-9 sm:h-9 bg-white group-hover:bg-vicePink-pastel border-2 border-black shadow-retro-sm flex items-center justify-center transition-colors">
+              <Sliders className="w-4 h-4 text-black group-hover:text-vicePink-dark" />
+            </div>
+            <span className="text-[10px] font-bold text-black uppercase tracking-wider font-mono">Monitor</span>
           </button>
 
           {/* Tile 3: Sedes Oficiales */}
@@ -78,18 +102,18 @@ export const Footer: React.FC<FooterProps> = ({
           </a>
 
           {/* Tile 5: Poolsuite FM / Synthwave */}
-          <button
-            onClick={toggleRadio}
+          <a
+            href="https://poolsuite.net/"
+            target="_blank"
+            rel="noreferrer"
             className="hidden sm:flex flex-col items-center gap-1 group active:translate-y-0.5 transition-transform"
-            title="Poolsuite FM 80s Synthwave"
+            title="Poolsuite FM 80s Inspiration"
           >
-            <div className={`w-8 h-8 sm:w-9 sm:h-9 ${isPlayingRadio ? "bg-vicePink text-white" : "bg-white"} group-hover:bg-vicePink border-2 border-black shadow-retro-sm flex items-center justify-center transition-colors`}>
-              <Radio className={`w-4 h-4 ${isPlayingRadio ? "text-white animate-pulse" : "text-black group-hover:text-white"}`} />
+            <div className="w-8 h-8 sm:w-9 sm:h-9 bg-white group-hover:bg-vicePink border-2 border-black shadow-retro-sm flex items-center justify-center transition-colors">
+              <Radio className="w-4 h-4 text-black group-hover:text-white" />
             </div>
-            <span className="text-[10px] font-bold text-black uppercase tracking-wider font-mono">
-              {isPlayingRadio ? "FM • ON" : "Radio FM"}
-            </span>
-          </button>
+            <span className="text-[10px] font-bold text-black uppercase tracking-wider font-mono">Radio FM</span>
+          </a>
         </div>
       </footer>
 
@@ -98,6 +122,7 @@ export const Footer: React.FC<FooterProps> = ({
         {showSedesModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-[1px]">
             <motion.div
+              ref={sedesTrapRef}
               initial={{ opacity: 0, scale: 0.95, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 10 }}

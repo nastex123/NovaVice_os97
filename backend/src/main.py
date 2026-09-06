@@ -1,9 +1,7 @@
 from contextlib import asynccontextmanager
-from pathlib import Path
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse, PlainTextResponse
+from fastapi.responses import PlainTextResponse
 from src.config import settings
 from src.api.routes import api_router
 from src.rag.ingestion import ingestion_pipeline
@@ -17,28 +15,18 @@ async def lifespan(app: FastAPI):
         ingestion_pipeline.run()
     except Exception as e:
         print(f"Startup ingestion note: {e}")
-
-    # Start Telegram background polling if configured
-    try:
-        from src.bot.telegram_bot import telegram_service
-        if settings.telegram_enabled and telegram_service.is_configured:
-            telegram_service.start_polling()
-    except Exception as e:
-        print(f"Telegram start note: {e}")
-
     yield
-
-    # Shutdown hooks
+    # Clean shutdown of pooled clients
     try:
-        from src.bot.telegram_bot import telegram_service
-        telegram_service.stop_polling()
+        from src.core.opencode_client import opencode_advisor
+        await opencode_advisor.close()
     except Exception:
         pass
 
 
 app = FastAPI(
     title=settings.app_name,
-    version="2.5.0",
+    version="2.6.0",
     description="Asistente Inteligente de Atención al Cliente con RAG y Automatización en Python para Academia de Idiomas.",
     lifespan=lifespan
 )
@@ -51,6 +39,31 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+import uuid
+from starlette.requests import Request
+
+
+@app.middleware("http")
+async def correlation_id_middleware(request: Request, call_next):
+    correlation_id = request.headers.get("X-Request-ID") or str(uuid.uuid4())
+    # Attach correlation id to request state for access in logs
+    request.state.correlation_id = correlation_id
+    response = await call_next(request)
+    response.headers["X-Request-ID"] = correlation_id
+    return response
+
+# Root API Status Endpoint
+@app.get("/")
+async def root_status():
+    return {
+        "app": settings.app_name,
+        "version": "2.6.0",
+        "status": "online",
+        "docs_url": "/docs",
+        "metrics_url": "/metrics/prometheus",
+        "frontend_url": "http://localhost:3000"
+    }
+
 # Standard root Prometheus endpoint
 @app.get("/metrics/prometheus", response_class=PlainTextResponse)
 async def root_prometheus_metrics():
@@ -58,12 +71,3 @@ async def root_prometheus_metrics():
 
 # Mount REST API
 app.include_router(api_router, prefix="/api/v1")
-
-# Mount Static Web Chat UI
-static_dir = Path(__file__).resolve().parent / "static"
-if static_dir.exists():
-    app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
-
-    @app.get("/")
-    async def serve_index():
-        return FileResponse(static_dir / "index.html")

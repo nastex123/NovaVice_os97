@@ -1,93 +1,135 @@
-# OpenCode Integration & Human Admissions Advisor Specification (Version 2.6.0)
+# OpenCode & AGY Dual Admissions Advisor Architecture (v2.6.0)
 
 ## 1. Executive Summary
-This document establishes the architecture, runtime configuration, and integration specification for **OpenCode** within the Nova Tech University Admissions Assistant ecosystem. 
+This document specifies the decoupled dual reasoning architecture for the Admissions Advisor within the Nova Idiomas Colombia assistant ecosystem.
 
-**OpenCode serves as our primary autonomous AI reasoning agent and live Human Admissions Advisor**, operating via a decoupled Python intermediary bridge:
-$$\text{Web Chat Client (Next.js 15)} \longrightarrow \text{FastAPI Backend (Python)} \longrightarrow \text{OpenCode Reasoning Server (Port 4096)}$$
+The system features two independent, high-reasoning engines sharing a unified prompt engineering core:
+$$\text{Web Client (Next.js 15)} \longrightarrow \text{FastAPI Gateway} \longrightarrow \begin{cases} \text{OpenCodeAdvisorClient} \longrightarrow \text{OpenCode Daemon (:4096)} \\ \text{AGYAdvisorClient} \longrightarrow \text{Google Antigravity CLI (agy.exe)} \end{cases}$$
 
----
-
-## 2. Why OpenCode Replaced Hermes Agent
-
-1. **Native Local Daemon & Direct REST API:** OpenCode runs as a headless server (`opencode serve --port 4096`) exposing clean session and message endpoints without third-party wrapper dependencies.
-2. **Superior Conversational Reasoning & Empathy:** OpenCode executes multi-step Chain-of-Thought reasoning, generating comprehensive, warm, and structured answers in Spanish with native Markdown.
-3. **Session Thread Isolation:** Dedicated conversation threads (`POST /session`) per applicant turn prevent thread congestion and deadlocks.
-4. **Rich Multi-Provider Ecosystem:** Supports local models and high-capacity cloud models (`opencode/muse-spark-1.2-contributor-free`, `deepseek-v4-flash-free`, `minimax-m2.7`, `qwen3.6-plus`).
+Both engines import from [`backend/src/core/advisor_common.py`](../../backend/src/core/advisor_common.py), guaranteeing identical analytical depth, structured Markdown table output, COP pricing accuracy, and institutional compliance.
 
 ---
 
-## 3. Architecture & Integration Flow
+## 2. Decoupled Physical Architecture
+
+```text
+backend/src/core/
+├── advisor_common.py    <-- Shared Prompt Construction, Directives, and Grounded Fallback
+├── opencode_client.py   <-- OpenCode HTTP REST Client (:4096)
+└── agy_client.py        <-- Google Antigravity (AGY) OS Subprocess CLI Client (agy.exe)
+```
+
+### 2.1 Shared Reasoning Core (`advisor_common.py`)
+Centralizes the prompt engineering rules for both engines:
+1. **Markdown Tables:** Generates complete Markdown comparison tables whenever requested by the user.
+2. **Pricing in $ COP:** Enforces Colombian Peso notation, 10% early discount, and 3-installment interest-free financing (40%/30%/30%).
+3. **Official Schedules:** Injects verified time slots (Early Birds 6:00-8:00 AM, Daytime, Night After Work 6:30-8:30 PM, Weekends).
+4. **Context Deduplication:** Eliminates repeated lines across multi-document chunk retrieval.
+5. **Multi-Pillar Fallback:** Structured contingency generator if both external LLM engines are unreachable.
+
+---
+
+## 3. Integration & Sequence Flow
 
 ```mermaid
 sequenceDiagram
     autonumber
     actor U as 👤 Postulante (Next.js 15 UI)
-    participant P as 🐍 FastAPI Backend (src/core/opencode_client.py)
+    participant P as 🐍 FastAPI Backend (engine.py)
     participant R as 📚 Hybrid RAG (ChromaDB + BM25)
-    participant O as 🤖 OpenCode Server (http://127.0.0.1:4096)
+    participant Router as 🔀 Advisor Router (settings.advisor_backend)
+    participant O as 🤖 OpenCode Client (opencode_client.py)
+    participant A as 🚀 AGY Client (agy_client.py)
+    participant C as 🧩 advisor_common.py
 
-    U->>P: POST /api/v1/chat (Option 9 o use_opencode_mode=true)
+    U->>P: POST /api/v1/chat (advisor_mode activo)
     P->>R: Recupera fragmentos oficiales relevantes (Top 5 chunks)
-    R-->>P: Chunks con citas oficiales (Becas, Laboratorios, Aranceles, etc.)
-    P->>O: POST /session (Crea hilo aislado para el postulante)
-    O-->>P: Retorna opencode_sid (ses_XXXXX)
-    P->>O: POST /session/:id/message (Prompt de Razonamiento Profundo + 5 Chunks)
-    O-->>P: Respuesta estructurada en Markdown con títulos y viñetas
-    P-->>U: Respuesta con badge [Asesor de Admisiones OpenCode] y botones de acción
+    R-->>P: 5 chunks con metadatos de precios, horarios y sedes
+    
+    P->>Router: Inspecciona motor activo ("opencode" o "agy")
+    
+    alt motor == "opencode"
+        Router->>O: query_advisor(query, session_id, chunks)
+        O->>C: build_advisor_reasoning_prompt(query, chunks)
+        C-->>O: Prompt unificado con directivas de tablas
+        O->>O: POST http://127.0.0.1:4096/session/{sid}/message
+        O-->>P: Respuesta Markdown estructurada con tablas
+    else motor == "agy"
+        Router->>A: query_advisor(query, session_id, chunks)
+        A->>C: build_advisor_reasoning_prompt(query, chunks)
+        C-->>A: Mismo Prompt unificado con directivas de tablas
+        A->>A: Subproceso: agy.exe --disable-slash-commands -p prompt
+        A-->>P: Respuesta Markdown idénticamente estructurada
+    end
+    
+    P-->>U: JSON Response con badge del asesor y botones de navegación
 ```
 
 ---
 
-## 4. OpenCode REST API Contract
+## 4. OpenCode REST API Contract (`opencode_client.py`)
 
 ### 4.1 Create Session: `POST /session`
+- **Endpoint:** `http://127.0.0.1:4096/session`
 - **Request Body:**
   ```json
   {
-    "title": "Asesor Admisiones - web_session_abc123"
+    "title": "Admissions - sess_web_abc123"
   }
   ```
 - **Response Body:**
   ```json
   {
     "id": "ses_faa46aa12ffeH8U8lGx1N325E4",
-    "title": "Asesor Admisiones - web_session_abc123",
+    "title": "Admissions - sess_web_abc123",
     "status": "active"
   }
   ```
 
-### 4.2 Send Message & Execute Reasoning: `POST /session/:id/message`
+### 4.2 Send Message: `POST /session/:id/message`
+- **Endpoint:** `http://127.0.0.1:4096/session/{id}/message`
 - **Request Body:**
   ```json
   {
     "parts": [
       {
         "type": "text",
-        "text": "Eres el Asesor Académico Senior de Admisiones en Nova Tech University...\n\nCONTEXTO OFICIAL VERIFICADO:\n[5 Documentos completos]...\n\nCONSULTA DEL POSTULANTE:\nhay becas disponibles?"
+        "text": "Eres el Asesor Académico Senior de Nova Idiomas...\n\nCONTEXTO OFICIAL VERIFICADO:...\n\nCONSULTA: hazme una tabla con los horarios y precios"
       }
     ]
-  }
-  ```
-- **Response Body:**
-  ```json
-  {
-    "parts": [
-      {
-        "type": "text",
-        "text": "¡Hola! ¡Qué alegría que estés considerando a Nova Tech University!...\n\n### 1. Beca Turing a la Excelencia Académica\n• Cobertura: Hasta el 50% de descuento en aranceles..."
-      }
-    ],
-    "status": "completed"
   }
   ```
 
 ---
 
-## 5. Benchmarks & Performance Verification
+## 5. AGY Antigravity CLI Execution Contract (`agy_client.py`)
 
-| Componente | Configuración | Latencia Promedio | Calidad de Respuesta |
+### 5.1 Subprocess Command Line Execution
+- **Binary Resolution:** Automatically located via `shutil.which("agy")`, `shutil.which("agy.exe")`, or `%LOCALAPPDATA%\agy\bin\agy.exe`.
+- **Command Invocation:**
+  ```bash
+  agy.exe --disable-slash-commands -p "<reasoning_prompt>"
+  ```
+- **Asynchronous Python Invocation:**
+  ```python
+  proc = await asyncio.create_subprocess_exec(
+      agy_bin,
+      "--disable-slash-commands",
+      "-p",
+      prompt,
+      stdout=asyncio.subprocess.PIPE,
+      stderr=asyncio.subprocess.PIPE
+  )
+  stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=35.0)
+  ```
+
+---
+
+## 6. Performance Benchmarks
+
+| Componente / Motor | Modo de Ejecución | Latencia Típica | Calidad & Capacidad de Tablas |
 | :--- | :--- | :---: | :--- |
-| **OpenCode Advisor** | Deep Reasoning (5 Chunks, 45s window) | 8.0s - 12.0s | **100% Certera, Multi-Beca, Markdown GFM** |
-| **RAG Directo Híbrido** | ChromaDB + BM25 + Gemini API | 1.2s - 2.1s | Concisa y Rápida |
-| **Caché Hit** | Invalidation-Aware Exact Match | <25ms | Instantánea |
+| **OpenCode Advisor** | HTTP REST Daemon (:4096) | 7.5s – 11.0s | **Excelente:** Tablas Markdown completas, soporte multi-turno |
+| **AGY Antigravity** | Subproceso CLI (`agy.exe -p`) | 6.8s – 9.5s | **Excelente:** Tablas Markdown idénticas, alta fidelidad institucional |
+| **Grounded Fallback** | Síntesis Estructurada Python | <5ms | **Alta:** Formato limpio multi-pilar sin repetición de líneas |
+| **Navegación FSM (1..4, 0)** | Determinista sin LLM | <4ms | Respuestas exactas con 0 consumo de tokens |

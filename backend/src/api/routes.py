@@ -1,5 +1,4 @@
 import json
-from pathlib import Path
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse, PlainTextResponse
 from src.api.schemas import (
@@ -7,14 +6,11 @@ from src.api.schemas import (
     ChatResponse,
     HealthResponse,
     MetricsResponse,
-    WebhookRequest,
-    QuoteRequest,
-    PlacementTestRequest
+    WebhookRequest
 )
 from src.rag.engine import rag_engine
 from src.rag.vector_store import vector_store
 from src.core.metrics import metrics_bus
-from src.core.tools import calcular_cotizacion_curso, agendar_examen_clasificacion, AVAILABLE_TOOLS
 from src.config import settings
 
 api_router = APIRouter()
@@ -38,7 +34,7 @@ async def chat_endpoint(request: ChatRequest):
         query=request.query,
         user_id=request.user_id or "guest_applicant",
         session_id=request.session_id or "default_session",
-        use_opencode_mode=bool(request.use_opencode_mode or request.use_hermes_mode)
+        use_opencode_mode=bool(request.use_opencode_mode)
     )
     return ChatResponse(**result)
 
@@ -49,7 +45,8 @@ async def chat_stream_endpoint(request: ChatRequest):
         rag_engine.stream_query(
             query=request.query,
             user_id=request.user_id or "guest_applicant",
-            session_id=request.session_id or "default_session"
+            session_id=request.session_id or "default_session",
+            use_opencode_mode=bool(request.use_opencode_mode)
         ),
         media_type="text/event-stream"
     )
@@ -69,51 +66,6 @@ async def inbound_webhook_endpoint(request: WebhookRequest):
     return ChatResponse(**result)
 
 
-@api_router.post("/telegram/webhook")
-async def telegram_webhook_endpoint(update: dict):
-    """
-    Webhook para recibir eventos directamente desde la API de Telegram.
-    """
-    from src.bot.telegram_bot import telegram_service
-    res = await telegram_service.handle_update(update)
-    return {"ok": True, "result": res}
-
-
-@api_router.post("/tools/quote")
-async def quote_course_tool(req: QuoteRequest):
-    """
-    Skill / Herramienta personalizada para calcular cotizaciones de cursos en COP.
-    """
-    return calcular_cotizacion_curso(
-        idioma=req.idioma,
-        modalidad=req.modalidad,
-        tipo_pago=req.tipo_pago,
-        es_familiar=req.es_familiar
-    )
-
-
-@api_router.post("/tools/placement-test")
-async def schedule_placement_test_tool(req: PlacementTestRequest):
-    """
-    Skill / Herramienta personalizada para agendar exámenes de clasificación gratuitos.
-    """
-    return agendar_examen_clasificacion(
-        nombre_completo=req.nombre_completo,
-        correo=req.correo,
-        telefono=req.telefono,
-        idioma=req.idioma,
-        modalidad_examen=req.modalidad_examen
-    )
-
-
-@api_router.get("/tools")
-async def list_available_tools():
-    """
-    Lista las especificaciones OpenAPI / MCP de las herramientas disponibles para agentes.
-    """
-    return {"tools": AVAILABLE_TOOLS}
-
-
 @api_router.get("/metrics", response_model=MetricsResponse)
 async def get_metrics():
     return MetricsResponse(**metrics_bus.to_dict())
@@ -126,6 +78,14 @@ async def get_prometheus_metrics():
 
 @api_router.get("/escalations")
 async def get_escalation_tickets():
+    try:
+        from src.data.sqlite_tickets import sqlite_ticket_repo
+        tickets = sqlite_ticket_repo.get_all_tickets(limit=200)
+        if tickets:
+            return tickets
+    except Exception:
+        pass
+
     log_file = settings.escalations_log_path
     if not log_file.exists():
         return []
@@ -134,4 +94,13 @@ async def get_escalation_tickets():
             return json.load(f)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Could not read escalations: {str(e)}")
+
+
+@api_router.post("/admin/vacuum")
+async def trigger_database_vacuum():
+    """
+    Triggers routine compression and vacuum on ChromaDB underlying store.
+    """
+    res = vector_store.vacuum()
+    return res
 

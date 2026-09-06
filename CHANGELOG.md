@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [2026-09-06 00:42] [Chore/Git-Ignore-And-Untrack-SENA]
+- **Exclusión y Desvinculación de la Carpeta SENA del Repositorio Git:**
+  - Desvinculada la totalidad del directorio `SENA/` del seguimiento de Git mediante `git rm -r --cached SENA/`, manteniendo íntegros y seguros todos los archivos locales en disco (`.docx`, `.pdf`, `.xlsx`, `.html`, `.png`, `.md`).
+  - Añadida la regla `SENA/` a `.gitignore` para prevenir su inclusión o rastreo en futuros commits y ramas.
+  - Eliminado el directorio `SENA/` del árbol remoto en GitHub para mantener el repositorio limpio y enfocado exclusivamente en el código fuente de producción de Nova OS '97.
+
 ### [2026-09-05 23:05] [Docs/SENA-UI-Screenshots-Generated-And-Embedded]
 - **Generación de Mockups HTML y Capturas de Pantalla Retro UI para Formatos SENA:**
   - **Mockups HTML Modulares:** Desarrollados 4 prototipos HTML con estética retro "Windows/Mac '97" y paleta oscuro-obsidiana en `SENA/html_mockups/`:

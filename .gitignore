@@ -51,3 +51,7 @@ desktop.ini
 # Office Lock files
 .~lock.*#
 ~$*
+
+# SENA Evidences
+SENA/
+

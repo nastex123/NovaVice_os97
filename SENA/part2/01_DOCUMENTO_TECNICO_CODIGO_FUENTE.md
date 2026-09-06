@@ -68,7 +68,36 @@ NovaVice_os97/
 
 ---
 
-## 2. Tecnologías y Frameworks Utilizados
+## 2. Diagrama de Flujo del Sistema y Ciclo de Vida de Ejecución
+
+El siguiente diagrama modela el ciclo de vida completo de procesamiento de una interacción dentro del backend de Nova OS '97:
+
+```mermaid
+flowchart TD
+    A([Inicio: Consulta de Usuario en Web]) --> B[FastAPI: POST /api/v1/chat]
+    B --> C{PreFlightGuardrails: ¿Prompt Injection?}
+    C -- Sí --> D[Status: refused / Advertencia de Seguridad]
+    C -- No --> E{GuidedNavigation: ¿Pilar 1..4 o sinónimo?}
+    E -- Sí --> F[Respuesta Determinística en Sub-10ms]
+    E -- No --> G{Caché Doble Capa: ¿Hit SHA-256 o Coseno >= 0.88?}
+    G -- Sí --> H[Respuesta Instantánea en Sub-30ms]
+    G -- No --> I[HybridRetriever: ChromaDB Densa + PureBM25 Léxica]
+    I --> J[Fusión RRF k=60 + Intent Coverage Boost]
+    J --> K{¿Score Relevancia >= Umbral 0.35?}
+    K -- Sí --> L[Síntesis Contextual Fundamentada LLM]
+    L --> M[Almacenar en Caché Doble Capa]
+    M --> N([Retorno de Respuesta con Citas Oficiales])
+    K -- No --> O[Fase 1: Confirmación de Escalamiento Humano]
+    O --> P{¿Aspirante acepta?}
+    P -- Sí --> Q[Fase 2: Generar Ticket ESC-YYYYMMDD-XXXX]
+    Q --> R[Persistir en escalations.json y Notificar Asesor]
+    R --> S([Entrega de Número de Caso al Aspirante])
+    P -- No --> T([Retorno a Menú Principal])
+```
+
+---
+
+## 3. Tecnologías y Frameworks Utilizados
 
 | Componente | Tecnología | Versión | Rol en el Sistema |
 | :--- | :--- | :---: | :--- |

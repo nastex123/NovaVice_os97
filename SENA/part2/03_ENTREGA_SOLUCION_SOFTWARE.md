@@ -136,6 +136,22 @@ El servidor de FastAPI expone una interfaz REST interactiva accesible localmente
 
 Siguiendo la decisión de arquitectura **ADR-006**, el sistema implementa un modelo de despliegue bare-metal / VPS de alto rendimiento mediante el supervisor multi-proceso [`run.py`](file:///c:/Users/Usuario/Documents/GitHub/NovaVice_os97/run.py), eliminando la sobrecarga de virtualización y dependencias obligatorias de Docker:
 
+```mermaid
+flowchart TD
+    User["👤 Usuario / Evaluador"] --> Launcher["Lanzador: start.bat / start.sh"]
+    Launcher --> Supervisor["Supervisor de Procesos: run.py"]
+    
+    subgraph Orquestacion["Orquestación de Procesos Concurrentes"]
+        Supervisor -->|Puerto 4096| P1["OpenCode Daemon (opencode serve)"]
+        Supervisor -->|Puerto 8000| P2["FastAPI Backend (uvicorn src.main:app)"]
+        Supervisor -->|Puerto 3000| P3["Next.js Frontend (npm run dev)"]
+    end
+
+    Supervisor --> Health["Chequeo de Salud (/health)"]
+    Health --> Browser["Apertura Automática del Navegador (http://localhost:3000)"]
+    Supervisor --> Shutdown["Manejo SIGINT (Ctrl+C): Cierre Limpio de Procesos"]
+```
+
 ```text
                                 [Usuario / Evaluador]
                                           │

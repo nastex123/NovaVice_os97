@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Nova OS '97 - Pantalla Principal</title>
+<style>
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+    background: #08090e;
+    color: #e2e8f0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    padding: 24px;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-image: 
+        radial-gradient(circle at 15% 15%, rgba(0, 240, 255, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 85% 85%, rgba(255, 0, 127, 0.08) 0%, transparent 40%);
+}
+.window {
+    width: 1000px;
+    background: #111422;
+    border: 2px solid #2e3456;
+    border-radius: 8px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.8), 0 0 25px rgba(0, 240, 255, 0.15);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+.titlebar {
+    background: linear-gradient(90deg, #18203c 0%, #2b1055 50%, #4a0e4e 100%);
+    padding: 10px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #00f0ff;
+}
+.titlebar-title {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: #00f0ff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.window-controls {
+    display: flex;
+    gap: 6px;
+}
+.btn-win {
+    width: 22px;
+    height: 22px;
+    background: #1e2540;
+    border: 1px solid #404b7c;
+    border-radius: 3px;
+    color: #cbd5e1;
+    font-size: 11px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.btn-close { background: #991b1b; border-color: #ef4444; color: white; }
+.menubar {
+    background: #161b2e;
+    padding: 6px 16px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: #94a3b8;
+    border-bottom: 1px solid #232a48;
+}
+.menu-items { display: flex; gap: 16px; font-weight: 600; }
+.menu-items span { cursor: pointer; }
+.menu-items span.active { color: #00f0ff; }
+.content-area {
+    padding: 18px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    background: #0d101d;
+}
+.badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+.badge-cyan { background: rgba(0, 240, 255, 0.15); color: #00f0ff; border: 1px solid #00f0ff; }
+.badge-pink { background: rgba(255, 0, 127, 0.15); color: #ff007f; border: 1px solid #ff007f; }
+.badge-green { background: rgba(34, 197, 94, 0.15); color: #22c55e; border: 1px solid #22c55e; }
+.badge-amber { background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid #f59e0b; }
+.statusbar {
+    background: #0f1322;
+    padding: 6px 16px;
+    font-size: 11px;
+    color: #64748b;
+    display: flex;
+    justify-content: space-between;
+    border-top: 1px solid #1e2540;
+}
+
+.chat-box {
+    background: #090b14;
+    border: 1px solid #232a48;
+    border-radius: 6px;
+    padding: 14px;
+    height: 380px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow-y: auto;
+}
+.msg {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-width: 85%;
+}
+.msg-bot { align-self: flex-start; }
+.msg-user { align-self: flex-end; text-align: right; }
+.msg-sender { font-size: 11px; font-weight: 700; color: #64748b; }
+.bubble {
+    padding: 12px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    line-height: 1.5;
+}
+.bubble-bot {
+    background: #14192b;
+    border-left: 3px solid #00f0ff;
+    color: #cbd5e1;
+}
+.bubble-user {
+    background: #2b1338;
+    border-right: 3px solid #ff007f;
+    color: #f1f5f9;
+}
+.pillars-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 8px;
+}
+.pillar-card {
+    background: #0d1222;
+    border: 1px solid #242e50;
+    padding: 8px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+}
+.pillar-card b { color: #00f0ff; }
+.actions-bar {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.action-btn {
+    background: #171d33;
+    border: 1px solid #313c66;
+    color: #e2e8f0;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.action-btn:hover { border-color: #00f0ff; color: #00f0ff; }
+.input-group {
+    display: flex;
+    gap: 8px;
+}
+.text-input {
+    flex: 1;
+    background: #0a0c16;
+    border: 1px solid #2f3960;
+    padding: 10px 14px;
+    border-radius: 4px;
+    color: white;
+    font-family: monospace;
+    font-size: 13px;
+}
+.send-btn {
+    background: #00f0ff;
+    color: #050811;
+    border: none;
+    padding: 0 20px;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+}
+</style>
+</head>
+<body>
+<div class="window">
+    <div class="titlebar">
+        <div class="titlebar-title">🌴 NOVA IDIOMAS COLOMBIA — ADMISSIONS OS '97 (v2.6.0)</div>
+        <div class="window-controls">
+            <div class="btn-win">—</div>
+            <div class="btn-win">口</div>
+            <div class="btn-win btn-close">X</div>
+        </div>
+    </div>
+    <div class="menubar">
+        <div class="menu-items">
+            <span class="active">[ARCHIVO]</span>
+            <span>[EDITAR]</span>
+            <span>[OFERTA 2026]</span>
+            <span>[MÉTRICAS]</span>
+            <span>[AYUDA]</span>
+        </div>
+        <div>🕒 10:45 AM | BOGOTÁ D.C.</div>
+    </div>
+    <div class="content-area">
+        <div style="background: rgba(0,240,255,0.06); border: 1px solid rgba(0,240,255,0.2); padding: 8px 12px; border-radius: 4px; font-size: 12px; color: #38bdf8;">
+            📢 <b>PORTAL DE ATENCIÓN:</b> Sedes Bogotá (Chicó, Chapinero), Medellín (Poblado, Laureles), Cali y Sede Virtual. Matrículas 2026 abiertas.
+        </div>
+        <div class="chat-box">
+            <div class="msg msg-bot">
+                <span class="msg-sender">🏛️ SISTEMA NOVA OS • 10:45:02</span>
+                <div class="bubble bubble-bot">
+                    ¡Bienvenido al Portal Oficial de Admisiones de <b>Nova Idiomas Colombia</b>! Selecciona una opción para consultar información oficial:
+                    <div class="pillars-grid">
+                        <div class="pillar-card"><b>1️⃣ Cursos & Idiomas:</b> Inglés, Francés, Alemán y Portugués.</div>
+                        <div class="pillar-card"><b>2️⃣ Horarios & Franjas:</b> Madrugadores, Diurnos y Nocturnos.</div>
+                        <div class="pillar-card"><b>3️⃣ Precios & Descuentos:</b> Tarifas COP y convenios Cajas.</div>
+                        <div class="pillar-card"><b>4️⃣ Sedes & Contacto:</b> Campus físicos y Virtual Sincrónico.</div>
+                    </div>
+                </div>
+            </div>
+            <div class="msg msg-user">
+                <span class="msg-sender">👤 ASPIRANTE • 10:45:30</span>
+                <div class="bubble bubble-user">
+                    ¿Cuáles son los precios del curso intensivo de inglés y qué descuentos aplican?
+                </div>
+            </div>
+            <div class="msg msg-bot">
+                <span class="msg-sender">🤖 ASISTENTE RAG • 10:45:31 • <span style="color:#00f0ff;">Latencia: 22ms</span> • [Caché Semántica 0.94]</span>
+                <div class="bubble bubble-bot">
+                    <b>📚 PROGRAMA DE INGLÉS INTENSIVO (10 horas/semana):</b><br>
+                    • Tarifa Plena Oficial: <b>$650.000 COP</b> mensuales por ciclo académico.<br><br>
+                    <b>🏷️ DESCUENTOS INSTITUCIONALES VIGENTES (Resolución 12_04):</b><br>
+                    • <b>10% Pronto Pago:</b> Pago de contado por ciclo ($585.000 COP netos).<br>
+                    • <b>15% Cajas de Compensación:</b> Convenio Compensar, Colsubsidio y Comfama ($552.500 COP netos).<br>
+                    • <b>Financiación:</b> 3 cuotas mensuales sin interés mediante PSE, Bancolombia o Nequi.<br>
+                    <small style="color:#94a3b8;">📌 Fuentes verificadas: <i>03_precios_ingles.md</i> y <i>12_04_becas_descuentos.md</i></small>
+                </div>
+            </div>
+        </div>
+        <div class="actions-bar">
+            <button class="action-btn">1. Cursos</button>
+            <button class="action-btn">2. Horarios</button>
+            <button class="action-btn">3. Precios</button>
+            <button class="action-btn">4. Sedes</button>
+            <button class="action-btn" style="border-color:#ff007f; color:#ff007f;">🎯 Agendar Test</button>
+            <button class="action-btn" style="border-color:#f59e0b; color:#f59e0b;">👨‍💼 Asesor Humano</button>
+        </div>
+        <div class="input-group">
+            <input type="text" class="text-input" value="Quiero agendar mi examen de clasificación placement test..." readonly>
+            <button class="send-btn">ENVIAR</button>
+        </div>
+    </div>
+    <div class="statusbar">
+        <div>Estado: <span style="color:#22c55e;">● Conectado</span> (FastAPI :8000 | Inferencia RAG :4096)</div>
+        <div>[CRT SCANLINES: <b style="color:#00f0ff;">ACTIVO</b>]</div>
+    </div>
+</div>
+</body>
+</html>

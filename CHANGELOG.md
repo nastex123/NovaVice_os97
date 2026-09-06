@@ -7,6 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [2026-09-05 23:05] [Docs/SENA-UI-Screenshots-Generated-And-Embedded]
+- **Generación de Mockups HTML y Capturas de Pantalla Retro UI para Formatos SENA:**
+  - **Mockups HTML Modulares:** Desarrollados 4 prototipos HTML con estética retro "Windows/Mac '97" y paleta oscuro-obsidiana en `SENA/html_mockups/`:
+    - `01_pantalla_principal.html`: Terminal interactiva CRT con diálogo RAG, menú de 4 pilares y barra de estado.
+    - `02_gestion_proyectos.html`: Catálogo de oferta académica y simulador interactivo de matrícula con descuentos en COP.
+    - `03_gestion_tareas.html`: Bandeja de gestión de tickets de admisiones (`ESC-YYYYMMDD-XXXX`), transcripción conversacional y métricas.
+    - `04_formulario_creacion_edicion.html`: Formularios validados de agendamiento de Placement Test y radicación de escalamiento humano.
+  - **Capturas PNG de Alta Resolución en `SENA/img/`:** Capturadas 4 imágenes PNG optimizadas a 1120x740 mediante motor Chromium headless:
+    - `ss_pantalla_principal.png` (128 KB)
+    - `ss_gestion_proyectos.png` (136 KB)
+    - `ss_gestion_tareas.png` (143 KB)
+    - `ss_formulario_creacion_edicion.png` (140 KB)
+  - **Incrustación en Formatos Oficiales Word (`.docx`):**
+    - **Norma 220501095:** Incrustadas en Fila 11 (Pantalla principal), Fila 12 (Gestión de proyectos), Fila 13 (Gestión de tareas) y Fila 14 (Formularios de creación/edición), totalizando 11 imágenes de alta definición en la Tabla de Evidencias.
+    - **Norma 220501096:** Incrustada en Fila 10 (Capturas de pantalla del sistema), totalizando 4 imágenes en la Tabla de Evidencias.
+    - Generados y validados los documentos entregables `_ Carranza Rangel - Brandon Jose.docx` y las plantillas base.
+  - **Inalterabilidad de Archivo Excel:** Respetada estrictamente la directriz de omitir e inalterar `CONOCIMIENTOS ESENCIALES - NORMA 220501095 - 220501096.xlsx`.
+
+### [2026-09-05 22:12] [Docs/SENA-Diagrams-Rendered-To-Images-And-Embedded]
+- **Renderizado e Incrustación de Diagramas UML y Arquitectura en Formatos Word SENA:**
+  - **Definición en Markdown (`.md`):** Actualizados y estandarizados en sintaxis Mermaid nativa los diagramas en `SENA/part1/01_DOCUMENTO_DISENO_SOFTWARE.md` (Arquitectura Multicapa), `02_DIAGRAMAS_UML.md` (Casos de Uso, Clases, Secuencia RAG, Secuencia Escalamiento, Actividades), `04_MODELO_BASE_DATOS.md` (ERD), `SENA/part2/01_DOCUMENTO_TECNICO_CODIGO_FUENTE.md` (Flujo del Sistema) y `03_ENTREGA_SOLUCION_SOFTWARE.md` (Orquestación Multi-Proceso).
+  - **Generación de Imágenes PNG de Alta Resolución:** Creado script `render_all_diagrams.py` y renderizados 9 diagramas a imágenes PNG en `SENA/img/` (`diagrama_casos_uso.png`, `diagrama_clases.png`, `diagrama_secuencia_rag.png`, `diagrama_secuencia_escalamiento.png`, `diagrama_actividades.png`, `diagrama_erd_bd.png`, `diagrama_arquitectura.png`, `diagrama_flujo_sistema.png`, `diagrama_despliegue_procesos.png`).
+  - **Incrustación Celda por Celda en Word (`.docx`):** Incrustadas 7 imágenes en `FORMATO DE PRODUCTO_NORMA 220501095` y 3 imágenes en `FORMATO DE PRODUCTO_NORMA 220501096` (tanto en plantillas originales como en copias formateadas con el nombre del candidato), ajustadas al ancho de columna (5.0-5.1 pulgadas) y acompañadas de pie de figura centrado y justificación técnica.
+  - Verificada la omisión absoluta e inalterabilidad del archivo Excel institucional.
+
+### [2026-09-05 22:05] [Docs/SENA-Word-Evidences-Populated]
+- **Diligenciamiento Integral de Formatos Oficiales Word SENA (Normas 220501095 y 220501096):**
+  - Procesadas las especificaciones de la `GUIA PARA PRESENTAR EVIDENCIA DE PRODUCTO (1).pdf` y la arquitectura técnica de NovaVice_os97 para completar celda por celda los formatos institucionales Word en `SENA/`.
+  - Diligenciado `FORMATO DE PRODUCTO_NORMA 220501095 _ Apellidos - Nombres.docx` (y su copia radicable `_ Carranza Rangel - Brandon Jose.docx`) con datos del candidato Brandon Jose Carranza Rangel (C.C. 1007892884), fecha límite 06/09/2026 y secciones de Diseño: Introducción, Requisitos (RF/RNF), Arquitectura N-Capas, Módulos, Justificación técnica, Diagramas UML (casos de uso, clases, secuencias, actividad), Prototipos UI (Terminal retro CRT, catálogo y simulador de becas/descuentos, bandeja de tickets, formularios placement test y escalamiento) y Modelo de Base de Datos relacional en 3FN.
+  - Diligenciado `FORMATO DE PRODUCTO_NORMA 220501096 _ Apellidos - Nombres.docx` (y su copia radicable `_ Carranza Rangel - Brandon Jose.docx`) cubriendo: Estructura monorepo, Descripción de carpetas/módulos, Flujo del sistema, Fragmentos de código fuente comentados (PureBM25, HybridRetriever RRF, PreFlightGuardrails, GuidedNavigationEngine), Tecnologías usadas, Requisitos de sistema, Pasos de instalación/ejecución con run.py/start.bat, Funcionalidades, Capturas/vistas, Repositorio Git, Código fuente completo, Base de datos relacional/vectorial y Pruebas automatizadas (27/27 en Pytest).
+  - Cumplida de forma estricta la directriz de omisión absoluta del archivo Excel `CONOCIMIENTOS ESENCIALES...xlsx`.
+
 ### [2026-09-05 13:15] [Docs/Full-Documentation-Synchronization-Phase-3]
 - **Sincronización Exhaustiva de Documentación Técnica y Guías Maestras (Fase 3 & Suite 72/72 Tests):**
   - **`README.md` & `README.es.md`:** Actualizados los badges de pruebas a 72/72 tests aprobados en Pytest (100% verde), actualizado el diagrama de la capa de presentación incorporando la arquitectura Next.js 15 RSC + Client Boundary, stores de Zustand, virtualización `@tanstack/react-virtual`, filtro CRT acelerado por GPU a 60 FPS, modo accesible WCAG 2.1 AAA, focus trap y panel vintage de control OSD.

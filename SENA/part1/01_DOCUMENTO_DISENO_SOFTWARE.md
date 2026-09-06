@@ -119,6 +119,58 @@ graph TD
 
 El sistema implementa una arquitectura multicapa desacoplada orientada a microservicios y Clean Architecture:
 
+```mermaid
+flowchart TD
+    subgraph C1["1. Capa de Presentación (UI)"]
+        UI1["Next.js 15 App Router + TypeScript"]
+        UI2["PixiJS WebGL (GPU Particles)"]
+        UI3["Terminal Retro CRT conmutable"]
+    end
+
+    subgraph C2["2. Capa API Gateway & REST"]
+        API1["FastAPI Asíncrono (:8000)"]
+        API2["Validación I/O Pydantic v2"]
+        API3["Endpoints: /chat, /stream, /health, /metrics"]
+    end
+
+    subgraph C3["3. Capa de Seguridad & Guardrails"]
+        G1["PreFlightGuardrails (Regex Anti-Injection)"]
+        G2["Sanitización Unicode NFD y Longitud"]
+    end
+
+    subgraph C4["4. Navegación Determinística"]
+        NAV1["GuidedNavigationEngine (4 Pilares / 24 Hojas)"]
+        NAV2["Corrección Levenshtein <= 2"]
+    end
+
+    subgraph C5["5. Capa de Caché de Doble Capa"]
+        CACHE1["Nivel 1: Exacta SHA-256 (O(1) < 20ms)"]
+        CACHE2["Nivel 2: Semántica Coseno (>= 0.88)"]
+        CACHE3["Invalidation-Aware Auto-Purge"]
+    end
+
+    subgraph C6["6. Motor de Recuperación Híbrido"]
+        RAG1["ChromaDB (Embeddings all-MiniLM-L6-v2)"]
+        RAG2["PureBM25 (Lematización en Español)"]
+        RAG3["Fusión Reciprocal Rank Fusion (k=60)"]
+    end
+
+    subgraph C7["7. Síntesis y Escalamiento Humano"]
+        EVAL{"¿Score >= Umbral 0.35 / 0.50?"}
+        LLM["Síntesis Fundamentada (LLM / OpenCode)"]
+        ESC["Escalamiento Humano en 2 Fases (ESC-XXXX)"]
+    end
+
+    C1 -->|HTTP / JSON /api/v1/*| C2
+    C2 --> C3
+    C3 -->|Consulta Segura| C4
+    C4 -->|Consulta Abierta| C5
+    C5 -->|Cache Miss| C6
+    C6 --> EVAL
+    EVAL -- Sí --> LLM
+    EVAL -- No --> ESC
+```
+
 ```text
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                          1. CAPA DE PRESENTACIÓN (UI)                       │

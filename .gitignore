@@ -47,3 +47,7 @@ desktop.ini
 *.swo
 .vscode/
 .idea/
+
+# Office Lock files
+.~lock.*#
+~$*

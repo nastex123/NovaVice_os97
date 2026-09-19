@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [2026-09-19 19:00] [Feat/GSAP-Hover-Appearance]
+- **Hover en botones y aparicion de mensajes con GSAP:**
+  - Nuevo `hooks/useGsapHoverGroup.ts` con hover/press delegado a botones.
+  - `ChatContainer.tsx`: timeline de aparicion (escala + stagger de acciones) y hover en lista.
+  - `ChatInput.tsx`, `Header.tsx`, `Footer.tsx`: hover GSAP en botones.
+  - `tsc --noEmit` limpio salvo error preexistente `@playwright/test`.
+
+### [2026-09-19 18:40] [Feat/GSAP-Full-Chatbot-UI]
+- **Migracion completa de animaciones a GSAP (chatbot + UI):**
+  - Nuevo `hooks/useGsapModal.ts` para entradas de modales con cleanup.
+  - `ChatContainer.tsx`: MessageItem memoizado con entrance GSAP solo ultimo mensaje, sin AnimatePresence.
+  - `Footer.tsx`, `MetricsModal.tsx`, `MonitorControlsModal.tsx`: modales con GSAP, sin framer-motion.
+  - `RetroDesktop.tsx`: entrada de ventana principal con timeline GSAP.
+  - `tsc --noEmit` limpio salvo error preexistente `@playwright/test`.
+
+### [2026-09-19 18:20] [Feat/Navbar-GSAP-Definitivo]
+- **Navbar principal migrado a diseno propuesto conservando botones originales:**
+  - Reescrito `frontend/src/components/Header.tsx` completo: mismos botones (Nuevo Chat, Menu, Telemetria, Monitor, CRT, A11Y, breadcrumb, reloj, ONLINE).
+  - Fuente unica de acciones, menu hamburguesa movil con `aria-expanded` y cierre `Escape`, entrada GSAP, reloj 30s con `Intl`, reduced-motion.
+
+### [2026-09-19 18:00] [Feat/Propuestas-GSAP-Navbar-Lab]
+- **Ruta `/propuestas` con comparativas motion vs GSAP:**
+  - Instalada dependencia `gsap@3.15.0`, creados `lib/motion.ts` y `hooks/useGsapReveal.ts`.
+  - Nuevo `PropuestasNavbar.tsx` con fuente unica de acciones y menu movil accesible.
+  - Pagina `app/propuestas/page.tsx` comparando navbar legacy, boxes motion/GSAP y tabla.
+  - `tsc --noEmit` limpio salvo error preexistente en `playwright.config.ts` (falta `@playwright/test`).
+
 ### [2026-09-19 12:35] [Feat/Fase-5-Horizontes-11-11]
 - **Fase 5 Horizontes Futuros completada (11/11, total 57/57 al 100%):**
   - TODO-5.1 `backend/src/rag/hyde.py`, 5.2 `embedding_fallback.py`, 5.3 `cert_graph.py` DAG A1-C2.

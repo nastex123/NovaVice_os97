@@ -88,12 +88,17 @@ export const PixiParticleBackground: React.FC = () => {
     if (appRef.current) return;
 
     const container = pixiContainerRef.current;
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const isMobile = window.innerWidth < 640;
+    if (reducedMotion) return;
+    const containerWidth = container.clientWidth || window.innerWidth;
+    const containerHeight = container.clientHeight || window.innerHeight;
     const app = new PIXI.Application({
-      width: window.innerWidth,
-      height: window.innerHeight,
+      width: containerWidth,
+      height: containerHeight,
       backgroundAlpha: 0,
-      antialias: true,
-      resolution: window.devicePixelRatio || 1,
+      antialias: false,
+      resolution: Math.min(window.devicePixelRatio || 1, 1.5),
       autoDensity: true,
     });
     // Style canvas to fill container
@@ -131,8 +136,9 @@ export const PixiParticleBackground: React.FC = () => {
       spore: 0xfaf6ee,
     };
 
+    const scale = isMobile ? 0.4 : 1;
     // Create fireflies (golden, magnetic to cursor)
-    for (let i = 0; i < 18; i++) {
+    for (let i = 0; i < Math.round(18 * scale); i++) {
       const g = new PIXI.Graphics();
       g.beginFill(colors.gold, 0.85);
       g.drawCircle(0, 0, 2.2 + Math.random() * 1.5);
@@ -154,7 +160,7 @@ export const PixiParticleBackground: React.FC = () => {
     }
 
     // Create dew spheres (emerald, slow drift)
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < Math.round(10 * scale); i++) {
       const g = new PIXI.Graphics();
       g.beginFill(colors.emerald, 0.7);
       g.drawCircle(0, 0, 1.8 + Math.random() * 1.2);
@@ -175,7 +181,7 @@ export const PixiParticleBackground: React.FC = () => {
     }
 
     // Create ascending spores (white, upward)
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < Math.round(8 * scale); i++) {
       const g = new PIXI.Graphics();
       g.beginFill(colors.spore, 0.6);
       g.drawCircle(0, 0, 1.2);
@@ -196,9 +202,32 @@ export const PixiParticleBackground: React.FC = () => {
 
     // Animation ticker
     let frame = 0;
+    let tick = 0;
+    let rafMotion = { x: -9999, y: -9999 };
+    let motionQueued = false;
+    const onMouseMoveThrottled = (e: MouseEvent) => {
+      rafMotion = { x: e.clientX, y: e.clientY };
+      if (!motionQueued) {
+        motionQueued = true;
+        requestAnimationFrame(() => {
+          mouse.x = rafMotion.x;
+          mouse.y = rafMotion.y;
+          motionQueued = false;
+        });
+      }
+    };
+    window.removeEventListener("mousemove", onMouseMove);
+    window.addEventListener("mousemove", onMouseMoveThrottled);
+    const onVisibility = () => {
+      if (document.hidden) app.ticker.stop();
+      else app.ticker.start();
+    };
+    document.addEventListener("visibilitychange", onVisibility);
     app.ticker.add(() => {
+      tick += 1;
       frame += 0.016;
-      graphicsLines.clear();
+      const drawLines = tick % 3 === 0;
+      if (drawLines) graphicsLines.clear();
 
       // Update fireflies with mouse magnetism
       fireflies.forEach((p, idx) => {
@@ -253,17 +282,21 @@ export const PixiParticleBackground: React.FC = () => {
       });
 
       // Draw constellation lines between close particles (<120px)
-      graphicsLines.lineStyle(0.6, 0xd97706, 0.12);
-      for (let i = 0; i < allParticles.length; i++) {
-        for (let j = i + 1; j < allParticles.length; j++) {
-          const dx = allParticles[i].x - allParticles[j].x;
-          const dy = allParticles[i].y - allParticles[j].y;
-          const d = Math.sqrt(dx * dx + dy * dy);
-          if (d < 120) {
-            const alpha = (1 - d / 120) * 0.12;
-            graphicsLines.lineStyle(0.7, 0xd97706, alpha);
-            graphicsLines.moveTo(allParticles[i].x, allParticles[i].y);
-            graphicsLines.lineTo(allParticles[j].x, allParticles[j].y);
+      if (drawLines) {
+        graphicsLines.lineStyle(0.6, 0xd97706, 0.12);
+        for (let i = 0; i < allParticles.length; i++) {
+          for (let j = i + 1; j < allParticles.length; j++) {
+            const dx = allParticles[i].x - allParticles[j].x;
+            const dy = allParticles[i].y - allParticles[j].y;
+            if (Math.abs(dx) > 120 || Math.abs(dy) > 120) continue;
+            const d2 = dx * dx + dy * dy;
+            if (d2 < 14400) {
+              const d = Math.sqrt(d2);
+              const alpha = (1 - d / 120) * 0.12;
+              graphicsLines.lineStyle(0.7, 0xd97706, alpha);
+              graphicsLines.moveTo(allParticles[i].x, allParticles[i].y);
+              graphicsLines.lineTo(allParticles[j].x, allParticles[j].y);
+            }
           }
         }
       }
@@ -276,6 +309,8 @@ export const PixiParticleBackground: React.FC = () => {
 
     return () => {
       window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mousemove", onMouseMoveThrottled);
+      document.removeEventListener("visibilitychange", onVisibility);
       window.removeEventListener("resize", onResize);
       app.ticker.stop();
       app.destroy(true, { children: true });

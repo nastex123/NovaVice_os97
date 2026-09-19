@@ -1,11 +1,12 @@
 "use client";
 
 import React, { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { MessageSquare, Gauge, Building2, Phone, Radio, MapPin, Sliders } from "lucide-react";
 import { useChatStore } from "../stores/useChatStore";
 import { useDesktopStore } from "../stores/useDesktopStore";
 import { useFocusTrap } from "../hooks/useFocusTrap";
+import { useGsapModal } from "../hooks/useGsapModal";
+import { useGsapHoverGroup } from "../hooks/useGsapHoverGroup";
 
 interface FooterProps {
   onReset?: () => void;
@@ -29,6 +30,8 @@ export const Footer: React.FC<FooterProps> = ({
     isActive: showSedesModal,
     onEscape: () => setShowSedesModal(false),
   });
+  const sedesModalRef = useGsapModal<HTMLDivElement>(showSedesModal);
+  const dockHoverRef = useGsapHoverGroup<HTMLElement>();
 
   const handleReset = onReset || resetChatStore;
   const handleOpenMetrics = onOpenMetrics || (() => setIsMetricsOpen(true));
@@ -36,7 +39,7 @@ export const Footer: React.FC<FooterProps> = ({
 
   return (
     <>
-      <footer className="h-16 flex items-center justify-center z-30 select-none pb-2 pt-1 px-4 w-full">
+      <footer ref={dockHoverRef} className="h-16 flex items-center justify-center z-30 select-none pb-2 pt-1 px-4 w-full">
         {/* Poolsuite Retro Application Dock */}
         <div className="bg-retroBeige border-2 border-black shadow-retro-lg rounded-t-2xl px-4 sm:px-6 py-2 flex items-center gap-3 sm:gap-6">
           {/* Tile 1: Chatbot / Reset */}
@@ -118,16 +121,15 @@ export const Footer: React.FC<FooterProps> = ({
       </footer>
 
       {/* Retro Window Modal for Sedes Oficiales */}
-      <AnimatePresence>
-        {showSedesModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-[1px]">
-            <motion.div
-              ref={sedesTrapRef}
-              initial={{ opacity: 0, scale: 0.95, y: 10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 10 }}
-              className="w-full max-w-lg bg-retroBeige border-2 border-black shadow-retro-xl text-black select-none overflow-hidden"
-            >
+      {showSedesModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-[1px]">
+          <div
+            ref={(node) => {
+              (sedesTrapRef as React.MutableRefObject<HTMLDivElement | null>).current = node;
+              (sedesModalRef as React.MutableRefObject<HTMLDivElement | null>).current = node;
+            }}
+            className="w-full max-w-lg bg-retroBeige border-2 border-black shadow-retro-xl text-black select-none overflow-hidden"
+          >
               {/* Retro Striped Window Titlebar */}
               <div className="retro-striped-titlebar border-b-2 border-black px-2 py-1.5 flex items-center justify-between">
                 <div className="flex items-center space-x-2">
@@ -212,10 +214,9 @@ export const Footer: React.FC<FooterProps> = ({
                   </button>
                 </div>
               </div>
-            </motion.div>
           </div>
-        )}
-      </AnimatePresence>
+        </div>
+      )}
     </>
   );
 };

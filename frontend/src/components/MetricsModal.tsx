@@ -1,12 +1,12 @@
 "use client";
 
 import React from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { Activity, TrendingUp, HelpCircle, DollarSign } from "lucide-react";
 import { TelemetryMetrics, ServerHealth } from "../lib/types";
 import { useChatStore } from "../stores/useChatStore";
 import { useDesktopStore } from "../stores/useDesktopStore";
 import { useFocusTrap } from "../hooks/useFocusTrap";
+import { useGsapModal } from "../hooks/useGsapModal";
 
 interface MetricsModalProps {
   isOpen?: boolean;
@@ -35,16 +35,17 @@ export const MetricsModal: React.FC<MetricsModalProps> = ({
     isActive: isOpen,
     onEscape: onClose,
   });
+  const modalRef = useGsapModal<HTMLDivElement>(isOpen);
 
   return (
-    <AnimatePresence>
+    <>
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-[1px]">
-          <motion.div
-            ref={trapRef}
-            initial={{ opacity: 0, scale: 0.95, y: 10 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 10 }}
+          <div
+            ref={(node) => {
+              (trapRef as React.MutableRefObject<HTMLDivElement | null>).current = node;
+              (modalRef as React.MutableRefObject<HTMLDivElement | null>).current = node;
+            }}
             className="w-full max-w-md bg-retroBeige border-2 border-black shadow-retro-xl text-black select-none overflow-hidden"
           >
             {/* Retro Striped Titlebar */}
@@ -196,9 +197,9 @@ export const MetricsModal: React.FC<MetricsModalProps> = ({
                 </button>
               </div>
             </div>
-          </motion.div>
+          </div>
         </div>
       )}
-    </AnimatePresence>
+    </>
   );
 };

@@ -1,11 +1,11 @@
 "use client";
 
 import React from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { Sliders, Sun, Tv, Layers, RotateCcw, ShieldCheck } from "lucide-react";
 import { useDesktopStore } from "../stores/useDesktopStore";
 import { useSettingsStore } from "../stores/useSettingsStore";
 import { useFocusTrap } from "../hooks/useFocusTrap";
+import { useGsapModal } from "../hooks/useGsapModal";
 
 interface MonitorControlsModalProps {
   isOpen?: boolean;
@@ -39,6 +39,7 @@ export const MonitorControlsModal: React.FC<MonitorControlsModalProps> = ({
     isActive: isOpen,
     onEscape: onClose,
   });
+  const modalRef = useGsapModal<HTMLDivElement>(isOpen);
 
   const applyPreset = (brightness: number, curvature: number, scanlines: number) => {
     setCrtBrightness(brightness);
@@ -47,14 +48,14 @@ export const MonitorControlsModal: React.FC<MonitorControlsModalProps> = ({
   };
 
   return (
-    <AnimatePresence>
+    <>
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-[1px]">
-          <motion.div
-            ref={trapRef}
-            initial={{ opacity: 0, scale: 0.95, y: 10 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 10 }}
+          <div
+            ref={(node) => {
+              (trapRef as React.MutableRefObject<HTMLDivElement | null>).current = node;
+              (modalRef as React.MutableRefObject<HTMLDivElement | null>).current = node;
+            }}
             className="w-full max-w-md bg-retroBeige border-2 border-black shadow-retro-xl text-black select-none overflow-hidden"
           >
             {/* Retro Striped Window Titlebar */}
@@ -232,9 +233,9 @@ export const MonitorControlsModal: React.FC<MonitorControlsModalProps> = ({
                 </button>
               </div>
             </div>
-          </motion.div>
+          </div>
         </div>
       )}
-    </AnimatePresence>
+    </>
   );
 };

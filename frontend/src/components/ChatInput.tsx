@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Send, Mic, MicOff } from "lucide-react";
 import { useChatStore } from "../stores/useChatStore";
+import { useGsapHoverGroup } from "../hooks/useGsapHoverGroup";
 
 interface ChatInputProps {
   onSendMessage?: (text: string) => void;
@@ -25,6 +26,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   const [input, setInput] = useState("");
   const [isRecording, setIsRecording] = useState(false);
   const recognitionRef = useRef<any>(null);
+  const hoverRef = useGsapHoverGroup<HTMLDivElement>();
 
   // Initialize Web Speech API
   useEffect(() => {
@@ -89,7 +91,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   };
 
   return (
-    <div className="p-3 sm:p-4 border-t-2 border-black bg-retroBeige z-10 select-none w-full">
+    <div ref={hoverRef} className="p-3 sm:p-4 border-t-2 border-black bg-retroBeige z-10 select-none w-full">
       {/* Input Form Centered */}
       <form onSubmit={handleSubmit} className="flex items-center gap-2 sm:gap-3 w-full">
         <div className="relative flex-1">
@@ -109,6 +111,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
         {/* Voice Button */}
         <button
           type="button"
+          data-gsap-hover
           onClick={toggleRecording}
           disabled={isLoading}
           className={`p-2.5 sm:p-3 border-2 border-black transition-all flex items-center justify-center ${
@@ -124,6 +127,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
         {/* Submit Send Button */}
         <button
           type="submit"
+          data-gsap-hover
           disabled={!input.trim() || isLoading}
           className="px-4 sm:px-6 py-2.5 sm:py-3 bg-vicePink hover:bg-vicePink-dark text-white font-bold font-mono text-xs sm:text-sm border-2 border-black shadow-retro active:translate-x-[2px] active:translate-y-[2px] active:shadow-none disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-1.5 uppercase"
         >

@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useRef, useEffect, useState, useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import React, { useRef, useEffect, useState, useMemo, useLayoutEffect, memo } from "react";
+import gsap from "gsap";
 import { Bot, User, Clock, FileText, Sparkles, Info, ChevronRight, RotateCcw } from "lucide-react";
 import confetti from "canvas-confetti";
 import ReactMarkdown from "react-markdown";
@@ -9,6 +9,8 @@ import remarkGfm from "remark-gfm";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { ChatMessage, ActionButton } from "../lib/types";
 import { useChatStore } from "../stores/useChatStore";
+import { motionSetup, EASE, DUR } from "../lib/motion";
+import { useGsapHoverGroup } from "../hooks/useGsapHoverGroup";
 
 interface ChatContainerProps {
   messages?: ChatMessage[];
@@ -184,7 +186,7 @@ interface MessageItemProps {
   sanitizeMarkdown: (text: string) => string;
 }
 
-const MessageItem: React.FC<MessageItemProps> = ({
+const MessageItem: React.FC<MessageItemProps> = memo(({
   msg,
   index,
   totalMessages,
@@ -196,14 +198,25 @@ const MessageItem: React.FC<MessageItemProps> = ({
   const isAdvisor = msg.mode === "opencode_advisor" || msg.mode === "agy_advisor";
   const isAgy = msg.mode === "agy_advisor";
   const isLatest = index === totalMessages - 1 && !isUser;
+  const rowRef = useRef<HTMLDivElement | null>(null);
+  useLayoutEffect(() => {
+    if (!isLatest || !rowRef.current || !motionSetup()) return;
+    const ctx = gsap.context(() => {
+      const tl = gsap.timeline({ defaults: { ease: EASE, overwrite: "auto" } });
+      tl.fromTo(rowRef.current, { opacity: 0, y: 14, scale: 0.985 }, { opacity: 1, y: 0, scale: 1, duration: DUR.base });
+      tl.fromTo(
+        rowRef.current!.querySelectorAll("[data-msg-action]"),
+        { opacity: 0, x: -8 },
+        { opacity: 1, x: 0, duration: 0.22, stagger: 0.05 },
+        "-=0.15"
+      );
+    }, rowRef);
+    return () => ctx.revert();
+  }, [isLatest, msg.id]);
 
   return (
-    <motion.div
-      key={msg.id}
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.18 }}
+    <div
+      ref={rowRef}
       className={`flex gap-3 w-full ${
         isUser ? "ml-auto flex-row-reverse max-w-xl" : "mr-auto max-w-full"
       }`}
@@ -304,6 +317,8 @@ const MessageItem: React.FC<MessageItemProps> = ({
               return (
                 <button
                   key={bIdx}
+                  data-gsap-hover
+                  data-msg-action
                   onClick={() => {
                     if (btn.value.includes("beca") || btn.value.includes("4") || btn.value.includes("3")) {
                       triggerConfetti();
@@ -337,6 +352,8 @@ const MessageItem: React.FC<MessageItemProps> = ({
             {(msg.mode === "clarification" ||
               (msg.confidence_score !== undefined && msg.confidence_score < 0.55)) && (
               <button
+                data-gsap-hover
+                data-msg-action
                 onClick={() =>
                   onActionButtonClick("¿Cuáles son los cursos, horarios y precios disponibles?")
                 }
@@ -352,9 +369,10 @@ const MessageItem: React.FC<MessageItemProps> = ({
           </div>
         )}
       </div>
-    </motion.div>
+    </div>
   );
-};
+});
+MessageItem.displayName = "MessageItem";
 
 export const ChatContainer: React.FC<ChatContainerProps> = ({
   messages: propMessages,
@@ -374,6 +392,7 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
 
   const bottomRef = useRef<HTMLDivElement>(null);
   const parentRef = useRef<HTMLDivElement>(null);
+  const hoverRef = useGsapHoverGroup<HTMLDivElement>();
 
   const isVirtualized = messages.length > 30;
 
@@ -416,7 +435,10 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
 
   return (
     <div
-      ref={parentRef}
+      ref={(node) => {
+        (parentRef as React.MutableRefObject<HTMLDivElement | null>).current = node;
+        (hoverRef as React.MutableRefObject<HTMLDivElement | null>).current = node;
+      }}
       className="flex-1 overflow-y-auto p-3 sm:p-5 space-y-5 custom-scrollbar z-10 w-full relative"
     >
       {isVirtualized ? (
@@ -456,7 +478,7 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
           })}
         </div>
       ) : (
-        <AnimatePresence initial={false}>
+        <>
           {messages.map((msg, index) => (
             <MessageItem
               key={msg.id}
@@ -468,7 +490,7 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
               sanitizeMarkdown={sanitizeMarkdown}
             />
           ))}
-        </AnimatePresence>
+        </>
       )}
 
       {/* Retro Loading Indicator */}

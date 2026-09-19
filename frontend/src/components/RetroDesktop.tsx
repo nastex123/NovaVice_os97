@@ -1,13 +1,15 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useLayoutEffect, useRef } from "react";
 import dynamic from "next/dynamic";
+import gsap from "gsap";
 import { ChatContainer } from "./ChatContainer";
 import { ChatInput } from "./ChatInput";
 import { useChatStore } from "../stores/useChatStore";
 import { useDesktopStore } from "../stores/useDesktopStore";
 import { useSettingsStore } from "../stores/useSettingsStore";
 import { ChatMessage } from "../lib/types";
+import { motionSetup, EASE, DUR } from "../lib/motion";
 
 // Dynamic code splitting for secondary heavy modals and WebGL/Canvas (TODO-3.6 & TODO-3.10)
 const MetricsModal = dynamic(
@@ -49,12 +51,22 @@ export const RetroDesktop: React.FC = () => {
   useEffect(() => {
     initChatStorage();
     initSettingsStorage();
-
     // Initial Telemetry Fetch & Periodic Polling
     refreshTelemetry();
-    const interval = setInterval(refreshTelemetry, 5000);
+    const interval = setInterval(() => {
+      if (!document.hidden) refreshTelemetry();
+    }, 30000);
     return () => clearInterval(interval);
   }, [initChatStorage, initSettingsStorage, refreshTelemetry]);
+
+  const windowRef = useRef<HTMLDivElement | null>(null);
+  useLayoutEffect(() => {
+    if (!windowRef.current || !motionSetup()) return;
+    const ctx = gsap.context(() => {
+      gsap.fromTo(windowRef.current, { opacity: 0, y: 14, scale: 0.99 }, { opacity: 1, y: 0, scale: 1, duration: DUR.slow, ease: EASE, overwrite: "auto" });
+    }, windowRef);
+    return () => ctx.revert();
+  }, []);
 
   // Synchronize WCAG AAA Accessible Mode with document root
   useEffect(() => {
@@ -118,31 +130,31 @@ export const RetroDesktop: React.FC = () => {
     toggleBypassRetroA11y,
   ]);
 
-  // C29: Re-engage timer at 60s of inactivity
+  // C29: Re-engage timer at 120s of inactivity
+  const messageCount = messages.length;
   useEffect(() => {
+    if (messageCount < 1) return;
     const timer = setTimeout(() => {
-      if (messages.length > 1 && messages[messages.length - 1].sender === "bot") {
-        const lastMsg = messages[messages.length - 1];
-        if (!lastMsg.text.includes("¿Sigues por aquí?")) {
-          const reengageMsg: ChatMessage = {
-            id: "reengage_" + Date.now(),
-            sender: "bot",
-            text: "⏱️ **¿Sigues por aquí?** Recuerda que puedes consultar en cualquier momento sobre becas, horarios o agendar tu examen de clasificación sin costo.",
-            timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-            action_buttons: [
-              { label: "1. Cursos & Idiomas", value: "1" },
-              { label: "2. Horarios & Modalidades", value: "2" },
-              { label: "3. Precios & Becas", value: "3" },
-              { label: "0. Menú Principal", "value": "0" },
-            ],
-          };
-          setMessages((prev) => [...prev, reengageMsg]);
-        }
+      const current = useChatStore.getState().messages;
+      const lastMsg = current[current.length - 1];
+      if (lastMsg && lastMsg.sender === "bot" && !lastMsg.text.includes("¿Sigues por aquí?")) {
+        const reengageMsg: ChatMessage = {
+          id: "reengage_" + Date.now(),
+          sender: "bot",
+          text: "⏱️ **¿Sigues por aquí?** Recuerda que puedes consultar en cualquier momento sobre becas, horarios o agendar tu examen de clasificación sin costo.",
+          timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+          action_buttons: [
+            { label: "1. Cursos & Idiomas", value: "1" },
+            { label: "2. Horarios & Modalidades", value: "2" },
+            { label: "3. Precios & Becas", value: "3" },
+            { label: "0. Menú Principal", "value": "0" },
+          ],
+        };
+        setMessages((prev) => [...prev, reengageMsg]);
       }
-    }, 60000);
-
+    }, 120000);
     return () => clearTimeout(timer);
-  }, [messages, setMessages]);
+  }, [messageCount, setMessages]);
 
   return (
     <>
@@ -151,7 +163,7 @@ export const RetroDesktop: React.FC = () => {
         <PixiParticleBackground />
 
         {/* Poolsuite Retro Window Frame */}
-        <div className="w-full max-w-4xl h-full max-h-[82vh] sm:max-h-[85vh] bg-retroBeige border-2 border-black shadow-retro-xl flex flex-col overflow-hidden z-10">
+        <div ref={windowRef} className="w-full max-w-4xl h-full max-h-[82vh] sm:max-h-[85vh] bg-retroBeige border-2 border-black shadow-retro-xl flex flex-col overflow-hidden z-10">
           {/* Classic 90s Horizontal Striped Titlebar */}
           <div className="retro-striped-titlebar border-b-2 border-black px-2 sm:px-3 py-1.5 flex items-center justify-between select-none">
             {/* Left Close Box */}
@@ -209,7 +221,12 @@ export const RetroDesktop: React.FC = () => {
       <MonitorControlsModal />
 
       {/* CRT Anti-Glare Optical Filter Layer (Bypassed under WCAG AAA mode) */}
-      {crtEnabled && !bypassRetroA11y && <div className="crt-overlay" />}
+      {crtEnabled && !bypassRetroA11y && (
+        <>
+          <div className="crt-overlay" aria-hidden="true" />
+          <div className="crt-vignette" aria-hidden="true" />
+        </>
+      )}
     </>
   );
 };

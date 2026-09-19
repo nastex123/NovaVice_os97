@@ -348,7 +348,26 @@ def prompt_advisor_selection() -> str:
     return "opencode"
 
 
+def doctor() -> int:
+    # Diagnose ports, Python/Node versions and ChromaDB health (TODO-4.7).
+    import sys
+    ok = True
+    print("Nova doctor: checking ports 8000/3000/4096, runtimes and chroma_db")
+    for port in (8000, 3000, 4096):
+        print(f"  port {port}: {'IN USE' if is_port_in_use(port) else 'free'}")
+    print(f"  python: {sys.version.split()[0]}")
+    node = shutil.which("node") or shutil.which("node.exe")
+    print(f"  node: {'found' if node else 'missing'}")
+    chroma = BASE_DIR / "backend" / "data" / "chroma_db"
+    print(f"  chroma_db: {'present' if chroma.exists() else 'missing'}")
+    if not chroma.exists():
+        ok = False
+    return 0 if ok else 1
+
+
 def main():
+    if len(sys.argv) > 1 and sys.argv[1] == "doctor":
+        sys.exit(doctor())
     print("=" * 70)
     print("  🎓 NOVA IDIOMAS COLOMBIA - LANZADOR SUPERVISADO DEL SISTEMA (RAG 2.6)")
     print("=" * 70)

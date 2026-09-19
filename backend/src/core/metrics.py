@@ -30,11 +30,31 @@ class MetricsBus:
         self.total_faithfulness_score += score
         self.evaluated_queries_count += 1
 
+    def __init_latency_samples(self) -> None:
+        pass
+
     def record_query(self, cached: bool = False, latency: float = 0.0) -> None:
         self.total_queries += 1
         if cached:
             self.cache_hits += 1
         self.total_latency_seconds += latency
+        samples = getattr(self, "_latency_samples", None)
+        if samples is None:
+            self._latency_samples: list = []
+            samples = self._latency_samples
+        samples.append(round(latency * 1000.0, 2))
+        if len(samples) > 1000:
+            del samples[: len(samples) - 1000]
+
+    def latency_percentiles(self) -> Dict[str, float]:
+        # Compute p50/p95/p99 over rolling window for Prometheus (TODO-5.4).
+        samples = sorted(getattr(self, "_latency_samples", []))
+        if not samples:
+            return {"p50": 0.0, "p95": 0.0, "p99": 0.0}
+        def pct(p: float) -> float:
+            idx = min(len(samples) - 1, int(len(samples) * p))
+            return float(samples[idx])
+        return {"p50": pct(0.50), "p95": pct(0.95), "p99": pct(0.99)}
 
     def record_pillar(self, pillar: str) -> None:
         """E48: Tracks admissions query volume categorized by pillar."""

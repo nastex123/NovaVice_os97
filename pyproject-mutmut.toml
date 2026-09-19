@@ -1,0 +1,6 @@
+# Mutmut configuration for financial modules (TODO-4.2).
+# Run: mutmut run --paths-to-mutate backend/src/core/advisor_common.py
+[mutmut]
+paths_to_mutate = ["backend/src/core/advisor_common.py"]
+backup = false
+runner = "pytest -x -q backend/tests/test_query_router.py"

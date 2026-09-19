@@ -1,0 +1,5 @@
+{
+  "package": { "productName": "NovaOS97", "version": "2.7.0" },
+  "tauri": { "bundle": { "targets": "all" } },
+  "build": { "frontendDist": "../frontend/out", "devUrl": "http://localhost:3000" }
+}

@@ -104,3 +104,19 @@ async def trigger_database_vacuum():
     res = vector_store.vacuum()
     return res
 
+
+@api_router.get("/escalations/export")
+async def export_escalation_tickets():
+    # Export escalation tickets as CSV rows for commercial team (TODO-5.6).
+    from fastapi.responses import PlainTextResponse
+    try:
+        from src.data.sqlite_tickets import sqlite_ticket_repo
+        tickets = sqlite_ticket_repo.get_all_tickets(limit=1000)
+    except Exception:
+        tickets = []
+    lines = ["id,query,status,created_at"]
+    for t in tickets or []:
+        if isinstance(t, dict):
+            lines.append(f"{t.get('id','')},{t.get('query','')[:60]},{t.get('status','')},{t.get('created_at','')}")
+    return PlainTextResponse("\n".join(lines), media_type="text/csv")
+

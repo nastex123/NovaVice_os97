@@ -11,10 +11,10 @@
 | :---: | :--- | :---: | :---: | :---: | :---: | :---: |
 | **Fase 1** | Precisión de Datos y Recuperación RAG | 11 | 11 | 0 | 0 | ✅ Completada (100%) |
 | **Fase 2** | Rendimiento Backend y Resiliencia + Complemento Anti-alucinación | 17 | 17 | 0 | 0 | ✅ Completada (100%) |
-| **Fase 3** | Frontend Moderno, UI Retro & Accesibilidad | 10 | 6 | 0 | 4 | 🚀 En Progreso (60%) |
-| **Fase 4** | Testing Automatizado, QA & Tooling DX | 8 | 0 | 0 | 8 | ⏳ Pendiente |
-| **Fase 5** | Horizontes Futuros y Despliegues Especializados | 11 | 0 | 0 | 11 | ⏳ Pendiente |
-| **TOTAL** | **Propuestas de Mejora Técnica** | **57** | **34** | **0** | **23** | **59.6%** |
+| **Fase 3** | Frontend Moderno, UI Retro & Accesibilidad | 10 | 10 | 0 | 0 | ✅ Completada (100%) |
+| **Fase 4** | Testing Automatizado, QA & Tooling DX | 8 | 8 | 0 | 0 | ✅ Completada (100%) |
+| **Fase 5** | Horizontes Futuros y Despliegues Especializados | 11 | 11 | 0 | 0 | ✅ Completada (100%) |
+| **TOTAL** | **Propuestas de Mejora Técnica** | **57** | **57** | **0** | **0** | **100%** |
 
 ---
 
@@ -173,50 +173,50 @@
 ## 🟣 FASE 4: Testing Automatizado, QA y Tooling DX (8 Tareas)
 > **Objetivo:** Establecer evaluación continua de calidad RAG, simular concurrencia con Locust, tests ultrarrápidos con mocks deterministas y diagnóstico CLI.
 
-- [ ] **TODO-4.1 [Prop. 39 - CRÍTICO] Pipeline de evaluación continua RAG (Ragas / Faithfulness):**
-  - [ ] Crear script `scripts/evaluate_rag.py` que calcule métricas de Context Precision, Context Recall y Answer Faithfulness.
-  - [ ] Definir dataset dorado de 30 preguntas/respuestas oficiales de admisiones.
-- [ ] **TODO-4.2 [Prop. 40 - RECOMENDADO] Pruebas de mutación con `mutmut`:**
-  - [ ] Ejecutar `mutmut` sobre los módulos de cálculo financiero (descuentos de contado del 10% y planes 40/30/30).
-  - [ ] Corregir cualquier brecha en los tests unitarios donde una mutación sobreviva.
-- [ ] **TODO-4.3 [Prop. 41 - RECOMENDADO] Pruebas de carga y concurrencia con Locust:**
-  - [ ] Crear archivo `scripts/load_test.py` simulando navegación por menús y preguntas abiertas con 50 usuarios simultáneos.
-  - [ ] Validar que el p95 de latencia se mantenga bajo los límites operativos.
-- [ ] **TODO-4.4 [Prop. 42 - RECOMENDADO] Proveedor de pruebas `MockDualAdvisor`:**
-  - [ ] Implementar clase mock de latencia determinista (<10ms) en la suite de pytest para que los 55 tests corran en <3 segundos.
-- [ ] **TODO-4.5 [Prop. 44 - OPCIONAL] Snapshot testing visual con Playwright:**
-  - [ ] Configurar Playwright en `frontend/` para capturar snapshots del escritorio retro OS '97 y prevenir regresiones visuales.
-- [ ] **TODO-4.6 [Prop. 47 - RECOMENDADO] Hooks de pre-commit con Ruff y ESLint:**
-  - [ ] Configurar `.pre-commit-config.yaml` con `ruff check` y `ruff format` para Python, y `prettier` para TypeScript.
-- [ ] **TODO-4.7 [Prop. 48 - RECOMENDADO] Comando CLI de diagnóstico `python run.py doctor`:**
-  - [ ] Implementar subcomando `doctor` en `run.py` que valide puertos (:8000, :3000, :4096), versiones de Python/Node y salud de ChromaDB.
-- [ ] **TODO-4.8 [Prop. 49 - RECOMENDADO] Verificación de diagramas Mermaid en CI:**
-  - [ ] Añadir paso de verificación de sintaxis para los bloques Mermaid de `DIAGRAMA.md` y `EXPLICACION_TECNICA.md`.
+- [x] **TODO-4.1 [Prop. 39 - CRÍTICO] Pipeline de evaluación continua RAG (Ragas / Faithfulness):**
+  - [x] Crear script `scripts/evaluate_rag.py` que calcule métricas de Context Precision, Context Recall y Answer Faithfulness.
+  - [x] Definir dataset dorado de 30 preguntas/respuestas oficiales de admisiones.
+- [x] **TODO-4.2 [Prop. 40 - RECOMENDADO] Pruebas de mutación con `mutmut`:**
+  - [x] Ejecutar `mutmut` sobre los módulos de cálculo financiero (descuentos de contado del 10% y planes 40/30/30).
+  - [x] Corregir cualquier brecha en los tests unitarios donde una mutación sobreviva.
+- [x] **TODO-4.3 [Prop. 41 - RECOMENDADO] Pruebas de carga y concurrencia con Locust:**
+  - [x] Crear archivo `scripts/load_test.py` simulando navegación por menús y preguntas abiertas con 50 usuarios simultáneos.
+  - [x] Validar que el p95 de latencia se mantenga bajo los límites operativos.
+- [x] **TODO-4.4 [Prop. 42 - RECOMENDADO] Proveedor de pruebas `MockDualAdvisor`:**
+  - [x] Implementar clase mock de latencia determinista (<10ms) en la suite de pytest para que los 55 tests corran en <3 segundos.
+- [x] **TODO-4.5 [Prop. 44 - OPCIONAL] Snapshot testing visual con Playwright:**
+  - [x] Configurar Playwright en `frontend/` para capturar snapshots del escritorio retro OS '97 y prevenir regresiones visuales.
+- [x] **TODO-4.6 [Prop. 47 - RECOMENDADO] Hooks de pre-commit con Ruff y ESLint:**
+  - [x] Configurar `.pre-commit-config.yaml` con `ruff check` y `ruff format` para Python, y `prettier` para TypeScript.
+- [x] **TODO-4.7 [Prop. 48 - RECOMENDADO] Comando CLI de diagnóstico `python run.py doctor`:**
+  - [x] Implementar subcomando `doctor` en `run.py` que valide puertos (:8000, :3000, :4096), versiones de Python/Node y salud de ChromaDB.
+- [x] **TODO-4.8 [Prop. 49 - RECOMENDADO] Verificación de diagramas Mermaid en CI:**
+  - [x] Añadir paso de verificación de sintaxis para los bloques Mermaid de `DIAGRAMA.md` y `EXPLICACION_TECNICA.md`.
 
 ---
 
 ## ⚪ FASE 5: Horizontes Futuros y Despliegues Especializados (11 Tareas)
 > **Objetivo:** Graph RAG para itinerarios de certificación, inferencia HyDE, audio procedural retro sintético y empaquetado nativo Tauri para recepciones de sedes.
 
-- [ ] **TODO-5.1 [Prop. 8 - OPCIONAL] Generación Aumentada de Consultas (HyDE):**
-  - [ ] Generar respuestas sintéticas de una línea para enriquecer el vector de búsqueda en preguntas extremadamente breves.
-- [ ] **TODO-5.2 [Prop. 9 - OPCIONAL] Fallback transparente multi-embeddings:**
-  - [ ] Crear conmutador automático si el modelo local `all-MiniLM-L6-v2` presenta errores en entornos sin soporte AVX.
-- [ ] **TODO-5.3 [Prop. 10 - FUTURO] Graph RAG liviano para rutas de prerrequisitos:**
-  - [ ] Modelar itinerarios de certificación internacional (A1 -> C1) como grafo acíclico dirigido (DAG).
-- [ ] **TODO-5.4 [Prop. 17 - OPCIONAL] Exposición formal de métricas OpenMetrics / Prometheus:**
-  - [ ] Implementar endpoint `/metrics/prometheus` con percentiles de latencia y tasas de acierto de caché.
-- [ ] **TODO-5.5 [Prop. 18 - FUTURO] Worker de re-indexación asíncrono en background:**
-  - [ ] Crear observador de archivos (File Watcher) que re-indexe documentos en segundo plano al guardarse cambios en `backend/data/documents/`.
-- [ ] **TODO-5.6 [Prop. 24 - OPCIONAL] Exportador de tickets de escalamiento a CSV/XLSX:**
-  - [ ] Agregar endpoint `/api/v1/escalations/export` con reporte tabular de aspirantes para el equipo comercial humano.
-- [ ] **TODO-5.7 [Prop. 31 - OPCIONAL] Manejo de estado offline con alerta retro vintage:**
-  - [ ] Detectar pérdida de conexión en el navegador y mostrar cuadro de diálogo retro ("Error de Comunicación de Red").
-- [ ] **TODO-5.8 [Prop. 32 - FUTURO] Arquitectura pluggable de ventanas de escritorio (`DesktopAppWindow`):**
-  - [ ] Diseñar interfaz genérica para permitir registrar nuevas aplicaciones en el escritorio OS '97 de forma desacoplada.
-- [ ] **TODO-5.9 [Prop. 37 - OPCIONAL] Modo PDA vintage adaptativo para smartphones:**
-  - [ ] Diseñar vista optimizada tipo Palm OS / PDA cuando el ancho de pantalla sea inferior a 450px.
-- [ ] **TODO-5.10 [Prop. 38 - OPCIONAL] Feedback auditivo procedural con Web Audio API (<2KB):**
-  - [ ] Sintetizar clics mecánicos y bleeps vintage al presionar botones o enviar mensajes (desactivado por defecto).
-- [ ] **TODO-5.11 [Prop. 50 - FUTURO] Empaquetado nativo de escritorio con Tauri (Modo Kiosco):**
-  - [ ] Configurar Tauri (Rust) para generar ejecutable nativo multiplataforma (<15MB) para pantallas táctiles de recepción en sedes físicas.
+- [x] **TODO-5.1 [Prop. 8 - OPCIONAL] Generación Aumentada de Consultas (HyDE):**
+  - [x] Generar respuestas sintéticas de una línea para enriquecer el vector de búsqueda en preguntas extremadamente breves.
+- [x] **TODO-5.2 [Prop. 9 - OPCIONAL] Fallback transparente multi-embeddings:**
+  - [x] Crear conmutador automático si el modelo local `all-MiniLM-L6-v2` presenta errores en entornos sin soporte AVX.
+- [x] **TODO-5.3 [Prop. 10 - FUTURO] Graph RAG liviano para rutas de prerrequisitos:**
+  - [x] Modelar itinerarios de certificación internacional (A1 -> C1) como grafo acíclico dirigido (DAG).
+- [x] **TODO-5.4 [Prop. 17 - OPCIONAL] Exposición formal de métricas OpenMetrics / Prometheus:**
+  - [x] Implementar endpoint `/metrics/prometheus` con percentiles de latencia y tasas de acierto de caché.
+- [x] **TODO-5.5 [Prop. 18 - FUTURO] Worker de re-indexación asíncrono en background:**
+  - [x] Crear observador de archivos (File Watcher) que re-indexe documentos en segundo plano al guardarse cambios en `backend/data/documents/`.
+- [x] **TODO-5.6 [Prop. 24 - OPCIONAL] Exportador de tickets de escalamiento a CSV/XLSX:**
+  - [x] Agregar endpoint `/api/v1/escalations/export` con reporte tabular de aspirantes para el equipo comercial humano.
+- [x] **TODO-5.7 [Prop. 31 - OPCIONAL] Manejo de estado offline con alerta retro vintage:**
+  - [x] Detectar pérdida de conexión en el navegador y mostrar cuadro de diálogo retro ("Error de Comunicación de Red").
+- [x] **TODO-5.8 [Prop. 32 - FUTURO] Arquitectura pluggable de ventanas de escritorio (`DesktopAppWindow`):**
+  - [x] Diseñar interfaz genérica para permitir registrar nuevas aplicaciones en el escritorio OS '97 de forma desacoplada.
+- [x] **TODO-5.9 [Prop. 37 - OPCIONAL] Modo PDA vintage adaptativo para smartphones:**
+  - [x] Diseñar vista optimizada tipo Palm OS / PDA cuando el ancho de pantalla sea inferior a 450px.
+- [x] **TODO-5.10 [Prop. 38 - OPCIONAL] Feedback auditivo procedural con Web Audio API (<2KB):**
+  - [x] Sintetizar clics mecánicos y bleeps vintage al presionar botones o enviar mensajes (desactivado por defecto).
+- [x] **TODO-5.11 [Prop. 50 - FUTURO] Empaquetado nativo de escritorio con Tauri (Modo Kiosco):**
+  - [x] Configurar Tauri (Rust) para generar ejecutable nativo multiplataforma (<15MB) para pantallas táctiles de recepción en sedes físicas.

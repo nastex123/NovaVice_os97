@@ -399,3 +399,9 @@ body.a11y-mode {
 .animate-seagull-r2l-3 {
   animation: seagullFlightR2L 29s linear infinite 18s;
 }
+
+/* Vintage PDA layout under 450px (TODO-5.9) */
+@media (max-width: 450px) {
+  .retro-window { margin: 4px; font-size: 14px; }
+  .retro-striped-titlebar { font-size: 12px; }
+}

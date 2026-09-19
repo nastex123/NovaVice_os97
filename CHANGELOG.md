@@ -7,6 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [2026-09-19 12:35] [Feat/Fase-5-Horizontes-11-11]
+- **Fase 5 Horizontes Futuros completada (11/11, total 57/57 al 100%):**
+  - TODO-5.1 `backend/src/rag/hyde.py`, 5.2 `embedding_fallback.py`, 5.3 `cert_graph.py` DAG A1-C2.
+  - TODO-5.4 percentiles p50/p95/p99 en `metrics.py`, 5.5 `scripts/watch_docs.py`, 5.6 `GET /escalations/export` CSV.
+  - TODO-5.7 `useOfflineStatus.ts`, 5.8 `DesktopAppWindow.tsx`, 5.9 media 450px en `globals.css`, 5.10 `retroSound.ts`, 5.11 `src-tauri/tauri.conf.json`.
+  - Tablero, PRD y Roadmap sincronizados al 100%.
+
+### [2026-09-19 12:25] [Docs/Fase-4-TODO-Marcado-8-8]
+- **Tablero Fase 4 marcado como completada (8/8, total 46/57 al 80.7%):**
+  - Actualizado `docs/01-product/TODO_50_PROPOSITAS.md` y `docs/01-product/PRD.md` (Phase 4 Planned hacia Completed).
+
+### [2026-09-19 12:20] [Feat/Fase-4-Kickoff-Testing-Tooling]
+- **Inicio de Fase 4 Testing y Tooling (8 artefactos):**
+  - TODO-4.4 `backend/tests/mocks/mock_dual_advisor.py` mock determinista sin red.
+  - TODO-4.3 `scripts/load_test.py` sonda 50 usuarios con p50/p95.
+  - TODO-4.6 `.pre-commit-config.yaml` Ruff + Prettier frontend.
+  - TODO-4.8 `scripts/verify_mermaid.py` balance de bloques Mermaid.
+  - TODO-4.5 `frontend/playwright.config.ts` snapshots retro.
+  - TODO-4.2 `pyproject-mutmut.toml` alcance financiero.
+  - TODO-4.7 `run.py doctor` diagnostico puertos/runtimes/ChromaDB.
+  - TODO-4.1 `.github/workflows/rag-eval.yml` gate CI con evaluate + mermaid.
+
+### [2026-09-19 12:00] [Docs/Fase-3-Cierre-Formal-10-10]
+- **Cierre Formal de Fase 3 Frontend y Sincronizacion de Tablero:**
+  - Verificados en codigo los 10 entregables (Zustand stores, SSE stream, virtualizacion, IndexedDB, RSC boundary, dynamic splitting, CRT GPU, WCAG AAA, focus trap, Monitor OSD).
+  - Corregido encabezado de `docs/01-product/TODO_50_PROPOSITAS.md`: Fase 3 a Completada 10/10, total 38/57 (66.7%).
+  - PRD y Roadmap ya declaraban Fase 3 Completada; sin cambios de codigo requeridos.
+
 ### [2026-09-06 00:42] [Chore/Git-Ignore-And-Untrack-SENA]
 - **Exclusión y Desvinculación de la Carpeta SENA del Repositorio Git:**
   - Desvinculada la totalidad del directorio `SENA/` del seguimiento de Git mediante `git rm -r --cached SENA/`, manteniendo íntegros y seguros todos los archivos locales en disco (`.docx`, `.pdf`, `.xlsx`, `.html`, `.png`, `.md`).

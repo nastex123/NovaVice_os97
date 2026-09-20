@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [2026-09-20 22:30] [Fix/PROP-105-StructuredOutput-Indentation]
+- **Bug de integración (CI run `35535682997`):** al insertar las tuplas de cita con un `oldString` ambiguo, el cuerpo de `verify_citations_strictly` quedó desplazado al final y `structured_output.py` lanzaba `IndentationError` (`if response.abstain:` sin bloque), rompiendo `scripts/evaluate_rag.py` al importar el engine. Archivo reescrito completo con la estructura correcta.
+- **Verificación:** pendiente del run `rag-eval` tras el push.
+
 ### [2026-09-20 22:28] [Feat/PROP-105-CitationTuples-SSE]
 - **Citas verificables por aserción en el stream (PROP-105 / CRÍTICO, Orden 2):**
   - `backend/src/rag/structured_output.py`: esquema Pydantic `CitationTuple {chunk_id, score, snippet}`; `build_citation_tuples` traza cada aserción a su chunk fuente con puntaje de adhesión (mismo criterio de overlap de tokens que `faithfulness.py`); `build_paragraph_citations` agrupa las tuplas por párrafo para el SSE.

@@ -12,14 +12,14 @@
 | TODO | Propuesta | Bloque | Área | Esfuerzo | Estado |
 | :-- | :-- | :-: | :-: | :-: | :-: |
 | TODO-PROP-102 | Pre-enrutador determinista de tarifas/convenios | 1 | Backend | S | Completada |
-| TODO-PROP-105 | Citas JSON en tuplas Pydantic | 1 | Backend | S | Pendiente |
+| TODO-PROP-105 | Citas JSON en tuplas Pydantic | 1 | Backend | S | Completada |
 | TODO-PROP-149 | FPS adaptativo por inactividad | 5 | Frontend | S | Pendiente |
 | TODO-PROP-178 | Kiosco watchdog + bloqueo HW | 9 | Tauri | M | Pendiente |
 | TODO-PROP-183 | Cifrado SQLCipher de SQLite local | 9 | Backend | S | Pendiente |
 | TODO-PROP-195 | PDF de cotización oficial local | 11 | Backend/Frontend | M | Pendiente |
 | TODO-PROP-200 | Registro de causa raíz de abandono | 11 | Backend | S | Pendiente |
 
-**Total: 7** | Completadas: 1 | Pendientes: 6
+**Total: 7** | Completadas: 2 | Pendientes: 5
 
 ---
 
@@ -40,7 +40,7 @@
 - [x] Emitir tuplas citadas junto a cada párrafo del SSE.
 - [x] Reusar `faithfulness.py` para el scoring de adhesión en tiempo real.
 - **Aceptación:** toda aserción de precio/cronograma lleva cita verificable; tests de esquema.
-- **Verificación:** pendiente del run `rag-eval` en GitHub Actions tras el push (tests en `backend/tests/test_structured_output.py`).
+- **Verificación:** run `rag-eval` `35535795484` verde (`82 passed, 1 skipped`) — `backend/tests/test_structured_output.py` (esquema, atribución, grupos por párrafo y stream e2e).
 
 ## 🟢 TODO-PROP-149 [Prop. 149 - CRÍTICO] FPS adaptativo por inactividad
 

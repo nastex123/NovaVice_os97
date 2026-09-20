@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### [2026-09-20 22:30] [Fix/PROP-105-StructuredOutput-Indentation]
 - **Bug de integración (CI run `35535682997`):** al insertar las tuplas de cita con un `oldString` ambiguo, el cuerpo de `verify_citations_strictly` quedó desplazado al final y `structured_output.py` lanzaba `IndentationError` (`if response.abstain:` sin bloque), rompiendo `scripts/evaluate_rag.py` al importar el engine. Archivo reescrito completo con la estructura correcta.
-- **Verificación:** pendiente del run `rag-eval` tras el push.
+- **Verificación:** run `rag-eval` `35535795484` verde.
 
 ### [2026-09-20 22:28] [Feat/PROP-105-CitationTuples-SSE]
 - **Citas verificables por aserción en el stream (PROP-105 / CRÍTICO, Orden 2):**
@@ -18,7 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `backend/src/core/query_router.py`: las respuestas canónicas deterministas también llevan `citation_tuples` (grounded sobre el texto oficial del corpus).
   - `ChatResponse` usa `extra="ignore"`, por lo que los campos nuevos no rompen el contrato JSON de `/api/v1/chat`.
   - `backend/tests/test_structured_output.py`: roundtrip del esquema Pydantic, atribución al chunk correcto, segregación de aserciones, grupos por párrafo y e2e de `stream_query` (vía router determinista, sin LLM).
-- **Verificación:** pendiente del run `rag-eval` tras el push.
+- **Verificación:** run `rag-eval` `35535795484` verde (`82 passed, 1 skipped`).
 
 ### [2026-09-20 22:21] [Fix/RAG-SelfConsistency-Tokens]
 - **Bug latente activado por el router ajustado (CI run `35535127164`, 1 failed / 75 passed / 1 skipped):** con los patrones acotados, la consulta de `test_api_chat_stream_endpoint` volvió al camino RAG y alcanzó la rama de self-consistency N=3 (`top_similarity ∈ [0.35, 0.50]` con candidatos válidos), donde `llm_output` nunca se definía → `UnboundLocalError` en `backend/src/rag/engine.py:610` (`metrics_bus.record_tokens`).

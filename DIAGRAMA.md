@@ -254,6 +254,6 @@ Se ejecuta en `main.py:14` `lifespan()` al arrancar y bajo demanda si `count==0`
 
 1. **GitHub:** este `.md` renderiza Mermaid automáticamente.
 2. **VS Code:** `Ctrl+Shift+V` (Preview) con extensión `Markdown Preview Mermaid Support`.
-3. **Online:** copiar bloque ```mermaid en https://mermaid.live → Export PNG/SVG.
+3. **Online:** copiar el bloque de código mermaid desde cualquier diagrama en https://mermaid.live → Export PNG/SVG.
 
 > Generado 2026-09-01 — Para defensa oral, imprime sección 2 y 4 en 1 slide cada una.

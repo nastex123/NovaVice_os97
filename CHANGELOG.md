@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [2026-09-20 22:11] [Fix/Docs-Mermaid-Balance]
+- **Gate `verify_mermaid.py` en CI (fallo preexistente):** `DIAGRAMA.md` tenía un ` ```mermaid ` literal en la sección "Cómo Ver los Diagramas" (conteo `opens=6 closes=5`), rompiendo la validación `scripts/verify_mermaid.py` (TODO-4.8) y bloqueando el paso `pytest` del nuevo gate. Reescribida la instrucción online sin la secuencia de comillas invertidas; ahora `opens=5 closes=5` y el pipeline `rag-eval` puede completar `evaluate_rag.py` y `pytest backend/tests`.
+
 ### [2026-09-20 22:09] [Feat/PROP-102-Router-Determinista-Tarifas]
 - **Pre-enrutador determinista de tarifas, financiación y convenios (PROP-102 / CRÍTICO, Orden 1):**
   - 3 rutas nuevas en `backend/src/core/query_router.py` con respuestas canónicas sub-15 ms sin LLM: `convenios_descuentos` (cajas de compensación por región, universitarios 15%, familiar/parejas 15%, empresas 20%, referidos bono $100.000), `financiacion_medios_pago` (contado 10%, 3 cuotas 40/30/30 sin Datacrédito, PSE/Nequi/Daviplata/tarjetas/transferencias/Efecty) y `precios_tarifas` (módulos $650.000/$720.000, sabatino, clases privadas y paquetes por nivel).

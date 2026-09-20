@@ -45,7 +45,7 @@ Este plan maestro organiza las **50 propuestas de mejora técnica** en **5 fases
 - **Propuesta 12 [CRÍTICO]:** Desacoplamiento y pool de conexiones HTTP persistente (`httpx.AsyncClient` singleton) para OpenCode y AGY.
 - **Propuesta 13 [RECOMENDADO]:** Mecanismo de Backoff Exponencial y Circuit Breaker para conmutación de proveedores LLM ante degradación.
 - **Propuesta 14 [RECOMENDADO]:** Middleware ASGI con inyección y propagación de `X-Request-ID` (Correlation ID) para trazabilidad unificada.
-- **Propuesta 15 [RECOMENDADO]:** Migración de `escalations.json` a base transaccional SQLite con modo WAL (Write-Ahead Logging).
+- **Propuesta 15 [RECOMENDADO]:** Migración de `escalations.json` a base transaccional SQLite con modo WAL (Write-Ahead Logging). **Completada el 2026-09-20** — ahora el artefacto en reposo está **cifrado (NovVault)**: `escalations.db.enc` + journal JSON cifrado, con copia de trabajo transitoria y script de recuperación `scripts/decrypt_escalations.py` (ver ADR-009, PROP-183).
 - **Propuesta 16 [RECOMENDADO]:** Validación estricta de esquemas con serializadores nativos Pydantic V2 (`model_validate` / `model_dump_json`).
 - **Propuesta 17 [OPCIONAL]:** Exposición de métricas nativas OpenMetrics/Prometheus (`/metrics/prometheus`) con latencias p50/p95/p99.
 - **Propuesta 18 [FUTURO]:** Worker en background asíncrono para hot-reload y re-indexación no bloqueante al modificar documentos en `backend/data/documents/`.

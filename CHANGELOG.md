@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [2026-09-20 22:43] [Feat/PROP-183-AtRest-Encryption-NovoVault]
+- **Cifrado en reposo de la persistencia de escalations (PROP-183 / CRÍTICO, Orden 1):**
+  - `backend/src/core/secure_store.py` (nuevo, **NovVault**): blob `NVVAULT\x00\x01` + salt(16) + token Fernet (AES-128-CBC + HMAC-SHA256) con clave derivada por PBKDF2-HMAC-SHA256 (210 000 iteraciones) desde `ESCALATIONS_DB_KEY` (nunca hardcodeada); helpers atómicos `encrypt_file`/`decrypt_file` y `atomic_write_encrypted`/`read_text_decrypted` (este último tolera journals legacy en plano para migración).
+  - `backend/src/data/sqlite_tickets.py`: con clave, el artefacto persistente es `escalations.db.enc`; la copia de trabajo `escalations.db` es transitoria (se materializa al abrir y se re-cifra + elimina al sellar, junto con `-wal`/`-shm`/`-journal`). Sin clave → modo plano original intacto (desarrollo/CI).
+  - `backend/src/core/dispatcher.py`: el journal JSON se persiste y lee cifrado cuando hay clave (`atomic_write_encrypted`/`read_text_decrypted`), manteniendo webhooks intactos.
+  - SQLCipher fue **evaluado y descartado** por dependencia nativa `libsqlcipher-dev` ausente en los runners CI; `cryptography>=42.0.0` (wheels cp312 universales) en `backend/requirements.txt`. Interface `_get_connection` aislada para migrar a SQLCipher en el futuro.
+  - `scripts/decrypt_escalations.py`: CLI de recuperación de respaldos cifrados a archivo en claro.
+  - `backend/tests/test_secure_store.py`: roundtrip bytes/archivo, clave incorrecta → `InvalidToken`, repo cifrado en reposo descifrable a SQLite válido, reapertura entre instancias, modo plano sin cambios, dispatcher JSON cifrado/plano y lectura de env.
+  - Recursos: `docs/09-decisions/ADR-009-secure-at-rest-encryption-novvault.md` (modelo de amenaza, backup/rotación de clave, evaluación SQLCipher); `PRD.md` FR-11 y `ROADMAP_50_PROPOSITAS.md` prop. 15 sincronizados; `.gitignore` cubre `*.work`, `*.enc`, `*.enc.tmp`.
+- **Verificación:** pendiente del run `rag-eval` en GitHub Actions tras el push.
+
 ### [2026-09-20 22:30] [Fix/PROP-105-StructuredOutput-Indentation]
 - **Bug de integración (CI run `35535682997`):** al insertar las tuplas de cita con un `oldString` ambiguo, el cuerpo de `verify_citations_strictly` quedó desplazado al final y `structured_output.py` lanzaba `IndentationError` (`if response.abstain:` sin bloque), rompiendo `scripts/evaluate_rag.py` al importar el engine. Archivo reescrito completo con la estructura correcta.
 - **Verificación:** run `rag-eval` `35535795484` verde.

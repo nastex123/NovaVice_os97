@@ -68,7 +68,7 @@ Human admission counselors spent excessive time repeatedly answering standard FA
 | **FR-08** | GFM Markdown Renderer (`react-markdown` + `remark-gfm`) | P0 | `frontend/src/components/ChatContainer.tsx` | Complete |
 | **FR-09** | Cross-Platform Installer & Process Launcher (`run.py`) | P0 | `installer.py`, `run.py`, `.bat`, `.sh` | Complete |
 | **FR-10** | Pre-Flight Prompt Injection Guardrail | P0 | `src/core/guardrails.py` | Complete |
-| **FR-11** | Automated Human Escalation Logging (`escalations.json` + SQLite WAL) — Heavy Only (2-phase Sí/No, lista negra very heavy) | P1 | `src/core/dispatcher.py:24`, `engine.py:220` | Complete |
+| **FR-11** | Automated Human Escalation Logging (`escalations.json` + SQLite WAL) — Heavy Only (2-phase Sí/No, lista negra very heavy) | P1 | `src/core/dispatcher.py:24`, `engine.py:220`, `src/core/secure_store.py` | Complete (at-rest NovVault, ADR-009) |
 | **FR-12** | Dual Cache with File-Hash Invalidation + Semantic 0.88 pilar (vs 0.95) | P1 | `src/core/cache.py:47` `vector_store.py:167` | Complete |
 | **FR-13** | SSE Real-Time Streaming (`/api/v1/chat/stream`) | P1 | `src/api/routes.py` | Complete |
 | **FR-14** | JSON & Prometheus Telemetry (`/metrics/prometheus`) | P1 | `src/core/metrics.py` | Complete |

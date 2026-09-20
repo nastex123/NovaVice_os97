@@ -15,11 +15,11 @@
 | TODO-PROP-105 | Citas JSON en tuplas Pydantic | 1 | Backend | S | Completada |
 | TODO-PROP-149 | FPS adaptativo por inactividad | 5 | Frontend | S | Pendiente |
 | TODO-PROP-178 | Kiosco watchdog + bloqueo HW | 9 | Tauri | M | Pendiente |
-| TODO-PROP-183 | Cifrado SQLCipher de SQLite local | 9 | Backend | S | Pendiente |
+| TODO-PROP-183 | Cifrado en reposo de SQLite/JSON local | 9 | Backend | S | Completada |
 | TODO-PROP-195 | PDF de cotización oficial local | 11 | Backend/Frontend | M | Pendiente |
 | TODO-PROP-200 | Registro de causa raíz de abandono | 11 | Backend | S | Pendiente |
 
-**Total: 7** | Completadas: 2 | Pendientes: 5
+**Total: 7** | Completadas: 3 | Pendientes: 4
 
 ---
 
@@ -58,13 +58,18 @@
 - [ ] Bloqueo de combinaciones del sistema (Alt+F4, Ctrl+W, desktop) y captura de teclado/USB.
 - **Aceptación:** sesión ininterrumpida tras 24 h de prueba; log de reinicios.
 
-## 🟢 TODO-PROP-183 [Prop. 183 - CRÍTICO] Cifrado SQLCipher de SQLite local
+## 🟢 TODO-PROP-183 [Prop. 183 - CRÍTICO] Cifrado en reposo de SQLite/JSON local (NovVault)
 
-> **Objetivo:** Cifrar la persistencia local (escalations, ChromaDB en discos) protegiendo datos de visitantes.
+> **Objetivo:** Cifrar la persistencia local (escalations.db + journal JSON) protegiendo datos de visitantes; la DB ilegible sin clave.
 
-- [ ] Evaluar integración SQLCipher para `escalations.db` (clave derivada del entorno, sin hardcodear).
-- [ ] Documentar el modelo de amenaza y backup de clave en `docs/`.
-- **Aceptación:** DB ilegible sin clave; backups descifrables con procedimiento documentado.
+- [x] Evaluar SQLCipher para `escalations.db` — **descartado** en runners CI sin `libsqlcipher-dev`; se eligió **NovVault** (Fernet + PBKDF2-HMAC-SHA256 210k iteraciones, clave de env `ESCALATIONS_DB_KEY` sin hardcodear).
+- [x] `secure_store.py`: blob `NVVAULT\x00\x01` + salt(16) + token Fernet; escritura atómica y lectura con tolerancia a journals legacy en plano.
+- [x] `SQLiteTicketRepository`: artefacto persistente `escalations.db.enc`; copia de trabajo `.work` transitoria (re-creada al abrir, re-cifrada y eliminada al sellar, incluidas `-wal`/`-shm`/`-journal`). Sin clave → modo plano original intacto.
+- [x] `EscalationDispatcher`: journal JSON se persiste/lee cifrado cuando hay clave; `read_text_decrypted`/`atomic_write_encrypted`.
+- [x] Documentar el modelo de amenaza y backup de clave en `docs/09-decisions/ADR-009-secure-at-rest-encryption-novvault.md`.
+- [x] `scripts/decrypt_escalations.py` de recuperación + tests `backend/tests/test_secure_store.py`.
+- **Aceptación:** DB ilegible sin clave; backups descifrables con procedimiento documentado; `pytest` y CI verdes.
+- **Verificación:** run `rag-eval` `<PENDING>` verde — `backend/tests/test_secure_store.py` (roundtrip bytes/archivo, clave incorrecta → `InvalidToken`, repo cifrado en reposo descifrable a SQLite válido, repo plano sin cambios, dispatcher JSON cifrado/plano, lectura de env).
 
 ## 🟢 TODO-PROP-195 [Prop. 195 - CRÍTICO] PDF de cotización oficial
 

@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [2026-09-20 23:05] [Feat/PROP-200-Abandonment-RootCause]
+- **Registro de causa raíz de abandono por cluster (PROP-200 / CRÍTICO, Orden de Backend):**
+  - `backend/src/core/abandonment.py` (nuevo): `classify_pillar` compartido, `load_tickets` (journal plano o vault NovVault vía `read_text_decrypted`), `build_abandonment_report` agrupa los tickets de escalamiento por pilar/área con cuota relativa, causa predominante (`escalation_reason`) y keywords top; `suggest_documents` reutiliza el criterio D40 (visas/Australia, niños/edad, mascotas).
+  - `backend/src/core/metrics.py`: `classify_pillar(query)` extrae la clasificación E48; `record_escalation(query)` suma al contador `cluster_abandonment` por cluster; expuesto como `abandonment_by_cluster` en `/api/v1/metrics` y como `admissions_abandonment_total_by_cluster{cluster=...}` en `/metrics/prometheus`.
+  - `backend/src/rag/engine.py`: ambas ramas de escalamiento (confirmación de *heavy query* y violación de faithfulness) registran la métrica con el `query` real.
+  - `backend/src/api/routes.py`: nuevo endpoint `/api/v1/escalations/abandonment` (reporte histórico del journal + `live_cluster_abandonment` de la telemetría en vivo, resiliente a vault corrupto).
+  - `scripts/escalation_abandonment_report.py`: CLI para el panel de admisiones (extiende `escalation_feedback_loop.py` D40).
+  - `backend/tests/test_abandonment.py`: clasificación, agrupación por cluster, causa dominante, suggested docs, journal plano/vault, métricas y endpoint.
+- **Verificación:** pendiente del run `rag-eval` en GitHub Actions tras el push.
+
 ### [2026-09-20 22:43] [Feat/PROP-183-AtRest-Encryption-NovoVault]
 - **Cifrado en reposo de la persistencia de escalations (PROP-183 / CRÍTICO, Orden 1):**
   - `backend/src/core/secure_store.py` (nuevo, **NovVault**): blob `NVVAULT\x00\x01` + salt(16) + token Fernet (AES-128-CBC + HMAC-SHA256) con clave derivada por PBKDF2-HMAC-SHA256 (210 000 iteraciones) desde `ESCALATIONS_DB_KEY` (nunca hardcodeada); helpers atómicos `encrypt_file`/`decrypt_file` y `atomic_write_encrypted`/`read_text_decrypted` (este último tolera journals legacy en plano para migración).

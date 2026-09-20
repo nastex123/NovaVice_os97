@@ -71,7 +71,7 @@ Human admission counselors spent excessive time repeatedly answering standard FA
 | **FR-11** | Automated Human Escalation Logging (`escalations.json` + SQLite WAL) — Heavy Only (2-phase Sí/No, lista negra very heavy) | P1 | `src/core/dispatcher.py:24`, `engine.py:220`, `src/core/secure_store.py` | Complete (at-rest NovVault, ADR-009) |
 | **FR-12** | Dual Cache with File-Hash Invalidation + Semantic 0.88 pilar (vs 0.95) | P1 | `src/core/cache.py:47` `vector_store.py:167` | Complete |
 | **FR-13** | SSE Real-Time Streaming (`/api/v1/chat/stream`) | P1 | `src/api/routes.py` | Complete |
-| **FR-14** | JSON & Prometheus Telemetry (`/metrics/prometheus`) | P1 | `src/core/metrics.py` | Complete |
+| **FR-14** | JSON & Prometheus Telemetry (`/metrics/prometheus`) | P1 | `src/core/metrics.py`, `abandonment.py` | Complete |
 | **FR-15** | Automated Pytest Test Suite (72/72 Tests Passed) | P0 | `tests/` | Complete |
 
 ---

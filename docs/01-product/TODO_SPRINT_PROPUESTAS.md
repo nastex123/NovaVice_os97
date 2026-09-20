@@ -17,9 +17,9 @@
 | TODO-PROP-178 | Kiosco watchdog + bloqueo HW | 9 | Tauri | M | Pendiente |
 | TODO-PROP-183 | Cifrado en reposo de SQLite/JSON local | 9 | Backend | S | Completada |
 | TODO-PROP-195 | PDF de cotización oficial local | 11 | Backend/Frontend | M | Pendiente |
-| TODO-PROP-200 | Registro de causa raíz de abandono | 11 | Backend | S | Pendiente |
+| TODO-PROP-200 | Registro de causa raíz de abandono | 11 | Backend | S | Completada |
 
-**Total: 7** | Completadas: 3 | Pendientes: 4
+**Total: 7** | Completadas: 4 | Pendientes: 3
 
 ---
 
@@ -83,9 +83,13 @@
 
 > **Objetivo:** Identificar por qué las conversaciones quedan sin resolver (cluster + tickets).
 
-- [ ] Vincular clusters de preguntas sin conversión con los tickets de escalamiento (`escalations`).
-- [ ] Reporte de causa raíz en `/metrics/prometheus` o endpoint dedicado.
-- **Aceptación:** métrica de abandono por cluster/área disponible para el panel de admisiones.
+- [x] Vincular clusters de preguntas sin conversión con los tickets de escalamiento (`escalations`): `backend/src/core/abandonment.py` agrupa cada ticket por pilar (reutilizando clasificación E48/`classify_pillar`), con cuota relativa, causa predominante (`escalation_reason`) y keywords top.
+- [x] Reporte de causa raíz en `/metrics/prometheus` o endpoint dedicado: métrica `admissions_abandonment_total_by_cluster{cluster=...}` en `/metrics/prometheus`, `abandonment_by_cluster` en `/api/v1/metrics` y endpoint `/api/v1/escalations/abandonment` (histórico del journal + `live_cluster_abandonment`).
+- [x] Telemetría en vivo: `record_escalation(query)` clasifica el cluster al escalar en `engine.py` (ambas ramas de escalamiento).
+- [x] CLI para el panel: `scripts/escalation_abandonment_report.py` (extiende feedback_loop D40) y sugerencias de documentación ausente (visas/Australia, niños/edad, mascotas).
+- [x] Tests `backend/tests/test_abandonment.py` (clasificación, agrupación, causa, journal plano/vault, métricas y endpoint).
+- **Aceptación:** métrica de abandono por cluster/área disponible para el panel de admisiones; `pytest` y CI verdes.
+- **Verificación:** run `rag-eval` `<PENDING>` verde.
 
 ---
 

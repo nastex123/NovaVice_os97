@@ -12,6 +12,9 @@ httpx>=0.27.0
 python-dotenv>=1.0.1
 python-multipart>=0.0.9
 
+# At-Rest Encryption (NovVault / Fernet for escalations persistence)
+cryptography>=42.0.0
+
 # Testing & QA
 pytest>=8.0.0
 pytest-asyncio>=0.23.5

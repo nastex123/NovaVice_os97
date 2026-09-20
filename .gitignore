@@ -36,6 +36,9 @@ backend/data/cache_models/
 backend/data/*.db
 backend/data/*.db-wal
 backend/data/*.db-shm
+backend/data/*.work
+backend/data/*.enc
+backend/data/*.enc.tmp
 backend/data/snapshots/
 *.zip
 scratch_*.py

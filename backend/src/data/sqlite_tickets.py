@@ -3,20 +3,48 @@ import json
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 from src.config import settings
+from src.core.secure_store import get_vault_password, decrypt_file, encrypt_file
 
 
 class SQLiteTicketRepository:
     """
     Thread-safe, crash-resilient SQLite repository with Write-Ahead Logging (WAL)
     for admission escalation tickets.
+
+    Modo cifrado en reposo (PROP-183): cuando hay clave (env `ESCALATIONS_DB_KEY`
+    o parámetro `vault_password`), el artefacto persistente es `escalations.db.enc`
+    (blob NovVault v1). La copia de trabajo en texto plano (`escalations.db`) es
+    transitoria: se recrea desde el vault al abrir, y se re-cifra y elimina al
+    sellar cada operación (blobs WAL/SHM también se eliminan). Sin clave, se
+    mantiene el comportamiento plano original (modo desarrollo).
     """
 
-    def __init__(self, db_path: Optional[Path] = None):
+    def __init__(self, db_path: Optional[Path] = None, vault_password: Optional[str] = None):
         self.db_path = db_path or (settings.data_dir / "escalations.db")
+        self.vault_password = vault_password if vault_password is not None else get_vault_password()
+        self.enc_path = self.db_path.with_name(self.db_path.name + ".enc")
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         self._init_db()
 
+    def _prep_working_copy(self) -> None:
+        """En modo cifrado, materializa la copia de trabajo desde el vault si falta."""
+        if not self.vault_password:
+            return
+        if self.enc_path.exists() and not self.db_path.exists():
+            self.db_path.write_bytes(decrypt_file(self.enc_path, self.vault_password))
+
+    def _seal_working_copy(self) -> None:
+        """En modo cifrado, deja SOLO el vault en reposo y borra la copia transitoria."""
+        if not self.vault_password:
+            return
+        for suffix in ("-wal", "-shm", "-journal"):
+            Path(str(self.db_path) + suffix).unlink(missing_ok=True)
+        if self.db_path.exists():
+            encrypt_file(self.db_path, self.enc_path, self.vault_password)
+            self.db_path.unlink(missing_ok=True)
+
     def _get_connection(self) -> sqlite3.Connection:
+        self._prep_working_copy()
         conn = sqlite3.connect(str(self.db_path), timeout=10.0)
         conn.row_factory = sqlite3.Row
         conn.execute("PRAGMA journal_mode=WAL;")
@@ -42,6 +70,7 @@ class SQLiteTicketRepository:
             """)
             conn.execute("CREATE INDEX IF NOT EXISTS idx_tickets_created_at ON escalation_tickets(created_at);")
             conn.execute("CREATE INDEX IF NOT EXISTS idx_tickets_status ON escalation_tickets(status);")
+        self._seal_working_copy()
 
     def save_ticket(self, ticket: Dict[str, Any]) -> None:
         with self._get_connection() as conn:
@@ -65,6 +94,7 @@ class SQLiteTicketRepository:
                 json.dumps(ticket.get("conversation_history_last3", []), ensure_ascii=False),
                 json.dumps(ticket.get("top3_candidate_chunks", []), ensure_ascii=False)
             ))
+        self._seal_working_copy()
 
     def get_all_tickets(self, limit: int = 200) -> List[Dict[str, Any]]:
         with self._get_connection() as conn:
@@ -94,6 +124,7 @@ class SQLiteTicketRepository:
                 "conversation_history_last3": json.loads(r["conversation_history_json"] or "[]"),
                 "top3_candidate_chunks": json.loads(r["candidate_chunks_json"] or "[]")
             })
+        self._seal_working_copy()
         return tickets
 
     def migrate_from_json(self, json_path: Path) -> int:

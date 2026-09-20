@@ -5,21 +5,23 @@ from pathlib import Path
 from typing import Dict, Any, Optional
 import httpx
 from src.config import settings
+from src.core.secure_store import get_vault_password, atomic_write_encrypted, read_text_decrypted
 
 
 class EscalationDispatcher:
     # Generates persistent escalation tickets and dispatches real-time webhooks.
+    # El journal JSON se persiste cifrado en reposo (PROP-183) cuando hay clave de vault.
 
-    def __init__(self, log_path: Optional[Path] = None, webhook_url: Optional[str] = None):
+    def __init__(self, log_path: Optional[Path] = None, webhook_url: Optional[str] = None, vault_password: Optional[str] = None):
         self.log_path = log_path or settings.escalations_log_path
         self.webhook_url = webhook_url or settings.escalation_webhook_url
+        self.vault_password = vault_password if vault_password is not None else get_vault_password()
         self._ensure_log_exists()
 
     def _ensure_log_exists(self) -> None:
         self.log_path.parent.mkdir(parents=True, exist_ok=True)
         if not self.log_path.exists():
-            with open(self.log_path, "w", encoding="utf-8") as f:
-                json.dump([], f, indent=2)
+            atomic_write_encrypted(self.log_path, "[]", self.vault_password)
 
     def create_ticket(
         self,
@@ -72,11 +74,10 @@ class EscalationDispatcher:
             pass
 
         try:
-            with open(self.log_path, "r", encoding="utf-8") as f:
-                tickets = json.load(f)
+            payload = read_text_decrypted(self.log_path, self.vault_password)
+            tickets = json.loads(payload) if payload else []
             tickets.append(ticket)
-            with open(self.log_path, "w", encoding="utf-8") as f:
-                json.dump(tickets, f, indent=2)
+            atomic_write_encrypted(self.log_path, json.dumps(tickets, indent=2, ensure_ascii=False), self.vault_password)
         except Exception:
             pass
 
@@ -88,8 +89,8 @@ class EscalationDispatcher:
         Returns total tickets, common topics, and suggested new documentation titles.
         """
         try:
-            with open(self.log_path, "r", encoding="utf-8") as f:
-                tickets = json.load(f)
+            payload = read_text_decrypted(self.log_path, self.vault_password)
+            tickets = json.loads(payload) if payload else []
         except Exception:
             tickets = []
 

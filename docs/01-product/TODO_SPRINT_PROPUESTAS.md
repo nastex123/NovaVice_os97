@@ -69,7 +69,7 @@
 - [x] Documentar el modelo de amenaza y backup de clave en `docs/09-decisions/ADR-009-secure-at-rest-encryption-novvault.md`.
 - [x] `scripts/decrypt_escalations.py` de recuperación + tests `backend/tests/test_secure_store.py`.
 - **Aceptación:** DB ilegible sin clave; backups descifrables con procedimiento documentado; `pytest` y CI verdes.
-- **Verificación:** run `rag-eval` `<PENDING>` verde — `backend/tests/test_secure_store.py` (roundtrip bytes/archivo, clave incorrecta → `InvalidToken`, repo cifrado en reposo descifrable a SQLite válido, repo plano sin cambios, dispatcher JSON cifrado/plano, lectura de env).
+- **Verificación:** run `rag-eval` `35536635688` verde (`92 passed, 1 skipped`) — `backend/tests/test_secure_store.py` (roundtrip bytes/archivo, clave incorrecta → `InvalidToken`, repo cifrado en reposo descifrable a SQLite válido, repo plano sin cambios, dispatcher JSON cifrado/plano, lectura de env).
 
 ## 🟢 TODO-PROP-195 [Prop. 195 - CRÍTICO] PDF de cotización oficial
 

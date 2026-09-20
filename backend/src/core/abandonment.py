@@ -9,9 +9,9 @@ from src.core.secure_store import read_text_decrypted
 PILLAR_LABELS = ("cursos", "horarios", "precios", "sedes", "becas", "unknown")
 
 _DOC_GAP_HEURISTICS = [
-    ("visa", "australia", "21_politica_visas_internacionales_y_alianzas_migratorias.md"),
-    ("niño", "infantil", "edad", "22_politica_edades_minimas_y_cursos_para_ninos.md"),
-    ("mascota", "pet", "23_politica_acceso_con_mascotas_pet_friendly.md"),
+    (("visa", "australia"), "21_politica_visas_internacionales_y_alianzas_migratorias.md"),
+    (("niño", "niños", "infantil", "edad"), "22_politica_edades_minimas_y_cursos_para_ninos.md"),
+    (("mascota", "pet"), "23_politica_acceso_con_mascotas_pet_friendly.md"),
 ]
 
 

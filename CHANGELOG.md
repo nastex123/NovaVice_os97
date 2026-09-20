@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [2026-09-20 21:57] [Docs/Plan-Evolucion-57-Ideas]
+- **Anteproyecto priorizado de evolución de producto (57 ideas, v2.7.0):** a partir del documento "Arquitectura de Evolución" se filtraron los bloques de interés (Conocimiento/RAG, Frontend, Arte Visual CRT, PixiJS/GSAP, DevOps/Kiosco Tauri, Multilingüe, Negocio) y se descartaron todas las ideas que requieren fuentes externas (clima, pasarelas de pago, calendarios, ERP de cupos, políticas de visa: PROP-107, 141, 191, 193, 197, 199).
+  - `docs/01-product/PROPUESTAS_57_IDEAS.md`: 57 ideas (40 nuevas / 17 evoluciones) en 5 fases con impacto/esfuerzo/prioridad; leyenda N/E; datos de cabecera corregidos (v2.7.0, corpus 83 docs / 245 chunks).
+  - `docs/01-product/VALIDACION_57_IDEAS.md`: matriz idea a idea con módulo existente a reutilizar; PROP-101 (reranker FlashRank) descartada por duplicada (`backend/src/rag/reranker.py` ya usa FlashRank/ONNX, TODO-1.3) y sustituida por caché de respuestas por cluster semántico.
+  - `docs/01-product/TODO_SPRINT_PROPUESTAS.md`: los 7 CRÍTICO (102, 105, 149, 178, 183, 195, 200) como TODOs accionables a 30 días con criterios de aceptación.
+- Sin cambios de código en este batch (solo documentación de backlog).
+
 ### [2026-09-20 14:36] [Chore/Deps-Git-Hygiene-Frontend]
 - **CRÍTICO — dependencia `@playwright/test` (tsc --noEmit):** añadida `@playwright/test@^1.63.0` a `frontend/package.json` devDependencies; importada por `frontend/playwright.config.ts` (TODO-4.5) pero ausente del manifiesto, lo que rompía `tsc --noEmit` (citado 3× en CHANGELOG previo). Verificación `npm install` + `tsc --noEmit` pendiente en máquina con Node (este equipo no tiene runtime).
 - **Higiene Git / ruido CRLF:** nuevo `.gitattributes` con texto explícito → LF, `.bat` → CRLF y binarios protegidos (`*.pdf`, `*.png`, `*.whl`, `*.db`, etc.); índice renormalizado (65 archivos "modificados" con diff vacío desaparecieron del `git status`).

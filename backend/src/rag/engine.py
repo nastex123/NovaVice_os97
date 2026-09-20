@@ -550,8 +550,11 @@ class PurePythonRAGEngine:
         if 0.35 <= top_similarity <= 0.50:
             # Self-consistency sampling: generate N=3 candidates with small temperature variation and select majority / most coherent
             candidates = []
+            token_counts = {"prompt_tokens": 0, "completion_tokens": 0}
             for t_sample in [0.0, 0.2, 0.4]:
                 sample_out = await self._call_llm_api(prompt, chunks=compressed_chunks, temperature=t_sample)
+                token_counts["prompt_tokens"] += sample_out.get("prompt_tokens", 0)
+                token_counts["completion_tokens"] += sample_out.get("completion_tokens", 0)
                 txt = sample_out.get("text", "").strip()
                 if txt:
                     candidates.append(txt)
@@ -570,9 +573,11 @@ class PurePythonRAGEngine:
                 answer_text = best_candidate
             else:
                 llm_output = await self._call_llm_api(prompt, chunks=compressed_chunks)
+                token_counts = {"prompt_tokens": llm_output.get("prompt_tokens", 0), "completion_tokens": llm_output.get("completion_tokens", 0)}
                 answer_text = llm_output["text"]
         else:
             llm_output = await self._call_llm_api(prompt, chunks=compressed_chunks)
+            token_counts = {"prompt_tokens": llm_output.get("prompt_tokens", 0), "completion_tokens": llm_output.get("completion_tokens", 0)}
             answer_text = llm_output["text"]
 
         # D38b / E44b: Conversational sanitization: never leak raw REST endpoints to the applicant
@@ -607,7 +612,7 @@ class PurePythonRAGEngine:
         # 7. Update Telemetry, Failure Reset & Memory
         latency = time.time() - start_time
         metrics_bus.record_query(cached=False, latency=latency)
-        metrics_bus.record_tokens(llm_output["prompt_tokens"], llm_output["completion_tokens"])
+        metrics_bus.record_tokens(token_counts["prompt_tokens"], token_counts["completion_tokens"])
 
         # Reset consecutive failures upon informative success
         applicant_memory.reset_failures(session_id)

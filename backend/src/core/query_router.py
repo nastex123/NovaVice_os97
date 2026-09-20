@@ -67,7 +67,6 @@ class DeterministicQueryRouter:
             {
                 "id": "convenios_descuentos",
                 "patterns": [
-                    r"\bconvenios?\b",
                     r"\bcaja\s+de\s+compensacion\b",
                     r"\bcompensar\b",
                     r"\bcolsubsidio\b",
@@ -75,21 +74,17 @@ class DeterministicQueryRouter:
                     r"\bcomfama\b",
                     r"\bcomfenalco\b",
                     r"\bcomfandi\b",
-                    r"\bdescuentos?\b",
-                    r"\bsubsidio\b",
-                    r"\bcarnet\s+(?:estudiantil|universitario)\b",
-                    r"\buniversidad\b",
-                    r"\bpregrado\b",
-                    r"\bposgrado\b",
-                    r"\bfamilia\b",
-                    r"\bfamiliar\b",
                     r"\bhermanos?\b",
-                    r"\bparejas?\b",
                     r"\bconyuges?\b",
+                    r"\bparejas?\b",
+                    r"\bsegundo\s+miembro\b",
                     r"\breferidos?\b",
                     r"\bbono\b",
-                    r"\bempleados?\b",
-                    r"\bempresa\b"
+                    r"\bdescuento\s+(?:por|para|familiar|empresarial|universitario|en)\b",
+                    r"\bdescuentos?\s+por\b",
+                    r"\bsubsidio\s+monetario\b",
+                    r"\bempleados?\s+de\s+empresas?\b",
+                    r"\bconvenio\s+(?:con|cajas?|colsubsidio|cafam|comfama|comfenalco|comfandi)\b"
                 ],
                 "response": (
                     "🤝 **Convenios y Descuentos - Nova Idiomas**\n\n"
@@ -111,11 +106,14 @@ class DeterministicQueryRouter:
             {
                 "id": "financiacion_medios_pago",
                 "patterns": [
-                    r"\bfinanciacion\b",
-                    r"\bfinanciar\b",
-                    r"\bcuotas?\b",
+                    r"\bmedios?\s+de\s+pago\b",
+                    r"\bformas?\s+de\s+pago\b",
+                    r"\bplan\s+de\s+(?:3|tres)\s+cuotas?\b",
+                    r"\bplan\s+de\s+contado\b",
+                    r"\bcuantas?\s+cuotas?\b",
+                    r"\bcuotas?\s+sin\s+(?:bancos?|intereses?)\b",
+                    r"\bpago\s+en\s+cuotas\b",
                     r"\bcontado\b",
-                    r"\babono\b",
                     r"\bnequi\b",
                     r"\bdaviplata\b",
                     r"\bpse\b",
@@ -124,8 +122,6 @@ class DeterministicQueryRouter:
                     r"\beffecty\b",
                     r"\bsured\b",
                     r"\bcorresponsales?\b",
-                    r"\bmedios\s+de\s+pago\b",
-                    r"\bformas\s+de\s+pago\b",
                     r"\bcomo\s+puedo\s+pagar\b"
                 ],
                 "response": (
@@ -152,11 +148,11 @@ class DeterministicQueryRouter:
                     r"\bcuanto\s+cuest(?:a|an|e)\b",
                     r"\bcuanto\s+vale\b",
                     r"\bcual\s+es\s+el\s+precio\b",
+                    r"\bcosto\s+del\s+curso\b",
                     r"\bvalor\s+del\s+curso\b",
                     r"\bvalor\s+del\s+modulo\b",
-                    r"\bprecios?\b",
-                    r"\btarifas?\b",
-                    r"\bcostos?\b",
+                    r"\bcuanto\s+es\s+el\s+valor\b",
+                    r"\bprecio\s+de(?:l| la)\b",
                     r"\bpagar\s+por\b"
                 ],
                 "response": (
@@ -194,6 +190,11 @@ class DeterministicQueryRouter:
         q_norm = self._normalize(query)
         # Avoid overriding conversational questions like greetings or complex price comparisons
         if len(q_norm) < 4:
+            return None
+
+        # Deterministic canned responses only for concise, direct queries (<=10 words).
+        # Longer composite queries (e.g. "precio + horarios") flow to RAG for full context.
+        if len(q_norm.split()) > 10:
             return None
 
         for route in self._routes:

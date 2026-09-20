@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [2026-09-20 22:28] [Feat/PROP-105-CitationTuples-SSE]
+- **Citas verificables por aserción en el stream (PROP-105 / CRÍTICO, Orden 2):**
+  - `backend/src/rag/structured_output.py`: esquema Pydantic `CitationTuple {chunk_id, score, snippet}`; `build_citation_tuples` traza cada aserción a su chunk fuente con puntaje de adhesión (mismo criterio de overlap de tokens que `faithfulness.py`); `build_paragraph_citations` agrupa las tuplas por párrafo para el SSE.
+  - `backend/src/rag/engine.py`: `answer_query` enriquece todas las respuestas (RAG, advisor e intermediario) con `citation_tuples` y `paragraph_citations`; `stream_query` emite un evento `citations` justo al cruzar cada límite de párrafo y agrega `citation_tuples` al evento final `done` (formato SSE retrocompatible: solo suma claves).
+  - `backend/src/core/query_router.py`: las respuestas canónicas deterministas también llevan `citation_tuples` (grounded sobre el texto oficial del corpus).
+  - `ChatResponse` usa `extra="ignore"`, por lo que los campos nuevos no rompen el contrato JSON de `/api/v1/chat`.
+  - `backend/tests/test_structured_output.py`: roundtrip del esquema Pydantic, atribución al chunk correcto, segregación de aserciones, grupos por párrafo y e2e de `stream_query` (vía router determinista, sin LLM).
+- **Verificación:** pendiente del run `rag-eval` tras el push.
+
 ### [2026-09-20 22:21] [Fix/RAG-SelfConsistency-Tokens]
 - **Bug latente activado por el router ajustado (CI run `35535127164`, 1 failed / 75 passed / 1 skipped):** con los patrones acotados, la consulta de `test_api_chat_stream_endpoint` volvió al camino RAG y alcanzó la rama de self-consistency N=3 (`top_similarity ∈ [0.35, 0.50]` con candidatos válidos), donde `llm_output` nunca se definía → `UnboundLocalError` en `backend/src/rag/engine.py:610` (`metrics_bus.record_tokens`).
 - **Fix:** telemetría de tokens agregada por rama — `token_counts` acumula `prompt_tokens`/`completion_tokens` de las 3 muestras en la rama self-consistency y los conserva de `llm_output` en las ramas de LLM único; `record_tokens` ya no depende de una variable sin asignar.

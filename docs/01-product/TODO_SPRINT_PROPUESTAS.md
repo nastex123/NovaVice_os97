@@ -36,10 +36,11 @@
 
 > **Objetivo:** Rastrear cada afirmación a su chunk fuente con puntaje NLI, emitido en el stream.
 
-- [ ] Definir esquema Pydantic `CitationTuple {chunk_id, score, snippet}` en `structured_output.py`.
-- [ ] Emitir tuplas citadas junto a cada párrafo del SSE.
-- [ ] Reusar `faithfulness.py` para el scoring de adhesión en tiempo real.
+- [x] Definir esquema Pydantic `CitationTuple {chunk_id, score, snippet}` en `structured_output.py`.
+- [x] Emitir tuplas citadas junto a cada párrafo del SSE.
+- [x] Reusar `faithfulness.py` para el scoring de adhesión en tiempo real.
 - **Aceptación:** toda aserción de precio/cronograma lleva cita verificable; tests de esquema.
+- **Verificación:** pendiente del run `rag-eval` en GitHub Actions tras el push (tests en `backend/tests/test_structured_output.py`).
 
 ## 🟢 TODO-PROP-149 [Prop. 149 - CRÍTICO] FPS adaptativo por inactividad
 

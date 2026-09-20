@@ -89,7 +89,7 @@
 - [x] CLI para el panel: `scripts/escalation_abandonment_report.py` (extiende feedback_loop D40) y sugerencias de documentación ausente (visas/Australia, niños/edad, mascotas).
 - [x] Tests `backend/tests/test_abandonment.py` (clasificación, agrupación, causa, journal plano/vault, métricas y endpoint).
 - **Aceptación:** métrica de abandono por cluster/área disponible para el panel de admisiones; `pytest` y CI verdes.
-- **Verificación:** run `rag-eval` `<PENDING>` verde.
+- **Verificación:** run `rag-eval` `35537789393` verde (`98 passed, 1 skipped`) — `backend/tests/test_abandonment.py` (clasificación, agrupación por cluster, causa dominante, suggested docs, journal plano/vault, métricas y endpoint).
 
 ---
 

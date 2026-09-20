@@ -15,7 +15,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `backend/src/api/routes.py`: nuevo endpoint `/api/v1/escalations/abandonment` (reporte histórico del journal + `live_cluster_abandonment` de la telemetría en vivo, resiliente a vault corrupto).
   - `scripts/escalation_abandonment_report.py`: CLI para el panel de admisiones (extiende `escalation_feedback_loop.py` D40).
   - `backend/tests/test_abandonment.py`: clasificación, agrupación por cluster, causa dominante, suggested docs, journal plano/vault, métricas y endpoint.
-- **Verificación:** pendiente del run `rag-eval` en GitHub Actions tras el push.
+- **Verificación:** run `rag-eval` `35537789393` verde (`98 passed, 1 skipped`).
+
+### [2026-09-20 23:05] [Fix/PROP-200-DocGaps-Heuristic-Structure]
+- **CI run `35537639488` (3 failed / 95 passed / 1 skipped):** `_DOC_GAP_HEURISTICS` estaba definida como tuplas planas de 3+ elementos (`visa`, `australia`, doc) pero `suggest_documents` las desempaqueta como `(needles, doc)` → `ValueError: too many values to unpack` en `abandonment.py:49`.
+- **Fix:** cada heurística es ahora `(tuple_de_needles, doc)`; se agrega `niños` al grupo de edades.
+- **Verificación:** run `rag-eval` `35537789393` verde.
 
 ### [2026-09-20 22:43] [Feat/PROP-183-AtRest-Encryption-NovoVault]
 - **Cifrado en reposo de la persistencia de escalations (PROP-183 / CRÍTICO, Orden 1):**

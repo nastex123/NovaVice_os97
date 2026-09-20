@@ -1,0 +1,43 @@
+# Auto-detectar texto pero normalizar con estrategia determinista por tipo
+* text=auto
+
+# Texto explícito -> LF en checkout (evita ruido CRLF en diffs)
+*.md text eol=lf
+*.py text eol=lf
+*.ts text eol=lf
+*.tsx text eol=lf
+*.js text eol=lf
+*.mjs text eol=lf
+*.json text eol=lf
+*.css text eol=lf
+*.ini text eol=lf
+*.toml text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.sh text eol=lf
+*.txt text eol=lf
+*.example text eol=lf
+*.gitignore text eol=lf
+.gitattributes text eol=lf
+Dockerfile* text eol=lf
+
+# Scripts de Windows conservan CRLF (requerido por cmd.exe)
+*.bat text eol=crlf
+
+# Archivos binarios (nunca aplicar normalización de texto)
+*.pdf binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.db binary
+*.db-wal binary
+*.db-shm binary
+*.onnx binary
+*.whl binary
+*.bin binary
+*.snap binary

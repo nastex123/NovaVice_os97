@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [2026-09-20 22:21] [Fix/RAG-SelfConsistency-Tokens]
+- **Bug latente activado por el router ajustado (CI run `35535127164`, 1 failed / 75 passed / 1 skipped):** con los patrones acotados, la consulta de `test_api_chat_stream_endpoint` volvió al camino RAG y alcanzó la rama de self-consistency N=3 (`top_similarity ∈ [0.35, 0.50]` con candidatos válidos), donde `llm_output` nunca se definía → `UnboundLocalError` en `backend/src/rag/engine.py:610` (`metrics_bus.record_tokens`).
+- **Fix:** telemetría de tokens agregada por rama — `token_counts` acumula `prompt_tokens`/`completion_tokens` de las 3 muestras en la rama self-consistency y los conserva de `llm_output` en las ramas de LLM único; `record_tokens` ya no depende de una variable sin asignar.
+- **Verificación:** pendiente del run `rag-eval` tras el push.
+
 ### [2026-09-20 22:18] [Fix/PROP-102-Router-Interferencia-Advisor-y-RAG]
 - **CI pytest (run `35534737594`, 5 failed / 72 passed):** los patrones amplios del router determinista interceptaban consultas ajenas:
   - `financiacion_medios_pago` capturaba la consulta compuesta "¿Cuáles son los planes de pago y cuotas para el curso intensivo de inglés?" de `test_cache_semantic.py` y `test_rag_pipeline.py` (`\bcuotas?\b`/`\bpago\b`), rompiendo el flujo caché-semántica/RAG.

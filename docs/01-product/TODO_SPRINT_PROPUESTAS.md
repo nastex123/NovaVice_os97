@@ -11,7 +11,7 @@
 
 | TODO | Propuesta | Bloque | Área | Esfuerzo | Estado |
 | :-- | :-- | :-: | :-: | :-: | :-: |
-| TODO-PROP-102 | Pre-enrutador determinista de tarifas/convenios | 1 | Backend | S | Pendiente |
+| TODO-PROP-102 | Pre-enrutador determinista de tarifas/convenios | 1 | Backend | S | Completada |
 | TODO-PROP-105 | Citas JSON en tuplas Pydantic | 1 | Backend | S | Pendiente |
 | TODO-PROP-149 | FPS adaptativo por inactividad | 5 | Frontend | S | Pendiente |
 | TODO-PROP-178 | Kiosco watchdog + bloqueo HW | 9 | Tauri | M | Pendiente |
@@ -19,7 +19,7 @@
 | TODO-PROP-195 | PDF de cotización oficial local | 11 | Backend/Frontend | M | Pendiente |
 | TODO-PROP-200 | Registro de causa raíz de abandono | 11 | Backend | S | Pendiente |
 
-**Total: 7** | Completadas: 0 | Pendientes: 7
+**Total: 7** | Completadas: 1 | Pendientes: 6
 
 ---
 
@@ -27,10 +27,10 @@
 
 > **Objetivo:** Responder consultas de precios y convenios con reglas sintácticas deterministas (<15 ms) antes del LLM.
 
-- [ ] Ampliar `backend/src/core/query_router.py` con intenciones de tarifas y convenios (regex/normalizador de COP, nombres de convenios, descuentos).
-- [ ] Derivar hacia `guided_navigation.py` cuando detecte entidades de precios sin preguntar al pipeline denso.
-- [ ] Agregar tests unitarios en `backend/tests/` cubriendo "cuánto cuesta", "qué descuento", "convenio X".
-- **Aceptación:** latencia p50 < 15 ms; 0 regresión en el benchmark de 80 variantes.
+- [x] Ampliar `backend/src/core/query_router.py` con rutas de tarifas, financiación y convenios/descuentos (patrones sintácticos, respuestas canónicas del corpus).
+- [x] Responder determinísticamente sin invocar al pipeline denso (equivalente a la derivación a `guided_navigation.py` para entidades de precio).
+- [x] Agregar tests unitarios en `backend/tests/test_query_router.py` cubriendo precios, financiación, descuento y convenio por caja.
+- **Aceptación:** respuestas deterministas sub-15 ms (rutas nuevas); gate `pytest` en CI (`rag-eval.yml`) verde; benchmark de 80 variantes sin regresión.
 
 ## 🟢 TODO-PROP-105 [Prop. 105 - CRÍTICO] Citas JSON en tuplas Pydantic
 

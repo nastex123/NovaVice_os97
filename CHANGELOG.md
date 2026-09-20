@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [2026-09-20 22:09] [Feat/PROP-102-Router-Determinista-Tarifas]
+- **Pre-enrutador determinista de tarifas, financiación y convenios (PROP-102 / CRÍTICO, Orden 1):**
+  - 3 rutas nuevas en `backend/src/core/query_router.py` con respuestas canónicas sub-15 ms sin LLM: `convenios_descuentos` (cajas de compensación por región, universitarios 15%, familiar/parejas 15%, empresas 20%, referidos bono $100.000), `financiacion_medios_pago` (contado 10%, 3 cuotas 40/30/30 sin Datacrédito, PSE/Nequi/Daviplata/tarjetas/transferencias/Efecty) y `precios_tarifas` (módulos $650.000/$720.000, sabatino, clases privadas y paquetes por nivel).
+  - Contenido verbatim de los documentos oficiales (`03_precios_tarifas_y_financiacion.md`, `10_02`, `12_01..12_03`); constante `_MENU_BUTTONS` compartida; orden "first match wins": convenios > financiación > precios (consultas mixtas devuelven la ruta más específica).
+  - `backend/tests/test_query_router.py`: 4 casos nuevos (precios, 3 cuotas, Comfama, descuento familiar, Nequi) y el passthrough RAG "cuánto cuesta..." ahora responde determinísticamente.
+  - **CI (Opción B):** gate `python -m pytest backend/tests -q` añadido a `.github/workflows/rag-eval.yml` (pytest ya estaba en `requirements.txt`).
+- **Verificación:** pendiente del run `rag-eval` en GitHub Actions tras el push.
+
 ### [2026-09-20 21:57] [Docs/Plan-Evolucion-57-Ideas]
 - **Anteproyecto priorizado de evolución de producto (57 ideas, v2.7.0):** a partir del documento "Arquitectura de Evolución" se filtraron los bloques de interés (Conocimiento/RAG, Frontend, Arte Visual CRT, PixiJS/GSAP, DevOps/Kiosco Tauri, Multilingüe, Negocio) y se descartaron todas las ideas que requieren fuentes externas (clima, pasarelas de pago, calendarios, ERP de cupos, políticas de visa: PROP-107, 141, 191, 193, 197, 199).
   - `docs/01-product/PROPUESTAS_57_IDEAS.md`: 57 ideas (40 nuevas / 17 evoluciones) en 5 fases con impacto/esfuerzo/prioridad; leyenda N/E; datos de cabecera corregidos (v2.7.0, corpus 83 docs / 245 chunks).

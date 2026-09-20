@@ -120,3 +120,23 @@ async def export_escalation_tickets():
             lines.append(f"{t.get('id','')},{t.get('query','')[:60]},{t.get('status','')},{t.get('created_at','')}")
     return PlainTextResponse("\n".join(lines), media_type="text/csv")
 
+
+@api_router.get("/escalations/abandonment")
+async def escalation_abandonment_report():
+    """
+    PROP-200: Causa raíz de abandono por cluster/área para el panel de admisiones.
+    Agrupa los tickets de escalamiento registrados y lo combina con la telemetría
+    por cluster del proceso en vivo (metrics_bus).
+    """
+    import time as _time
+    from src.core.abandonment import load_tickets, build_abandonment_report
+    from src.core.secure_store import get_vault_password
+    try:
+        tickets = load_tickets(settings.escalations_log_path, get_vault_password())
+    except Exception:
+        tickets = []
+    report = build_abandonment_report(tickets)
+    report["reported_at"] = _time.strftime("%Y-%m-%dT%H:%M:%S%z")
+    report["live_cluster_abandonment"] = dict(metrics_bus.cluster_abandonment)
+    return report
+

@@ -1,5 +1,24 @@
 import time
-from typing import Dict, Any
+from typing import Dict, Any, Optional
+
+
+def classify_pillar(query: str) -> str:
+    """Clasifica una consulta en uno de los 5 pilares de admisiones (E48).
+
+    Devuelve 'unknown' si no hay suficiente evidencia de pilar.
+    """
+    p_norm = (query or "").lower()
+    if any(k in p_norm for k in ("curso", "idioma", "intensivo", "clase")):
+        return "cursos"
+    if any(k in p_norm for k in ("horario", "modalidad", "agenda")):
+        return "horarios"
+    if any(k in p_norm for k in ("precio", "cuesta", "vale", "costo", "tarifa", "financiacion", "cuota", "pago", "abono", "valor")):
+        return "precios"
+    if any(k in p_norm for k in ("sede", "admision", "matricula", "inscripcion", "ubicacion", "direccion")):
+        return "sedes"
+    if any(k in p_norm for k in ("beca", "descuento", "convenio", "auxilio", "subsidio")):
+        return "becas"
+    return "unknown"
 
 
 class MetricsBus:
@@ -24,6 +43,15 @@ class MetricsBus:
             "precios": 0,
             "sedes": 0,
             "becas": 0
+        }
+        # PROP-200: Abandonment (escalated/resolved-lost) telemetry by cluster/area
+        self.cluster_abandonment: Dict[str, int] = {
+            "cursos": 0,
+            "horarios": 0,
+            "precios": 0,
+            "sedes": 0,
+            "becas": 0,
+            "unknown": 0
         }
 
     def record_faithfulness(self, score: float) -> None:
@@ -58,26 +86,18 @@ class MetricsBus:
 
     def record_pillar(self, pillar: str) -> None:
         """E48: Tracks admissions query volume categorized by pillar."""
-        p_norm = pillar.lower()
-        if "curso" in p_norm or "idioma" in p_norm:
-            self.pillar_queries["cursos"] += 1
-        elif "horario" in p_norm or "modalidad" in p_norm:
-            self.pillar_queries["horarios"] += 1
-        elif "precio" in p_norm or "tarifa" in p_norm or "financiacion" in p_norm:
-            self.pillar_queries["precios"] += 1
-        elif "sede" in p_norm or "admision" in p_norm or "matricula" in p_norm:
-            self.pillar_queries["sedes"] += 1
-        elif "beca" in p_norm or "descuento" in p_norm or "convenio" in p_norm:
-            self.pillar_queries["becas"] += 1
-        else:
-            self.pillar_queries["cursos"] += 1
+        label = classify_pillar(pillar)
+        if label == "unknown":
+            label = "cursos"
+        self.pillar_queries[label] += 1
 
     def record_tokens(self, prompt: int, completion: int) -> None:
         self.prompt_tokens += prompt
         self.completion_tokens += completion
 
-    def record_escalation(self) -> None:
+    def record_escalation(self, query: Optional[str] = None) -> None:
         self.human_escalations += 1
+        self.cluster_abandonment[classify_pillar(query)] += 1
 
     @property
     def estimated_cost_usd(self) -> float:
@@ -117,7 +137,8 @@ class MetricsBus:
             "estimated_cost_usd": self.estimated_cost_usd,
             "average_latency_ms": self.average_latency_ms,
             "average_faithfulness_score": round(self.total_faithfulness_score / max(1, self.evaluated_queries_count), 4) if self.evaluated_queries_count > 0 else 1.0,
-            "pillar_distribution": dict(self.pillar_queries)
+            "pillar_distribution": dict(self.pillar_queries),
+            "abandonment_by_cluster": dict(self.cluster_abandonment)
         }
 
     def to_prometheus_format(self) -> str:
@@ -144,7 +165,13 @@ class MetricsBus:
             "",
             "# HELP admissions_uptime_seconds Application uptime in seconds",
             "# TYPE admissions_uptime_seconds gauge",
-            f"admissions_uptime_seconds {round(time.time() - self.start_time, 1)}"
+            f"admissions_uptime_seconds {round(time.time() - self.start_time, 1)}",
+            "",
+            "# HELP admissions_abandonment_total_by_cluster Escalations (lost-to-human pipeline) per admissions cluster (PROP-200)",
+            "# TYPE admissions_abandonment_total_by_cluster gauge",
+        ]
+        lines += [
+            f"admissions_abandonment_total_by_cluster{{cluster=\"{c}\"}} {n}" for c, n in self.cluster_abandonment.items()
         ]
         return "\n".join(lines) + "\n"
 

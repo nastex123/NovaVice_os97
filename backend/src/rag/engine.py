@@ -217,7 +217,7 @@ class PurePythonRAGEngine:
                 top_chunks=top_candidate_chunks
             )
             await escalation_dispatcher.dispatch_webhook(ticket)
-            metrics_bus.record_escalation()
+            metrics_bus.record_escalation(query=query)
             metrics_bus.record_query(cached=False, latency=time.time() - start_time)
             applicant_memory.update_attributes(session_id, "pending_heavy_query", None)
             return {
@@ -611,7 +611,7 @@ class PurePythonRAGEngine:
                 top_chunks=compressed_chunks[:3]
             )
             await escalation_dispatcher.dispatch_webhook(ticket)
-            metrics_bus.record_escalation()
+            metrics_bus.record_escalation(query=query)
 
         if mapped_query:
             answer_text += "\n\n*(Escribe '0' para regresar al Menú Principal)*"

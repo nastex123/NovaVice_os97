@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [2026-09-20 14:36] [Chore/Deps-Git-Hygiene-Frontend]
+- **CRÍTICO — dependencia `@playwright/test` (tsc --noEmit):** añadida `@playwright/test@^1.63.0` a `frontend/package.json` devDependencies; importada por `frontend/playwright.config.ts` (TODO-4.5) pero ausente del manifiesto, lo que rompía `tsc --noEmit` (citado 3× en CHANGELOG previo). Verificación `npm install` + `tsc --noEmit` pendiente en máquina con Node (este equipo no tiene runtime).
+- **Higiene Git / ruido CRLF:** nuevo `.gitattributes` con texto explícito → LF, `.bat` → CRLF y binarios protegidos (`*.pdf`, `*.png`, `*.whl`, `*.db`, etc.); índice renormalizado (65 archivos "modificados" con diff vacío desaparecieron del `git status`).
+- **`.gitignore`:** agregado `frontend/tsconfig.tsbuildinfo` (artefacto untracked de TypeScript).
+- **Dependencia sin uso removida:** `framer-motion@^11.15.0` eliminada; solo la ruta laboratorio `/propuestas` la consumía. `frontend/src/app/propuestas/page.tsx` migrado de `motion`/`AnimatePresence` a CSS transition + GSAP (laboratorio conserva comparativa legacy vs GSAP) y `next.config.mjs` sin `optimizePackageImports` de framer-motion. `package-lock.json` se sincronizará con `npm install`.
+- **Git DX:** `safe.directory` global configurado para eliminar el error "dubious ownership" en este repositorio.
+
 ### [2026-09-20 14:23] [Docs/Sync-Documental-V2.7.0-Fases-4-5]
 - **Sincronización documental masiva a v2.7.0 (Fases 4 y 5 completadas, corpus 83 docs / 245 chunks, 72/72 tests):**
   - `docs/01-product/ROADMAP_50_PROPOSITAS.md`: Fases 4 y 5 trazadas de "Planificada" a "Completada"; aceptación Fase 1 actualizada de 55 a 72 tests.

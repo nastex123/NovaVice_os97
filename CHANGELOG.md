@@ -18,6 +18,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Recursos: `docs/09-decisions/ADR-009-secure-at-rest-encryption-novvault.md` (modelo de amenaza, backup/rotación de clave, evaluación SQLCipher); `PRD.md` FR-11 y `ROADMAP_50_PROPOSITAS.md` prop. 15 sincronizados; `.gitignore` cubre `*.work`, `*.enc`, `*.enc.tmp`.
 - **Verificación:** pendiente del run `rag-eval` en GitHub Actions tras el push.
 
+### [2026-09-20 22:43] [Fix/PROP-183-CI-WAL-Checkpoint]
+- **CI run `35536480008` (4 failed / 88 passed / 1 skipped) en `test_secure_store.py`:**
+  - `_seal_working_copy` eliminaba el blob `-wal` **antes** de encifrar el archivo principal: como SQLite deja los datos commiteados en WAL en modo `journal_mode=WAL`, el vault cifrado no incluía la tabla `escalation_tickets` → `sqlite3.OperationalError: no such table`.
+  - **Fix:** `_get_connection` es ahora un context manager que hace `conn.commit()` y `conn.close()` (checkpoint de WAL) antes de volver al sello; el `finally` garantiza cierre incluso ante excepciones.
+  - `test_dispatcher_json_*` llamaban `create_ticket(dict)` con la firma antigua; ahora pasan `query`, `user_id`, `confidence_score`, `conversation_history` y `top_chunks` explícitos.
+- **Verificación:** pendiente del run `rag-eval` tras el push.
+
 ### [2026-09-20 22:30] [Fix/PROP-105-StructuredOutput-Indentation]
 - **Bug de integración (CI run `35535682997`):** al insertar las tuplas de cita con un `oldString` ambiguo, el cuerpo de `verify_citations_strictly` quedó desplazado al final y `structured_output.py` lanzaba `IndentationError` (`if response.abstain:` sin bloque), rompiendo `scripts/evaluate_rag.py` al importar el engine. Archivo reescrito completo con la estructura correcta.
 - **Verificación:** run `rag-eval` `35535795484` verde.

@@ -118,7 +118,14 @@ def test_repo_plaintext_mode_unchanged(tmp_path):
 def test_dispatcher_json_encrypted_at_rest(tmp_path):
     log = tmp_path / "escalations.json"
     dispatcher = EscalationDispatcher(log_path=log, vault_password=PASSWORD)
-    dispatcher.create_ticket(_ticket())
+    t = _ticket()
+    dispatcher.create_ticket(
+        query=t["query"],
+        user_id=t["user_id"],
+        confidence_score=t["confidence_score"],
+        conversation_history=t["conversation_history_last3"],
+        top_chunks=t["top3_candidate_chunks"],
+    )
 
     raw = log.read_bytes()
     assert b"pasant" not in raw
@@ -133,7 +140,14 @@ def test_dispatcher_json_encrypted_at_rest(tmp_path):
 def test_dispatcher_json_plaintext_when_no_key(tmp_path):
     log = tmp_path / "escalations.json"
     dispatcher = EscalationDispatcher(log_path=log)
-    dispatcher.create_ticket(_ticket())
+    t = _ticket()
+    dispatcher.create_ticket(
+        query=t["query"],
+        user_id=t["user_id"],
+        confidence_score=t["confidence_score"],
+        conversation_history=t["conversation_history_last3"],
+        top_chunks=t["top3_candidate_chunks"],
+    )
     data = json.loads(log.read_text(encoding="utf-8"))
     assert "pasant" in data[0]["query"]
 

@@ -1,7 +1,8 @@
 import sqlite3
 import json
 from pathlib import Path
-from typing import List, Dict, Any, Optional
+from contextlib import contextmanager
+from typing import List, Iterator, Dict, Any, Optional
 from src.config import settings
 from src.core.secure_store import get_vault_password, decrypt_file, encrypt_file
 
@@ -43,13 +44,18 @@ class SQLiteTicketRepository:
             encrypt_file(self.db_path, self.enc_path, self.vault_password)
             self.db_path.unlink(missing_ok=True)
 
-    def _get_connection(self) -> sqlite3.Connection:
+    @contextmanager
+    def _get_connection(self) -> Iterator[sqlite3.Connection]:
         self._prep_working_copy()
         conn = sqlite3.connect(str(self.db_path), timeout=10.0)
-        conn.row_factory = sqlite3.Row
-        conn.execute("PRAGMA journal_mode=WAL;")
-        conn.execute("PRAGMA synchronous=NORMAL;")
-        return conn
+        try:
+            conn.row_factory = sqlite3.Row
+            conn.execute("PRAGMA journal_mode=WAL;")
+            conn.execute("PRAGMA synchronous=NORMAL;")
+            yield conn
+            conn.commit()
+        finally:
+            conn.close()
 
     def _init_db(self):
         with self._get_connection() as conn:

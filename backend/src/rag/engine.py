@@ -380,6 +380,11 @@ class PurePythonRAGEngine:
 
             source_docs = [f"{c.get('metadata', {}).get('source', 'doc')} (Sección: {c.get('metadata', {}).get('section', 'General')})" for c in advisor_chunks] if advisor_chunks else [f"Asesor Humano de Admisiones ({engine_label})"]
 
+            # PROP-105: CitationTuples per assertion + per paragraph for the advisor response
+            from src.rag.structured_output import build_citation_tuples, build_paragraph_citations
+            citation_tuples = [t.model_dump() for t in build_citation_tuples(resp_text, advisor_chunks)]
+            paragraph_citations = [g["citations"] for g in build_paragraph_citations(resp_text, advisor_chunks)]
+
             applicant_memory.add_interaction(session_id, query, resp_text)
 
             return {
@@ -391,6 +396,8 @@ class PurePythonRAGEngine:
                 "cached": False,
                 "mode": mode_tag,
                 "latency_ms": round(latency * 1000, 1),
+                "citation_tuples": citation_tuples,
+                "paragraph_citations": paragraph_citations,
                 "action_buttons": [
                     {"label": "1. Cursos & Certificaciones", "value": "1"},
                     {"label": "2. Horarios & Modalidades", "value": "2"},
@@ -628,6 +635,11 @@ class PurePythonRAGEngine:
 
         source_docs = [f"{c.get('metadata', {}).get('source', 'doc')} (Sección: {c.get('metadata', {}).get('section', 'General')})" for c in chunks]
 
+        # PROP-105: CitationTuples per assertion + per paragraph, grounded on retrieved chunks
+        from src.rag.structured_output import build_citation_tuples, build_paragraph_citations
+        citation_tuples = [t.model_dump() for t in build_citation_tuples(answer_text, chunks)]
+        paragraph_citations = [g["citations"] for g in build_paragraph_citations(answer_text, chunks)]
+
         # C25: Cross-pillar dynamic suggestions based on dominant source
         primary_source = chunks[0].get("metadata", {}).get("source", "") if chunks else ""
         if not action_buttons:
@@ -676,6 +688,8 @@ class PurePythonRAGEngine:
             "cached": False,
             "mode": "opencode_advisor" if use_opencode_mode else "rag_direct",
             "latency_ms": round(latency * 1000, 1),
+            "citation_tuples": citation_tuples,
+            "paragraph_citations": paragraph_citations,
             "action_buttons": action_buttons
         }
 
@@ -716,11 +730,28 @@ class PurePythonRAGEngine:
         response_text = full_res.get("response", "")
 
         from src.core.advisor_common import stream_advisor_tokens
+
+        # PROP-105: emit CitationTuples right after each paragraph boundary completes streaming
+        paragraph_citations = full_res.get("paragraph_citations", [])
+        boundary_ends = []
+        _cursor = 0
+        for par in [p for p in re.split(r"\n\s*\n", response_text) if p.strip()]:
+            idx = response_text.find(par, _cursor)
+            if idx < 0:
+                continue
+            _cursor = idx + len(par)
+            boundary_ends.append(_cursor)
+        para_idx = 0
+        emitted_chars = 0
         async for token in stream_advisor_tokens(response_text, chunk_delay=0.012):
             yield f"data: {json.dumps({'token': token, 'done': False})}\n\n"
+            emitted_chars += len(token)
+            while para_idx < len(boundary_ends) and emitted_chars >= boundary_ends[para_idx]:
+                yield f"data: {json.dumps({'citations': paragraph_citations[para_idx] if para_idx < len(paragraph_citations) else [], 'done': False})}\n\n"
+                para_idx += 1
 
         # Final metadata payload signaling stream completion
-        yield f"data: {json.dumps({'done': True, 'confidence_score': full_res.get('confidence_score', 1.0), 'source_documents': full_res.get('source_documents', []), 'escalated_to_human': full_res.get('escalated_to_human', False), 'mode': full_res.get('mode', 'rag_direct'), 'action_buttons': full_res.get('action_buttons', []), 'latency_ms': full_res.get('latency_ms', 0.0)})}\n\n"
+        yield f"data: {json.dumps({'done': True, 'confidence_score': full_res.get('confidence_score', 1.0), 'source_documents': full_res.get('source_documents', []), 'escalated_to_human': full_res.get('escalated_to_human', False), 'mode': full_res.get('mode', 'rag_direct'), 'citation_tuples': full_res.get('citation_tuples', []), 'action_buttons': full_res.get('action_buttons', []), 'latency_ms': full_res.get('latency_ms', 0.0)})}\n\n"
 
 
 import json

@@ -46,8 +46,8 @@ synapse-admissions-ai/ (NovaVice_os97)
 │   ├── data/                              # Base de conocimiento (83 docs, incl. 12_04 becas→descuentos) y tickets
 │   │   ├── documents/                     # Archivos Markdown con programas y reglamentos
 │   │   └── escalations.json               # Registro de tickets humanos
-│   ├── src/                               # Código fuente backend (API, bot, core, rag)
-│   ├── tests/                             # Suite completa de 27 pruebas en Pytest (incl. caché semántica)
+│   ├── src/                               # Código fuente backend (API, core, rag)
+│   ├── tests/                             # Suite completa de 72 pruebas en Pytest (incl. caché semántica)
 │   └── requirements.txt                   # Dependencias Python
 │
 ├── frontend/                              # 🌐 Aplicación Web Retro Next.js 15
@@ -110,9 +110,10 @@ synapse-admissions-ai/ (NovaVice_os97)
 │                                                                        │
 │   FastAPI Core Engine (:8000) + Pydantic v2 Schemas                    │
 │   ├── POST /api/v1/chat       (Consulta conversacional y navegación)  │
+│   ├── POST /api/v1/chat/stream (Streaming SSE token a token)          │
 │   ├── GET  /api/v1/health     (Estado, docs indexados, motor asesor)  │
 │   ├── GET  /api/v1/metrics    (Telemetría de tokens, latencia y cache)│
-│   └── POST /api/v1/escalate   (Generación de tickets humanos)         │
+│   └── GET  /api/v1/escalations (Tickets humanos transaccionales SQLite)│
 └───────────────────────────────────┬────────────────────────────────────┘
                                     │
                                     ▼
@@ -149,7 +150,7 @@ synapse-admissions-ai/ (NovaVice_os97)
 
 ## 🚀 Características Principales
 
-1. **RAG Híbrido con 82 Documentos Oficiales (245 Chunks):**
+1. **RAG Híbrido con 83 Documentos Oficiales (245 Chunks):**
    - Indexación en ChromaDB y BM25 de todos los programas, niveles MCER, precios, sedes y reglamentos.
    - Respuestas fundamentadas al 100% en información institucional verificada.
 
@@ -165,7 +166,7 @@ synapse-admissions-ai/ (NovaVice_os97)
 
 4. **Navegación Guiada Determinista y Cero Alucinaciones:**
    - Menú interactivo estructurado (1. Cursos, 2. Horarios, 3. Precios COP, 4. Sedes/Admisiones y retorno 0).
-   - Umbral de confianza semántica de 0.50: si la consulta está fuera del alcance oficial, genera un ticket `ESC-YYYYMMDD-XXXX` y deriva a secretaría académica.
+   - Umbral dual de confianza (0.35 pilar / 0.50 heavy): si la consulta está fuera del alcance oficial, genera un ticket `ESC-YYYYMMDD-XXXX` y deriva a secretaría académica.
 
 5. **Telemetría y Control de Costos en Vivo:**
    - Panel de métricas con seguimiento de consultas, tasa de aciertos en caché, tasa de escalamiento a humano, consumo de tokens y costo estimado en USD.
@@ -186,7 +187,7 @@ synapse-admissions-ai/ (NovaVice_os97)
 # En Windows:
 install.bat
 ```
-*(Crea el entorno virtual `venv`, instala las dependencias de Python y Node.js, e indexa automáticamente los 82 documentos en ChromaDB).*
+*(Crea el entorno virtual `venv`, instala las dependencias de Python y Node.js, e indexa automáticamente los 83 documentos en ChromaDB).*
 
 ### 2. Ejecución con Selector de Motor
 ```bash
@@ -215,11 +216,12 @@ Al iniciar, se levantarán automáticamente:
 - `POST /api/v1/chat`: Consulta interactiva con respuesta RAG estructurada y botones de acción.
 - `POST /api/v1/chat/stream`: Streaming de respuestas token por token (SSE).
 - `POST /api/v1/webhook`: Webhook universal para integración con formularios web y canales externos.
-- `POST /api/v1/tools/quote`: Cálculo dinámico de cotizaciones en COP con descuentos.
-- `POST /api/v1/tools/placement-test`: Registro para examen de nivelación gratuito.
-- `GET /api/v1/metrics`: Telemetría operativa en formato JSON.
-- `GET /api/v1/escalations`: Registro de tickets de escalamiento humano.
 - `GET /api/v1/health`: Estado de salud, documentos indexados y motor de asesor configurado.
+- `GET /api/v1/metrics`: Telemetría operativa en formato JSON.
+- `GET /api/v1/metrics/prometheus`: Exportador Prometheus/OpenMetrics con percentiles de latencia.
+- `GET /api/v1/escalations`: Registro de tickets de escalamiento humano.
+- `GET /api/v1/escalations/export`: Exportación CSV de tickets para el equipo comercial.
+- `POST /api/v1/admin/vacuum`: Mantenimiento de compactación y desfragmentación del índice ChromaDB.
 
 ---
 

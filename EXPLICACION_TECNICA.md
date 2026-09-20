@@ -76,13 +76,13 @@ A continuación se detalla la estructura física del repositorio, especificando 
 NovaVice_os97/
 ├── backend/                                   # 🐍 Backend FastAPI & Inteligencia Artificial
 │   ├── data/                                  # Almacenamiento local de datos
-│   │   ├── documents/                         # 82 documentos Markdown estructurados con metadata oficial
+│   │   ├── documents/                         # 83 documentos Markdown estructurados con metadata oficial
 │   │   ├── chroma_db/                         # Base vectorial persistente de ChromaDB
 │   │   └── escalations.json                   # Registro de tickets humanos generados por el bot
 │   │
 │   ├── src/                                   # Código Fuente Modular
 │   │   ├── api/                               # Capa de Endpoints HTTP REST
-│   │   │   ├── routes.py                      # Definición de /chat, /health, /metrics, /escalate
+│   │   │   ├── routes.py                      # Definición de /chat, /chat/stream, /webhook, /health, /metrics, /escalations
 │   │   │   └── schemas.py                     # Contratos Pydantic v2 (ChatRequest, ChatResponse, etc.)
 │   │   │
 │   │   ├── core/                              # Núcleo Lógico del Negocio
@@ -106,7 +106,7 @@ NovaVice_os97/
 │   │   ├── config.py                          # Configuración centralizada con pydantic-settings
 │   │   └── main.py                            # Punto de entrada ASGI de FastAPI con CORS y middleware
 │   │
-│   └── tests/                                 # 🧪 Suite de 55 Pruebas Automatizadas
+│   └── tests/                                 # 🧪 Suite de 72 Pruebas Automatizadas
 │       ├── test_api_routes.py                 # Validación de endpoints REST y códigos HTTP
 │       ├── test_cache_semantic.py             # Pruebas de invalidación y acierto de caché semántica
 │       ├── test_executables.py                # Verificación de scripts e instaladores multiplataforma
@@ -297,7 +297,7 @@ sequenceDiagram
 El corazón de la recuperación documental reside en [`backend/src/rag/hybrid_retriever.py`](backend/src/rag/hybrid_retriever.py).
 
 ### 5.1 Ingestión y Segmentación con Solapamiento (*Chunking with Overlap*)
-* **Documentos Oficiales:** 82 archivos Markdown en [`backend/data/documents/`](backend/data/documents/).
+* **Documentos Oficiales:** 83 archivos Markdown en [`backend/data/documents/`](backend/data/documents/).
 * **Tamaño de Chunk:** 600 caracteres con un solapamiento (*overlap*) de 120 caracteres (20%).
 * **Razón Técnica:** Si un descuento del 15% para cajas de compensación se menciona al final de un párrafo y las condiciones al inicio del siguiente, el solapamiento de 120 caracteres garantiza que el contexto no quede mutilado entre dos fragmentos adyacentes.
 * **Almacenamiento:** 245 chunks persistidos en ChromaDB con metadatos de sección, fuente y pilar temático.
@@ -499,22 +499,14 @@ Fondo decorativo optimizado para correr a 60 cuadros por segundo constantes:
 
 El proyecto cuenta con una de las suites de validación más rigurosas de su categoría:
 
-### 11.1 Suite de 55 Tests Automatizados en Pytest
+### 11.1 72 Tests Automatizados en Pytest
+
+> [!NOTE]
+> La distribución individual por archivo la emite en vivo el pipeline de CI (`.github/workflows/rag-eval.yml`) y las ejecuciones locales de `pytest`; el resumen documentado del lote verde del horizonte de testing (Fase 4) es:
 
 ```text
-backend\tests\test_api_routes.py ...                                     [  5%]
-backend\tests\test_cache_semantic.py ..                                  [  9%]
-backend\tests\test_executables.py ...                                    [ 14%]
-backend\tests\test_guardrails.py ....                                    [ 21%]
-backend\tests\test_hybrid_search.py .......                              [ 34%]
-backend\tests\test_ingestion.py ..                                       [ 38%]
-backend\tests\test_intent_vectorizer.py ..................               [ 70%]
-backend\tests\test_navigation.py ..                                      [ 74%]
-backend\tests\test_navigation_continuity.py .........                    [ 90%]
-backend\tests\test_opencode_intermediary.py ....                         [ 98%]
-backend\tests\test_rag_pipeline.py .                                     [100%]
-
-============================= 55 passed in 27.93s =============================
+pytest backend/tests -v
+============================= 72 passed in ~88s =============================
 ```
 
 Para ejecutar la suite completa:

@@ -3,17 +3,17 @@
 ## 1. End-to-End Multi-Tier Architectural Diagram
 
 ```text
-                                INBOUND CLIENT TIERS
-        +──────────────────────────────────────+──────────────────────────────+
-        |       Next.js 15 Web App (:3000)     |         Telegram Bot         |
-        |   (PixiJS WebGL + ReactMarkdown)     |     (Async Webhook/Poll)     |
-        +──────────────────┬───────────────────+──────────────┬───────────────+
-                           │ (Next.js Reverse Proxy)          │
-                           v                                  v
-                  HTTP /api/v1/chat                   Webhook Handler
-                  HTTP /api/v1/chat/stream (SSE)
-                           │                                  │
-                           +─────────────────┬────────────────+
+                                INBOUND CLIENT TIER
+        +──────────────────────────────────────────────+
+        |            Next.js 15 Web App (:3000)         |
+        |        (PixiJS WebGL + ReactMarkdown)         |
+        +──────────────────────┬───────────────────────+
+                               │ (Next.js Reverse Proxy)
+                               v
+                       HTTP /api/v1/chat
+                       HTTP /api/v1/chat/stream (SSE)
+                               │
+                               v
                                              │
                                              v
 ┌────────────────────────────────────────────────────────────────────────────┐
@@ -95,8 +95,9 @@
 ### 2.1 Web Frontend Architecture (`frontend/`)
 - **Next.js 15 (App Router):** Server-rendered framework with client-side interactivity, proxying `/api/*` to the FastAPI backend.
 - **PixiJS Canvas (`PixiParticleBackground.tsx`):** WebGL particle constellation engine with mouse magnetism.
-- **ReactMarkdown Engine (`ChatContainer.tsx`):** Native GFM markdown renderer with Dark Glassmorphism callouts, glowing neon bullets, and clear typography.
+- **ReactMarkdown Engine (`ChatContainer.tsx`):** Native GFM markdown renderer with retro callouts and electrified neon typography (90s Guru Desktop aesthetic, GSAP entrance animations).
 - **Process Supervisor (`run.py`):** Multi-process launcher managing OpenCode (:4096), FastAPI (:8000), and Next.js (:3000).
+- **Fases 4 y 5 (Testing & Horizons):** Suite pytest 72/72, CI Gold Dataset (50/50) y benchmark lingüístico (80/80); empaquetado nativo Tauri kiosco (`src-tauri/`), exportador CSV de escalationes y telemetría Prometheus disponibles.
 
 ### 2.2 Ingestion & Indexing Pipeline (`src/rag/ingestion.py:32`)
 - **Source Directory:** `data/documents/` (83 docs, 245 chunks, 20 clusters + `12_04_becas_descuentos_aclaratoria.md` canónico).

@@ -45,15 +45,15 @@
 ```text
 synapse-admissions-ai/ (NovaVice_os97)
 ├── backend/                               # 🐍 FastAPI Backend & AI Pipelines
-│   ├── data/                              # Official Knowledge Base (82 docs) & Ticket Store
+│   ├── data/                              # Official Knowledge Base (83 docs) & Ticket Store
 │   │   ├── documents/                     # Structured Markdown files (courses, prices, campuses)
 │   │   ├── chroma_db/                     # Persistent ChromaDB vector storage
 │   │   └── escalations.json               # Persisted human escalation tickets
 │   ├── src/                               # Application source code
-│   │   ├── api/                           # REST endpoints (/chat, /health, /metrics, /escalate)
+│   │   ├── api/                           # REST endpoints (/chat, /chat/stream, /health, /metrics, /escalations)
 │   │   ├── core/                          # Core logic (advisor_common, opencode_client, agy_client, navigation)
 │   │   └── rag/                           # Retrieval-Augmented Generation (engine, hybrid_retriever, bm25)
-│   ├── tests/                             # 55 Automated Pytest tests (unit, integration & e2e)
+│   ├── tests/                             # 72 Automated Pytest tests (unit, integration & e2e)
 │   └── requirements.txt                   # Python dependencies
 │
 ├── frontend/                              # 🌐 Next.js 15 Retro Web Application
@@ -109,10 +109,10 @@ synapse-admissions-ai/ (NovaVice_os97)
 │                                                                        │
 │   FastAPI Core Engine (:8000) + Pydantic v2 Models + Correlation ID    │
 │   ├── POST /api/v1/chat         (Conversational query & menu navigation)│
-│   ├── GET  /api/v1/chat/stream  (Real-time SSE token-by-token stream)   │
+│   ├── POST /api/v1/chat/stream  (Real-time SSE token-by-token stream)   │
 │   ├── GET  /api/v1/health       (Health status, indexed docs, advisor)  │
 │   ├── GET  /api/v1/metrics      (Live telemetry, faithfulness & tokens) │
-│   ├── POST /api/v1/escalate     (Transactional SQLite human ticket)     │
+│   ├── GET  /api/v1/escalations  (SQLite WAL human escalation tickets)   │
 │   └── POST /api/v1/admin/vacuum (ChromaDB index compacting routine)     │
 └───────────────────────────────────┬────────────────────────────────────┘
                                     │
@@ -160,7 +160,7 @@ synapse-admissions-ai/ (NovaVice_os97)
 
 ## 🚀 Key Features
 
-1. **Hybrid RAG over 82 Official Institutional Documents (245 Chunks):**
+1. **Hybrid RAG over 83 Official Institutional Documents (245 Chunks):**
    - Grounded ChromaDB vector indexing and BM25 lexical keyword recall over all language courses, schedules, COP pricing, campuses, and regulations.
    - 100% grounded responses eliminating hallucinations.
 
@@ -203,7 +203,7 @@ synapse-admissions-ai/ (NovaVice_os97)
 # On Windows:
 install.bat
 ```
-*(Automatically initializes the virtual environment, installs Python and Node.js dependencies, and indexes the 82 knowledge base documents in ChromaDB).*
+*(Automatically initializes the virtual environment, installs Python and Node.js dependencies, and indexes the 83 knowledge base documents in ChromaDB).*
 
 ### 2. Launch with Advisor Engine Selector
 ```bash
@@ -232,11 +232,12 @@ When started, all services boot concurrently:
 - `POST /api/v1/chat`: Interactive conversational query with structured RAG response and quick action buttons.
 - `POST /api/v1/chat/stream`: Token-by-token streaming responses (Server-Sent Events / SSE).
 - `POST /api/v1/webhook`: Universal webhook endpoint for CRM, form, and external channel integrations.
-- `POST /api/v1/tools/quote`: Dynamic COP course quote calculator with cash and installment discounts.
-- `POST /api/v1/tools/placement-test`: Free diagnostic placement test registration.
-- `GET /api/v1/metrics`: Live JSON telemetry and runtime statistics.
-- `GET /api/v1/escalations`: Persisted log of human escalation tickets.
 - `GET /api/v1/health`: System health status, indexed document count, and active advisor engine.
+- `GET /api/v1/metrics`: Live JSON telemetry and runtime statistics.
+- `GET /api/v1/metrics/prometheus`: Prometheus/OpenMetrics exporter with latency percentiles.
+- `GET /api/v1/escalations`: Persisted log of human escalation tickets.
+- `GET /api/v1/escalations/export`: CSV export of escalation tickets for the commercial team.
+- `POST /api/v1/admin/vacuum`: ChromaDB index compaction and defragmentation maintenance routine.
 
 ---
 

@@ -101,14 +101,14 @@ Este plan maestro organiza las **50 propuestas de mejora técnica** en **5 fases
 | **Fase 1** | **Precisión de Datos y Recuperación RAG** | 1, 2, 3, 4, 5, 6, 7, 19, 21, 23, 43 | **Completada** | 0% fragmentación de tablas COP, recall semántico exacto, indexación BM25 persistida. |
 | **Fase 2** | **Rendimiento Backend y Resiliencia** | 11, 12, 13, 14, 15, 16, 20, 22, 45, 46, TODO-2.11 | **Completada** | Streaming SSE token a token, pooling HTTP, pipeline en cascada multi-filtro (precios vs horarios), SQLite WAL y Docker. |
 | **Fase 3** | **Frontend Moderno, UI Retro & Accesibilidad** | 25, 26, 27, 28, 29, 30, 33, 34, 35, 36 | **Completada** | Zustand store, decodificación SSE progresiva, filtro CRT acelerado por GPU (60 FPS), modo WCAG AAA, focus trap y panel OSD de monitor. |
-| **Fase 4** | **Testing Automatizado, QA y Tooling DX** | 39, 40, 41, 42, 44, 47, 48, 49 | **Planificada** | Evaluación continua Ragas, Locust carga concurrente, CLI doctor y pre-commits. |
-| **Fase 5** | **Ampliación de Experiencia y Nuevos Horizontes** | 8, 9, 10, 17, 18, 24, 31, 32, 37, 38, 50 | **Planificada** | Graph RAG, HyDE, audio web retro, exportador comercial y empaquetado Tauri kiosco. |
+| **Fase 4** | **Testing Automatizado, QA y Tooling DX** | 39, 40, 41, 42, 44, 47, 48, 49 | **Completada** | Evaluación continua Ragas, Locust carga concurrente, CLI doctor y pre-commits. |
+| **Fase 5** | **Ampliación de Experiencia y Nuevos Horizontes** | 8, 9, 10, 17, 18, 24, 31, 32, 37, 38, 50 | **Completada** | Graph RAG, HyDE, audio web retro, exportador comercial y empaquetado Tauri kiosco. |
 
 ---
 
 ## 4. Criterios de Aceptación por Fase
 
-1. **Aceptación Fase 1:** Ningún valor de precio o cuota fragmentado en chunks; similitud de búsqueda <10ms en caché; 55 tests de pytest y benchmark 80/80 pasando al 100%.
+1. **Aceptación Fase 1:** Ningún valor de precio o cuota fragmentado en chunks; similitud de búsqueda <10ms en caché; 72 tests de pytest y benchmark 80/80 pasando al 100%.
 2. **Aceptación Fase 2:** Time-to-First-Token en streaming <300ms; soporte concurrente multi-hilo de tickets en SQLite sin bloqueos de archivo.
 3. **Aceptación Fase 3:** 60 FPS estables en el escritorio retro con CRT activo en laptops de bajos recursos; 0 fugas de re-renderizado mediante Zustand.
 4. **Aceptación Fase 4:** Suite completa de tests ejecutándose en <5 segundos con mocks; reporte Locust validando 50 usuarios concurrentes sin caídas.

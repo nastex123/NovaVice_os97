@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [2026-09-20 14:23] [Docs/Sync-Documental-V2.7.0-Fases-4-5]
+- **Sincronización documental masiva a v2.7.0 (Fases 4 y 5 completadas, corpus 83 docs / 245 chunks, 72/72 tests):**
+  - `docs/01-product/ROADMAP_50_PROPOSITAS.md`: Fases 4 y 5 trazadas de "Planificada" a "Completada"; aceptación Fase 1 actualizada de 55 a 72 tests.
+  - `docs/01-product/PRD.md`: versión 2.6.0 → 2.7.0, Status 25/25 → 72/72, grounding 82 → 83 docs, escalamiento con umbral dual (0.35 pilar / 0.50 heavy), FR-04/FR-11/FR-12 y Phase 4/5 marcados Complete.
+  - `README.md` y `README.es.md`: árbol, badges y características 82 → 83 docs y 55/27 → 72 tests; bloque REST reescrito omitiendo `/api/v1/tools/*` y publicando los 9 endpoints reales (chat, chat/stream, webhook, health, metrics, metrics/prometheus, escalations, escalations/export, admin/vacuum); diagrama `/api/v1/escalate` → `/api/v1/escalations`; espejo ESP sin mención de "bot" y umbral dual.
+  - `docs/03-architecture/system-architecture.md`: eliminado nivel residuo Telegram Bot/Webhook Handler del diagrama entrante; callouts "Dark Glassmorphism" → estética retro GSAP; nota Fase 4/5 (72/72, Gold 50/50, benchmark 80/80, Tauri kiosco, CSV escalations, Prometheus).
+  - `TECHNICAL_EXPLANATION.md` / `EXPLICACION_TECNICA.md`: árbol y §5.1 82 → 83 docs; rutas REST reales; §11.1 transcript obsoleto de 55 tests sustituido por resumen documentado 72/72 (la distribución por archivo la emite CI rag-eval.yml y pytest local).
+  - `DIAGRAMA.md`: título v2.6.0 → v2.7.0, ingestión 82 → 83 docs y endpoint `/escalate` → `/escalations`.
+  - `docs/03-architecture/technological-enhancement-proposals.md`: P-02 corpus 82 → 83 docs.
+
 ### [2026-09-19 19:00] [Feat/GSAP-Hover-Appearance]
 - **Hover en botones y aparicion de mensajes con GSAP:**
   - Nuevo `hooks/useGsapHoverGroup.ts` con hover/press delegado a botones.

@@ -1,4 +1,4 @@
-# 📊 Diagrama Completo — Synapse Admissions AI (Nova Idiomas OS '97 v2.6.0)
+# 📊 Diagrama Completo — Synapse Admissions AI (Nova Idiomas OS '97 v2.7.0)
 
 > Guía visual paso a paso de cómo el bot sabe qué responder. Renderiza este archivo en GitHub, VS Code (Markdown Preview) o https://mermaid.live
 
@@ -22,7 +22,7 @@ flowchart TB
         B1[POST /api/v1/chat]
         B2[GET /api/v1/health]
         B3[GET /api/v1/metrics]
-        B4[POST /api/v1/escalate]
+        B4[GET /api/v1/escalations]
     end
 
     subgraph SEC [GUARDRAILS]
@@ -69,7 +69,7 @@ flowchart TD
     REQ --> ENG[rag_engine.answer_query<br/>engine.py:111]
 
     ENG --> CHK{BM25 o Chroma<br/>vacíos?<br/>engine.py:123}
-    CHK -->|sí| ING[ingestion_pipeline.run<br/>ingestion.py:83<br/>82 docs → 245 chunks<br/>chunk 500 overlap 100<br/>hash dir para invalidar caché]
+    CHK -->|sí| ING[ingestion_pipeline.run<br/>ingestion.py:83<br/>83 docs → 245 chunks<br/>chunk 500 overlap 100<br/>hash dir para invalidar caché]
     CHK -->|no| NAV
     ING --> NAV
 
@@ -217,7 +217,7 @@ Frontend etiqueta burbujas `ASESORÍA (OPENCODE MEMO)` vs `(AGY ANTIGRAVITY MEMO
 
 ```mermaid
 flowchart LR
-    DOCS[82 .md en<br/>backend/data/documents/] --> HASH[compute_directory_hash<br/>ingestion.py:24<br/>sha256 nombres+bytes]
+    DOCS[83 .md en<br/>backend/data/documents/] --> HASH[compute_directory_hash<br/>ingestion.py:24<br/>sha256 nombres+bytes]
     HASH --> SPLIT[_split_into_chunks<br/>ingestion.py:32<br/>split por ##<br/>ventana 500 char<br/>overlap 100]
     SPLIT --> CHUNKS[245 chunks<br/>id sha256[:16]<br/>metadata source/section]
     CHUNKS --> CHROMA[vector_store.add_documents<br/>vector_store.py:137<br/>Chroma Persistent<br/>all-MiniLM-L6-v2]

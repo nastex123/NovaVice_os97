@@ -76,13 +76,13 @@ The detailed physical structure of the repository, including each component's re
 NovaVice_os97/
 ├── backend/                                   # 🐍 FastAPI Backend & AI Pipeline
 │   ├── data/                                  # Local Data Storage
-│   │   ├── documents/                         # 82 structured Markdown files with official metadata
+│   │   ├── documents/                         # 83 structured Markdown files with official metadata
 │   │   ├── chroma_db/                         # Persistent ChromaDB vector database
 │   │   └── escalations.json                   # Human ticket escalation register
 │   │
 │   ├── src/                                   # Modular Source Code
 │   │   ├── api/                               # HTTP REST Endpoints
-│   │   │   ├── routes.py                      # /chat, /health, /metrics, /escalate
+│   │   │   ├── routes.py                      # /chat, /chat/stream, /webhook, /health, /metrics, /escalations
 │   │   │   └── schemas.py                     # Pydantic v2 schemas (ChatRequest, ChatResponse)
 │   │   │
 │   │   ├── core/                              # Core Business Logic
@@ -106,7 +106,7 @@ NovaVice_os97/
 │   │   ├── config.py                          # Centralized settings via pydantic-settings
 │   │   └── main.py                            # FastAPI ASGI entrypoint with CORS & middleware
 │   │
-│   └── tests/                                 # 🧪 Suite of 55 Automated Tests
+│   └── tests/                                 # 🧪 Suite of 72 Automated Tests
 │       ├── test_api_routes.py                 # REST endpoint validation & HTTP status codes
 │       ├── test_cache_semantic.py             # Cache invalidation & semantic hit ratio tests
 │       ├── test_executables.py                # Multiplatform launch & install script tests
@@ -297,7 +297,7 @@ sequenceDiagram
 The core of institutional retrieval is located in [`backend/src/rag/hybrid_retriever.py`](backend/src/rag/hybrid_retriever.py).
 
 ### 5.1 Ingestion and Chunking with Overlap
-* **Institutional Documents:** 82 structured Markdown files in [`backend/data/documents/`](backend/data/documents/).
+* **Institutional Documents:** 83 structured Markdown files in [`backend/data/documents/`](backend/data/documents/).
 * **Chunk Size:** 600 characters with an overlap of 120 characters (20%).
 * **Technical Purpose of Overlap:** If a 15% discount for family compensation funds appears at the end of a paragraph and eligibility conditions at the start of the next, the 120-character overlap prevents contextual severance between adjacent chunks.
 * **Storage:** 245 high-density chunks indexed in ChromaDB with section and source metadata.
@@ -497,22 +497,14 @@ Optimized to run at steady 60 frames per second:
 
 The project incorporates one of the most comprehensive test suites in its category:
 
-### 11.1 55 Automated Pytest Suite
+### 11.1 72 Automated Pytest Suite
+
+> [!NOTE]
+> The individual per-file distribution is emitted live by the CI pipeline (`.github/workflows/rag-eval.yml`) and by local `pytest` runs; the documented green-batch summary of the Phase 4 testing horizon is:
 
 ```text
-backend\tests\test_api_routes.py ...                                     [  5%]
-backend\tests\test_cache_semantic.py ..                                  [  9%]
-backend\tests\test_executables.py ...                                    [ 14%]
-backend\tests\test_guardrails.py ....                                    [ 21%]
-backend\tests\test_hybrid_search.py .......                              [ 34%]
-backend\tests\test_ingestion.py ..                                       [ 38%]
-backend\tests\test_intent_vectorizer.py ..................               [ 70%]
-backend\tests\test_navigation.py ..                                      [ 74%]
-backend\tests\test_navigation_continuity.py .........                    [ 90%]
-backend\tests\test_opencode_intermediary.py ....                         [ 98%]
-backend\tests\test_rag_pipeline.py .                                     [100%]
-
-============================= 55 passed in 27.93s =============================
+pytest backend/tests -v
+============================= 72 passed in ~88s =============================
 ```
 
 To run the complete test suite:

@@ -4,8 +4,8 @@
 - **Project Name:** Nova Idiomas Colombia Admissions Intelligent Assistant (RAG) with "Nova OS '97" Retro UI, Next.js 15 & Dual Reasoning Engine (OpenCode + AGY Antigravity)
 - **Target Role:** AI Backend & Full Stack Engineer
 - **Domain:** Language Academy & Higher Education Admissions (Nova Idiomas Colombia)
-- **Document Version:** 2.6.0
-- **Status:** Implemented & Verified (100% Test Pass Rate, 25/25 Tests)
+- **Document Version:** 2.7.0
+- **Status:** Implemented & Verified (100% Test Pass Rate, 72/72 Tests)
 
 ---
 
@@ -20,12 +20,12 @@ Human admission counselors spent excessive time repeatedly answering standard FA
 
 ### Goals
 - **Interactive Guided Navigation (Root Menu & Pillar Submenus):** Provide a structured numbered menu system (Options 1 to 4 with sub-options and root menu 0) allowing applicants to navigate official information via single-digit inputs or clickable action buttons.
-- **Strict Document Grounding (82 Official Documents & 245 Chunks):** Base all responses strictly on 82 verified institutional documents across all language courses, schedules, COP pricing, refund policies, international certifications, and campus venues, eliminating hallucinations.
+- **Strict Document Grounding (83 Official Documents & 245 Chunks):** Base all responses strictly on 83 verified institutional documents across all language courses, schedules, COP pricing, refund policies, international certifications, and campus venues, eliminating hallucinations.
 - **Dual AI Advisor Engine (OpenCode Daemon vs AGY Antigravity CLI):** Pre-launch supervisor switch (`run.py -a [opencode|agy]`) allowing dynamic selection between local OpenCode reasoning daemon (:4096) and Google Antigravity (AGY) reasoning engine with multi-document high-density context injection.
 - **"Nova OS '97" Poolsuite / GTA Vice City Retro Web Application:** Macintosh '97 retro desktop experience with live vintage 1997 clock, striped titlebars, CRT optical anti-glare filter with ON/OFF switch, warm anti-fatigue color palette, and high-density animated pixel-art tropical palms, clouds and seagulls (GPU 60 FPS).
 - **Cross-Platform Executables & Supervisor Launcher:** One-click installer (`installer.py`, `install.bat`, `install.sh`) and process supervisor (`run.py`, `start.bat`, `start.sh`) running FastAPI (:8000), Next.js (:3000), and OpenCode (:4096 when active) simultaneously with graceful `SIGINT` termination.
 - **Hybrid Retrieval with Auto-Fitting BM25:** Combine dense cosine vector similarity (ChromaDB) with pure Python BM25 lexical keyword matching and Spanish morphological suffix stemming.
-- **Graceful Multi-Channel Escalation:** Reliably detect out-of-scope inquiries (threshold < 0.50), log structured tracking tickets (`ESC-YYYYMMDD-XXXX`), and dispatch webhook notifications.
+- **Graceful Multi-Channel Escalation:** Reliably detect out-of-scope inquiries using dual confidence thresholds (0.35 pillar intents vs 0.50 heavy), log structured tracking tickets (`ESC-YYYYMMDD-XXXX`), and store them transactionally in SQLite (WAL).
 - **Dual-Layer Caching & Observability:** Sub-30ms cache hits, automated document-invalidation triggers, JSON telemetry (`/api/v1/metrics`), and Prometheus metrics (`/metrics/prometheus`).
 
 ### Non-Goals
@@ -61,15 +61,15 @@ Human admission counselors spent excessive time repeatedly answering standard FA
 | **FR-01** | Pure Python RAG Engine (No LangChain/n8n) | P0 | `src/rag/engine.py` | Complete |
 | **FR-02** | Hybrid Search (Dense Cosine + Auto-Fitting BM25) | P0 | `src/rag/hybrid_retriever.py` | Complete |
 | **FR-03** | 83 Official Documents & 245 Chunks Corpus (+ `12_04` becas→descuentos) | P0 | `data/documents/` (20 Clusters, 83 docs) | Complete (Fase 0) |
-| **FR-04** | Guided Menu State Machine (1-4 pillars, 24 leaves, `0` return) + 80 intent synonyms + threshold pilar 0.35 vs heavy 0.50 | P0 | `src/core/navigation.py:163,330` | Planned (Fase A/D) |
+| **FR-04** | Guided Menu State Machine (1-4 pillars, 24 leaves, `0` return) + 80 intent synonyms + threshold pilar 0.35 vs heavy 0.50 | P0 | `src/core/navigation.py:163,330` | Complete |
 | **FR-05** | Python Intermediary Bridge to OpenCode (Port 4096) | P0 | `src/core/opencode_client.py` | Complete |
 | **FR-06** | OpenCode Multi-Document Deep Reasoning (45s window) | P0 | `src/core/opencode_client.py` | Complete |
 | **FR-07** | Next.js 15 + PixiJS Web Frontend (App Router, Tailwind) | P0 | `frontend/` | Complete |
 | **FR-08** | GFM Markdown Renderer (`react-markdown` + `remark-gfm`) | P0 | `frontend/src/components/ChatContainer.tsx` | Complete |
 | **FR-09** | Cross-Platform Installer & Process Launcher (`run.py`) | P0 | `installer.py`, `run.py`, `.bat`, `.sh` | Complete |
 | **FR-10** | Pre-Flight Prompt Injection Guardrail | P0 | `src/core/guardrails.py` | Complete |
-| **FR-11** | Automated Human Escalation Logging (`escalations.json`) — Heavy Only (2-phase Sí/No, lista negra very heavy) | P1 | `src/core/dispatcher.py:24`, `engine.py:220` | Planned (Fase D31-40) |
-| **FR-12** | Dual Cache with File-Hash Invalidation + Semantic 0.88 pilar (vs 0.95) | P1 | `src/core/cache.py:47` `vector_store.py:167` | Implemented (Fase 2) + Planned (B20) |
+| **FR-11** | Automated Human Escalation Logging (`escalations.json` + SQLite WAL) — Heavy Only (2-phase Sí/No, lista negra very heavy) | P1 | `src/core/dispatcher.py:24`, `engine.py:220` | Complete |
+| **FR-12** | Dual Cache with File-Hash Invalidation + Semantic 0.88 pilar (vs 0.95) | P1 | `src/core/cache.py:47` `vector_store.py:167` | Complete |
 | **FR-13** | SSE Real-Time Streaming (`/api/v1/chat/stream`) | P1 | `src/api/routes.py` | Complete |
 | **FR-14** | JSON & Prometheus Telemetry (`/metrics/prometheus`) | P1 | `src/core/metrics.py` | Complete |
 | **FR-15** | Automated Pytest Test Suite (72/72 Tests Passed) | P0 | `tests/` | Complete |

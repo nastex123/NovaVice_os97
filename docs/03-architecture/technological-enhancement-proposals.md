@@ -12,7 +12,7 @@
 | Proposal | Enhancement Area | Status | Implementation Reference |
 | :--- | :--- | :---: | :--- |
 | **P-01** | Hybrid Search (Dense Cosine + Pure Python BM25 via RRF) | **Implemented** | `src/rag/hybrid_retriever.py` |
-| **P-02** | 82 Official Documents & 245 Chunks Knowledge Base | **Implemented** | `data/documents/` (20 Clusters) |
+| **P-02** | 83 Official Documents & 245 Chunks Knowledge Base | **Implemented** | `data/documents/` (20 Clusters) |
 | **P-03** | Interactive Guided State Machine (1-4 & Submenus + Freeform) | **Implemented** | `src/core/navigation.py` |
 | **P-04** | Decoupled Dual Reasoning Engine (OpenCode :4096 & AGY CLI) | **Implemented** | `src/core/opencode_client.py` & `agy_client.py` |
 | **P-05** | Next.js 15 + CRT Anti-Glare Optical Filter Retro OS '97 UI | **Implemented** | `frontend/` |

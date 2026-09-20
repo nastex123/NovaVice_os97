@@ -4,7 +4,7 @@ const nextConfig = {
   compress: true,
   poweredByHeader: false,
   reactStrictMode: true,
-  experimental: { optimizePackageImports: ["lucide-react", "framer-motion"] },
+  experimental: { optimizePackageImports: ["lucide-react"] },
   async rewrites() {
     return [
       {

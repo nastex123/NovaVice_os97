@@ -1,7 +1,6 @@
 "use client";
 import React, { useLayoutEffect, useRef, useState } from "react";
 import gsap from "gsap";
-import { motion, AnimatePresence } from "framer-motion";
 import { Header } from "../../components/Header";
 import { PropuestasNavbar } from "../../components/PropuestasNavbar";
 import { useGsapReveal } from "../../hooks/useGsapReveal";
@@ -50,20 +49,13 @@ export default function PropuestasPage() {
       </section>
       <div ref={labRef} className="px-4 py-6 grid gap-4 md:grid-cols-2">
         <article data-reveal className="border-2 border-black bg-retroBeige p-3">
-          <h2 className="font-bold text-sm">Animacion legacy (framer-motion)</h2>
+          <h2 className="font-bold text-sm">Animacion legacy (CSS)</h2>
           <button onClick={() => setShow((v) => !v)} className="mt-2 border border-black px-2 py-0.5 text-xs">
             Alternar
           </button>
-          <AnimatePresence initial={false}>
-            {show && (
-              <motion.div
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 8 }}
-                className="mt-3 h-16 bg-vicePink border border-black"
-              />
-            )}
-          </AnimatePresence>
+          <div
+            className={`mt-3 h-16 bg-vicePink border border-black transition-all duration-300 ${show ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"}`}
+          />
         </article>
         <article data-reveal className="border-2 border-black bg-retroBeige p-3">
           <h2 className="font-bold text-sm">Animacion propuesta (GSAP)</h2>
@@ -85,7 +77,7 @@ export default function PropuestasPage() {
             <tbody>
               <tr className="border-t border-black">
                 <td className="p-1">Motor</td>
-                <td className="p-1">framer-motion por componente</td>
+                <td className="p-1">CSS transition por componente</td>
                 <td className="p-1">GSAP ticker unico, transform y opacity</td>
               </tr>
               <tr className="border-t border-black">

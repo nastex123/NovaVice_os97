@@ -268,7 +268,10 @@ class PurePythonRAGEngine:
             }
 
         # 1b. Deterministic Pre-LLM Query Router (P1 / TODO-1.4: <15ms sub-response)
-        det_route = deterministic_query_router.route(effective_query)
+        # Advisor mode (menu "9" or use_opencode_mode) must reach the advisor intermediary, never canned routes.
+        _det_menu_state = applicant_memory.get_session(session_id).get("attributes", {}).get("menu_state", "root")
+        _det_advisor_active = _det_menu_state == "advisor_mode" or use_opencode_mode
+        det_route = None if _det_advisor_active else deterministic_query_router.route(effective_query)
         if det_route:
             latency = time.time() - start_time
             metrics_bus.record_query(cached=False, latency=latency)

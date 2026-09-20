@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [2026-09-20 22:18] [Fix/PROP-102-Router-Interferencia-Advisor-y-RAG]
+- **CI pytest (run `35534737594`, 5 failed / 72 passed):** los patrones amplios del router determinista interceptaban consultas ajenas:
+  - `financiacion_medios_pago` capturaba la consulta compuesta "¿Cuáles son los planes de pago y cuotas para el curso intensivo de inglés?" de `test_cache_semantic.py` y `test_rag_pipeline.py` (`\bcuotas?\b`/`\bpago\b`), rompiendo el flujo caché-semántica/RAG.
+  - `convenios_descuentos`/`financiacion_medios_pago`/`precios_tarifas` capturaban las consultas de los tests e2e de `test_opencode_intermediary.py` (el router corre en `engine.py` antes de la rama `advisor_mode`).
+- **Fixes:**
+  - `backend/src/rag/engine.py`: el router determinista se **omite** cuando `menu_state == "advisor_mode"` o `use_opencode_mode`; esas consultas siguen al intermediario (OpenCode/AGY) como antes.
+  - `backend/src/core/query_router.py`: patrones acotados a formulaciones directas y entidades (se eliminan `convenios`, `financiacion`, `cuotas`, `precios`/`tarifas`/`costos` sueltos; se conservan cajas por nombre, `plan de 3 cuotas`, `medios de pago`, `cuanto cuesta/vale`, etc.) y **guard de longitud ≤ 10 palabras** para que las consultas compuestas largas (p. ej. precio + horarios) fluyan a RAG con contexto completo.
+  - `backend/tests/test_opencode_intermediary.py`: `test_agy_client_standalone` hace `pytest.skip` si el binario AGY no está disponible en el entorno (fallo puramente ambiental en CI).
+- **Verificación:** pendiente del run `rag-eval` en GitHub Actions tras el push.
+
 ### [2026-09-20 22:11] [Fix/Docs-Mermaid-Balance]
 - **Gate `verify_mermaid.py` en CI (fallo preexistente):** `DIAGRAMA.md` tenía un ` ```mermaid ` literal en la sección "Cómo Ver los Diagramas" (conteo `opens=6 closes=5`), rompiendo la validación `scripts/verify_mermaid.py` (TODO-4.8) y bloqueando el paso `pytest` del nuevo gate. Reescribida la instrucción online sin la secuencia de comillas invertidas; ahora `opens=5 closes=5` y el pipeline `rag-eval` puede completar `evaluate_rag.py` y `pytest backend/tests`.
 

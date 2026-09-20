@@ -307,11 +307,36 @@ export const PixiParticleBackground: React.FC = () => {
     };
     window.addEventListener("resize", onResize);
 
+    // PROP-149: Adaptive FPS by inactivity (active 60 fps / idle 5 fps).
+    // Resets to nominal FPS on any user interaction and throttles the ticker
+    // to 5 fps after IDLE_TIMEOUT_MS without input (~92% fewer frames).
+    const ACTIVE_FPS = 60;
+    const IDLE_FPS = 5;
+    const IDLE_TIMEOUT_MS = 3000;
+    let idleTimer: number | null = null;
+    const onUserActivity = () => {
+      app.ticker.maxFPS = ACTIVE_FPS;
+      if (idleTimer !== null) window.clearTimeout(idleTimer);
+      idleTimer = window.setTimeout(() => {
+        app.ticker.maxFPS = IDLE_FPS;
+      }, IDLE_TIMEOUT_MS);
+    };
+    window.addEventListener("pointerdown", onUserActivity);
+    window.addEventListener("keydown", onUserActivity);
+    window.addEventListener("touchstart", onUserActivity);
+    window.addEventListener("pointermove", onUserActivity);
+    onUserActivity();
+
     return () => {
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("mousemove", onMouseMoveThrottled);
       document.removeEventListener("visibilitychange", onVisibility);
       window.removeEventListener("resize", onResize);
+      window.removeEventListener("pointerdown", onUserActivity);
+      window.removeEventListener("keydown", onUserActivity);
+      window.removeEventListener("touchstart", onUserActivity);
+      window.removeEventListener("pointermove", onUserActivity);
+      if (idleTimer !== null) window.clearTimeout(idleTimer);
       app.ticker.stop();
       app.destroy(true, { children: true });
       appRef.current = null;

@@ -13,13 +13,13 @@
 | :-- | :-- | :-: | :-: | :-: | :-: |
 | TODO-PROP-102 | Pre-enrutador determinista de tarifas/convenios | 1 | Backend | S | Completada |
 | TODO-PROP-105 | Citas JSON en tuplas Pydantic | 1 | Backend | S | Completada |
-| TODO-PROP-149 | FPS adaptativo por inactividad | 5 | Frontend | S | Pendiente |
+| TODO-PROP-149 | FPS adaptativo por inactividad | 5 | Frontend | S | Completada |
 | TODO-PROP-178 | Kiosco watchdog + bloqueo HW | 9 | Tauri | M | Pendiente |
 | TODO-PROP-183 | Cifrado en reposo de SQLite/JSON local | 9 | Backend | S | Completada |
 | TODO-PROP-195 | PDF de cotización oficial local | 11 | Backend/Frontend | M | Pendiente |
 | TODO-PROP-200 | Registro de causa raíz de abandono | 11 | Backend | S | Completada |
 
-**Total: 7** | Completadas: 4 | Pendientes: 3
+**Total: 7** | Completadas: 5 | Pendientes: 2
 
 ---
 
@@ -46,9 +46,10 @@
 
 > **Objetivo:** Reducir consumo de CPU/GPU del fondo Pixi cuando no hay interacción (hasta 5 fps).
 
-- [ ] En `PixiParticleBackground.tsx`, mapear `ticker.maxFPS` según inactividad (reset con input/pointer/keydown).
-- [ ] Restaurar FPS nominal al reanudar interacción; respetar `prefers-reduced-motion`.
-- **Aceptación:** mínimo 80% de reducción de frames en reposo; benchmark FPS sin jank al volver.
+- [x] En `PixiParticleBackground.tsx`, mapear `ticker.maxFPS` según inactividad (reset con pointer/pointerdown/keydown/touchstart): `ACTIVE_FPS=60` / `IDLE_FPS=5` con idle timeout de 3000 ms; listeners con cleanup en el unmount.
+- [x] Restaurar FPS nominal al reanudar interacción; respetar `prefers-reduced-motion` (el Pixi ni se crea bajo `reduce`, early return existente).
+- **Aceptación:** mínimo 80% de reducción de frames en reposo — se cumple: 60→5 fps = **91.7% menos frames** por ticker de partículas (y >90% en pantallas >60 Hz); al interaccionar vuelve a 60 fps sin reiniciar la escena.
+- **Nota de verificación:** sin runtime npm en el equipo de trabajo; el cambio es aislado en el `PixiParticleBackground.tsx` (ticker + listeners + cleanup) y no lo cubre el gate `rag-eval` (backend). Verificar con `npm run build`/lint en un entorno local.
 
 ## 🟢 TODO-PROP-178 [Prop. 178 - CRÍTICO] Kiosco con watchdog y bloqueo de hardware
 

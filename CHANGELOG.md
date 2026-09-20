@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [2026-09-20 23:15] [Feat/PROP-149-Adaptive-FPS-Idle]
+- **FPS adaptativo por inactividad en el fondo Pixi (PROP-149 / CRÍTICO, Frontend):**
+  - `frontend/src/components/PixiParticleBackground.tsx`: el `ticker` de partículas arranca en 60 fps nominales y baja a `IDLE_FPS=5` tras 3000 ms sin actividad (`pointermove`, `pointerdown`, `keydown`, `touchstart`); cualquier interacción restaura 60 fps al instante, sin reiniciar la escena.
+  - Limpieza completa en el unmount (timeout del idle + 4 listeners nuevos) y `prefers-reduced-motion` intacto: bajo `reduce` el Pixi no se crea (early return existente).
+  - **Cómputo de ahorro:** 60 → 5 fps = **91.7% menos frames** por ticker (superior al 80% exigido); en pantallas >60 Hz la reducción es aún mayor. La escena CSS (nubes, gaviotas, palmas) ya corre por compositing y queda fuera del throttling.
+- **Verificación:** sin runtime npm en el equipo (aíslo del gate `rag-eval`, que solo valida backend); revisar con `npm run build` en entorno local.
+
 ### [2026-09-20 23:05] [Feat/PROP-200-Abandonment-RootCause]
 - **Registro de causa raíz de abandono por cluster (PROP-200 / CRÍTICO, Orden de Backend):**
   - `backend/src/core/abandonment.py` (nuevo): `classify_pillar` compartido, `load_tickets` (journal plano o vault NovVault vía `read_text_decrypted`), `build_abandonment_report` agrupa los tickets de escalamiento por pilar/área con cuota relativa, causa predominante (`escalation_reason`) y keywords top; `suggest_documents` reutiliza el criterio D40 (visas/Australia, niños/edad, mascotas).

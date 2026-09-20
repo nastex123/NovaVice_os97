@@ -200,6 +200,11 @@ class DeterministicQueryRouter:
         for route in self._routes:
             for pattern in route["patterns"]:
                 if re.search(pattern, q_norm, re.IGNORECASE):
+                    # PROP-105: verifiable citations for canonical responses (grounded on official text itself)
+                    from src.rag.structured_output import build_citation_tuples, build_paragraph_citations
+                    canonical_chunks = [{"text": route["response"], "metadata": {"source": route["source"]}}]
+                    citation_tuples = [t.model_dump() for t in build_citation_tuples(route["response"], canonical_chunks)]
+                    paragraph_citations = [g["citations"] for g in build_paragraph_citations(route["response"], canonical_chunks)]
                     return {
                         "status": "success",
                         "response": route["response"],
@@ -208,6 +213,8 @@ class DeterministicQueryRouter:
                         "escalated_to_human": False,
                         "cached": False,
                         "mode": "deterministic_query_router",
+                        "citation_tuples": citation_tuples,
+                        "paragraph_citations": paragraph_citations,
                         "action_buttons": route["buttons"]
                     }
         return None

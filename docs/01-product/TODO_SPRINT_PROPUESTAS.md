@@ -16,10 +16,10 @@
 | TODO-PROP-149 | FPS adaptativo por inactividad | 5 | Frontend | S | Completada |
 | TODO-PROP-178 | Kiosco watchdog + bloqueo HW | 9 | Tauri | M | Pendiente |
 | TODO-PROP-183 | Cifrado en reposo de SQLite/JSON local | 9 | Backend | S | Completada |
-| TODO-PROP-195 | PDF de cotización oficial local | 11 | Backend/Frontend | M | Pendiente |
+| TODO-PROP-195 | PDF de cotización oficial local | 11 | Backend/Frontend | M | Completada |
 | TODO-PROP-200 | Registro de causa raíz de abandono | 11 | Backend | S | Completada |
 
-**Total: 7** | Completadas: 5 | Pendientes: 2
+**Total: 7** | Completadas: 6 | Pendientes: 1
 
 ---
 
@@ -76,9 +76,10 @@
 
 > **Objetivo:** Generar cotización en PDF localmente (sin pasarela ni servicios externos).
 
-- [ ] Endpoint/render local que arme la cotización (programa, valor, descuentos, convenio).
-- [ ] UI retro consumible desde el chat y desde la sección de matrícula.
-- **Aceptación:** PDF válido y fiel al formato institucional; prueba E2E de descarga.
+- [x] Endpoint/render local que arma la cotización (programa, valor, descuentos, convenio): `backend/src/core/quote.py` (writer PDF 1.4 propio, sin dependencias nuevas) + `GET /api/v1/quote` (detalle JSON) + `GET /api/v1/quote/pdf` (descarga `application/pdf` con `Content-Disposition: attachment`). Reglas canónicas: Regular/Sabatino $650.000, Intensivo $720.000; contado −10%, caja/universidad/familiar −15%, bono $100.000 por referido; cuotas 40/30/30.
+- [x] UI retro consumible desde el chat y desde la sección de matrícula: `QuotePdfCard.tsx` (preview en vivo + descarga) bajo respuestas del pilar precios en `ChatContainer.tsx`, y tile "Cotizar" en el dock del `Footer.tsx` con modal `COTIZACION_OFICIAL.EXE`. Sin cambios al engine (evita regresiones E48).
+- **Aceptación:** PDF válido y fiel al formato institucional (banda navy + franja rosa, total, cuotas, notas, fuentes 03_/09_/10_/12_); prueba E2E de descarga en `backend/tests/test_quote_pdf.py` (header `%PDF-1.4`, `%%EOF`, content-type, tokens `$585.000`/`COTIZACION OFICIAL`, 422 en parámetros inválidos).
+- **Verificación:** run `rag-eval` `35548867696` verde (`106 passed, 1 skipped`); frontend sin runtime npm en el equipo — revisar con `npm run build` en entorno local.
 
 ## 🟢 TODO-PROP-200 [Prop. 200 - CRÍTICO] Registro de causa raíz de abandono
 

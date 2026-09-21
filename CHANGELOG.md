@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### [2026-09-21 02:51] [Feat/PROP-195-Quote-PDF-Local]
+- **Cotización oficial en PDF generada localmente (PROP-195 / CRÍTICO, Backend/Frontend):**
+  - `backend/src/core/quote.py` (nuevo): writer PDF 1.4 propio sin dependencias nuevas (fuentes estándar Helvetica/Bold, stream sin comprimir), con reglas canónicas — Regular/Sabatino $650.000, Intensivo $720.000; contado −10%, caja/universidad/familiar −15%, bono $100.000 por referido; cuotas 40/30/30 con suma exacta; formato `$585.000 COP`; banda institucional navy + franja rosa, total, cuotas, notas y fuentes (03_/09_/10_/12_).
+  - `backend/src/api/routes.py`: `GET /api/v1/quote` (detalle JSON para la UI) y `GET /api/v1/quote/pdf` (descarga `application/pdf` con `Content-Disposition: attachment`); parámetros inválidos → 422.
+  - `backend/tests/test_quote_pdf.py` (nuevo, 8 tests): matemática canónica (contado regular → $585.000, caja intensivo → $612.000), estructura `%PDF-1.4`/`%%EOF`, tokens en el PDF y E2E de descarga vía ASGI.
+  - `frontend/src/components/QuotePdfCard.tsx` (nuevo): tarjeta retro con selects de programa/descuento/referidos, preview en vivo (`/api/v1/quote`) y descarga del PDF; render compacto bajo respuestas del pilar precios en `ChatContainer.tsx` (detección por `source_documents` 03_/10_/12_ o patrón de tarifa, sin tocar el engine); tile "Cotizar" en el dock de `Footer.tsx` con modal `COTIZACION_OFICIAL.EXE`.
+- **Verificación:** run `rag-eval` `35548867696` verde (`106 passed, 1 skipped`); frontend pendiente de `npm run build` local (sin runtime npm en el equipo).
+
 ### [2026-09-20 23:15] [Feat/PROP-149-Adaptive-FPS-Idle]
 - **FPS adaptativo por inactividad en el fondo Pixi (PROP-149 / CRÍTICO, Frontend):**
   - `frontend/src/components/PixiParticleBackground.tsx`: el `ticker` de partículas arranca en 60 fps nominales y baja a `IDLE_FPS=5` tras 3000 ms sin actividad (`pointermove`, `pointerdown`, `keydown`, `touchstart`); cualquier interacción restaura 60 fps al instante, sin reiniciar la escena.

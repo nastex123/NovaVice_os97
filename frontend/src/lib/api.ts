@@ -153,3 +153,55 @@ export async function fetchServerHealth(): Promise<ServerHealth | null> {
   }
   return null;
 }
+
+// PROP-195: Cotización oficial (detalle JSON + descarga PDF local).
+export interface QuoteParams {
+  programa: string;
+  descuento: string;
+  referidos: number;
+}
+
+export interface QuoteDetail {
+  quote_id: string;
+  emitida: string;
+  vigencia_dias: number;
+  moneda: string;
+  programa: string;
+  programa_label: string;
+  tarifa_base: number;
+  descuento: string;
+  descuento_label: string;
+  descuento_pct: number;
+  descuento_valor: number;
+  referidos: number;
+  bono_valor: number;
+  total: number;
+  cuotas: number[];
+  cuotas_pct: number[];
+  fuentes: string[];
+}
+
+export function buildQuoteQuery(params: QuoteParams): string {
+  const qs = new URLSearchParams({
+    programa: params.programa,
+    descuento: params.descuento,
+    referidos: String(params.referidos),
+  });
+  return qs.toString();
+}
+
+export async function fetchQuotePreview(params: QuoteParams): Promise<QuoteDetail | null> {
+  try {
+    const res = await fetch(`/api/v1/quote?${buildQuoteQuery(params)}`);
+    if (res.ok) {
+      return (await res.json()) as QuoteDetail;
+    }
+  } catch {
+    // Graceful fallback
+  }
+  return null;
+}
+
+export function buildQuotePdfUrl(params: QuoteParams): string {
+  return `/api/v1/quote/pdf?${buildQuoteQuery(params)}`;
+}

@@ -1,12 +1,13 @@
 "use client";
 
 import React, { useState } from "react";
-import { MessageSquare, Gauge, Building2, Phone, Radio, MapPin, Sliders } from "lucide-react";
+import { MessageSquare, Gauge, Building2, Phone, Radio, MapPin, Sliders, FileText } from "lucide-react";
 import { useChatStore } from "../stores/useChatStore";
 import { useDesktopStore } from "../stores/useDesktopStore";
 import { useFocusTrap } from "../hooks/useFocusTrap";
 import { useGsapModal } from "../hooks/useGsapModal";
 import { useGsapHoverGroup } from "../hooks/useGsapHoverGroup";
+import { QuotePdfCard } from "./QuotePdfCard";
 
 interface FooterProps {
   onReset?: () => void;
@@ -20,6 +21,7 @@ export const Footer: React.FC<FooterProps> = ({
   onNewChat,
 }) => {
   const [showSedesModal, setShowSedesModal] = useState(false);
+  const [showQuoteModal, setShowQuoteModal] = useState(false);
 
   const resetChatStore = useChatStore((state) => state.resetChat);
   const newChatStore = useChatStore((state) => state.newChat);
@@ -31,6 +33,11 @@ export const Footer: React.FC<FooterProps> = ({
     onEscape: () => setShowSedesModal(false),
   });
   const sedesModalRef = useGsapModal<HTMLDivElement>(showSedesModal);
+  const quoteTrapRef = useFocusTrap<HTMLDivElement>({
+    isActive: showQuoteModal,
+    onEscape: () => setShowQuoteModal(false),
+  });
+  const quoteModalRef = useGsapModal<HTMLDivElement>(showQuoteModal);
   const dockHoverRef = useGsapHoverGroup<HTMLElement>();
 
   const handleReset = onReset || resetChatStore;
@@ -88,6 +95,18 @@ export const Footer: React.FC<FooterProps> = ({
               <Building2 className="w-4 h-4 text-black group-hover:text-viceOrange" />
             </div>
             <span className="text-[10px] font-bold text-black uppercase tracking-wider font-mono">Sedes</span>
+          </button>
+
+          {/* Tile 3.5: Cotización PDF (PROP-195) */}
+          <button
+            onClick={() => setShowQuoteModal(true)}
+            className="flex flex-col items-center gap-1 group active:translate-y-0.5 transition-transform"
+            title="Generar Cotización Oficial en PDF"
+          >
+            <div className="w-8 h-8 sm:w-9 sm:h-9 bg-white group-hover:bg-vicePink-pastel border-2 border-black shadow-retro-sm flex items-center justify-center transition-colors">
+              <FileText className="w-4 h-4 text-black group-hover:text-vicePink-dark" />
+            </div>
+            <span className="text-[10px] font-bold text-black uppercase tracking-wider font-mono">Cotizar</span>
           </button>
 
           {/* Tile 4: WhatsApp Admisiones */}
@@ -208,6 +227,50 @@ export const Footer: React.FC<FooterProps> = ({
                 <div className="pt-2 flex justify-end">
                   <button
                     onClick={() => setShowSedesModal(false)}
+                    className="px-5 py-2 bg-retroBeige hover:bg-black hover:text-white text-black font-bold text-xs border-2 border-black shadow-retro active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all font-mono"
+                  >
+                    [ ACEPTAR / CERRAR ]
+                  </button>
+                </div>
+              </div>
+          </div>
+        </div>
+      )}
+
+      {/* PROP-195: Retro Window Modal para Cotización Oficial en PDF */}
+      {showQuoteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-[1px]">
+          <div
+            ref={(node) => {
+              (quoteTrapRef as React.MutableRefObject<HTMLDivElement | null>).current = node;
+              (quoteModalRef as React.MutableRefObject<HTMLDivElement | null>).current = node;
+            }}
+            className="w-full max-w-md bg-retroBeige border-2 border-black shadow-retro-xl text-black select-none overflow-hidden"
+          >
+              {/* Retro Striped Window Titlebar */}
+              <div className="retro-striped-titlebar border-b-2 border-black px-2 py-1.5 flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <div className="w-3.5 h-3.5 bg-white border border-black shadow-retro-sm flex items-center justify-center text-[10px] font-mono cursor-pointer" onClick={() => setShowQuoteModal(false)}>
+                    ■
+                  </div>
+                  <span className="font-bold text-xs uppercase tracking-wider bg-retroBeige px-2 border border-black font-display">
+                    COTIZACION_OFICIAL.EXE
+                  </span>
+                </div>
+                <button
+                  onClick={() => setShowQuoteModal(false)}
+                  className="w-5 h-5 bg-vicePink hover:bg-vicePink-dark text-white border border-black font-mono font-bold flex items-center justify-center text-xs shadow-retro-sm"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Window Content */}
+              <div className="p-4 sm:p-5 bg-retroPaper">
+                <QuotePdfCard />
+                <div className="pt-3 flex justify-end">
+                  <button
+                    onClick={() => setShowQuoteModal(false)}
                     className="px-5 py-2 bg-retroBeige hover:bg-black hover:text-white text-black font-bold text-xs border-2 border-black shadow-retro active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all font-mono"
                   >
                     [ ACEPTAR / CERRAR ]

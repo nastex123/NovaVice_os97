@@ -9,6 +9,7 @@ import remarkGfm from "remark-gfm";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { ChatMessage, ActionButton } from "../lib/types";
 import { useChatStore } from "../stores/useChatStore";
+import { QuotePdfCard } from "./QuotePdfCard";
 import { motionSetup, EASE, DUR } from "../lib/motion";
 import { useGsapHoverGroup } from "../hooks/useGsapHoverGroup";
 
@@ -186,6 +187,16 @@ interface MessageItemProps {
   sanitizeMarkdown: (text: string) => string;
 }
 
+// PROP-195: detecta respuestas del pilar precios para ofrecer la cotización PDF.
+const looksLikePricing = (m: ChatMessage): boolean => {
+  if (m.sender !== "bot") return false;
+  const sources = m.source_documents || [];
+  if (sources.some((s) => s.includes("03_") || s.includes("10_") || s.includes("12_"))) {
+    return true;
+  }
+  return /(\$\s?\d{3}[\.,]\d{3}|descuento de contado|3 cuotas|cotiza)/i.test(m.text || "");
+};
+
 const MessageItem: React.FC<MessageItemProps> = memo(({
   msg,
   index,
@@ -306,6 +317,13 @@ const MessageItem: React.FC<MessageItemProps> = memo(({
             </div>
           )}
         </div>
+
+        {/* PROP-195: Cotización PDF bajo respuestas de precios */}
+        {!isUser && looksLikePricing(msg) && (
+          <div className="w-full max-w-md">
+            <QuotePdfCard compact />
+          </div>
+        )}
 
         {/* 90s Raised Bevel Action Buttons Grid */}
         {!isUser && msg.action_buttons && msg.action_buttons.length > 0 && (

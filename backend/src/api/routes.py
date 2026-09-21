@@ -140,3 +140,39 @@ async def escalation_abandonment_report():
     report["live_cluster_abandonment"] = dict(metrics_bus.cluster_abandonment)
     return report
 
+
+@api_router.get("/quote")
+async def get_quote(programa: str = "regular", descuento: str = "ninguno", referidos: int = 0):
+    """
+    PROP-195: Detalle JSON de la cotizacion oficial (programa, tarifa base,
+    descuento/convenio, bono por referidos, total y plan 3 cuotas 40/30/30).
+    Lo consume la UI retro antes de descargar el PDF.
+    """
+    from src.core.quote import build_quote, QuoteError
+    try:
+        return build_quote(programa=programa, descuento=descuento, referidos=referidos)
+    except QuoteError as e:
+        raise HTTPException(status_code=422, detail=str(e))
+
+
+@api_router.get("/quote/pdf")
+async def get_quote_pdf(programa: str = "regular", descuento: str = "ninguno", referidos: int = 0):
+    """
+    PROP-195: Cotizacion oficial en PDF generada localmente (sin pasarela ni
+    servicios externos). Descarga E2E consumible desde el chat y la seccion
+    de matricula.
+    """
+    from fastapi.responses import Response
+    from src.core.quote import build_quote, render_quote_pdf, QuoteError
+    try:
+        quote = build_quote(programa=programa, descuento=descuento, referidos=referidos)
+    except QuoteError as e:
+        raise HTTPException(status_code=422, detail=str(e))
+    pdf = render_quote_pdf(quote)
+    filename = f"cotizacion_nova_{quote['programa']}_{quote['quote_id']}.pdf"
+    return Response(
+        content=pdf,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
